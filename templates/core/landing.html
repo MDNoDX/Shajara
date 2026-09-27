@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Welcome" %}{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>{% translate "Keep your family's history in one place" %}</h1>
+    <p class="lead">{% translate "Build your family tree, record the life stories of your relatives and share them with your family. Everything is in Uzbek, in Latin or Cyrillic script." %}</p>
+    <div class="row">
+      <a class="btn btn-primary" href="{% url 'accounts:register' %}">{% translate "Create an account" %}</a>
+      <a class="btn" href="{% url 'accounts:login' %}">{% translate "Sign in" %}</a>
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <svg viewBox="0 0 420 260" width="100%" role="presentation">
+      <g class="t-line"><path d="M150 52 H270 M210 52 V100 M95 100 H325 M95 100 V128 M210 100 V128 M325 100 V128"/></g>
+      <g class="t-card"><rect class="box" x="60" y="18" width="90" height="46" rx="10"/><text class="t-name" x="72" y="46">{% translate "Grandfather" context "kinship" %}</text></g>
+      <g class="t-card female"><rect class="box" x="270" y="18" width="90" height="46" rx="10"/><text class="t-name" x="282" y="46">{% translate "Grandmother" context "kinship" %}</text></g>
+      <g class="t-card"><rect class="box" x="40" y="128" width="110" height="46" rx="10"/><text class="t-name" x="52" y="156">{% translate "Father" context "kinship" %}</text></g>
+      <g class="t-card female"><rect class="box" x="155" y="128" width="110" height="46" rx="10"/><text class="t-name" x="167" y="156">{% translate "Father's sister" context "kinship" %}</text></g>
+      <g class="t-card"><rect class="box" x="270" y="128" width="110" height="46" rx="10"/><text class="t-name" x="282" y="156">{% translate "Father's brother" context "kinship" %}</text></g>
+      <g class="t-line"><path d="M95 174 V206"/></g>
+      <g class="t-card focus"><rect class="box" x="40" y="206" width="110" height="46" rx="10"/><text class="t-name" x="52" y="234">{% translate "You" context "kinship" %}</text></g>
+    </svg>
+  </div>
+</section>
+<section class="features grid grid-3">
+  <div class="card"><h3>{% translate "Family tree" context "kinship" %}</h3><p>{% translate "Relationship names are worked out for you: aka and uka, amaki and togʻa, kelin and kuyov." %}</p></div>
+  <div class="card"><h3>{% translate "Life stories" %}</h3><p>{% translate "Write down biographies and family stories so that they are not forgotten." %}</p></div>
+  <div class="card"><h3>{% translate "Download as PDF" %}</h3><p>{% translate "Download the family tree or a relative's biography as a PDF in the language you use." %}</p></div>
+</section>
+{% endblock %}

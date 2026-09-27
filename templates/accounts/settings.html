@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Settings" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>{% translate "Settings" %}</h1></div></div>
+
+<section class="card" id="language">
+  <h2>{% translate "Language" %}</h2>
+  <p class="muted">{% translate "Choose the script for the interface. Your choice is saved to your account and used every time you sign in, including in PDF downloads." %}</p>
+  <form method="post" novalidate>{% csrf_token %}
+    <div class="lang-choice" role="radiogroup" aria-label="{% translate 'Language' %}">
+      {% for radio in language_form.language %}
+        <label lang="{% cycle 'uz-Latn' 'uz-Cyrl' %}">{{ radio.tag }} {{ radio.choice_label }}</label>
+      {% endfor %}
+    </div>
+    <div class="form-actions" style="margin-top:14px">
+      <button class="btn btn-primary" name="save_language" type="submit">{% translate "Save" %}</button>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{% translate "Personal details" %}</h2>
+  <form method="post" novalidate>{% csrf_token %}
+    <div class="form-grid">
+      {% include "partials/field.html" with field=profile_form.first_name %}
+      {% include "partials/field.html" with field=profile_form.last_name %}
+    </div>
+    {% include "partials/field.html" with field=profile_form.email %}
+    {% include "partials/field.html" with field=profile_form.gender %}
+    <div class="form-actions">
+      <button class="btn btn-primary" name="save_profile" type="submit">{% translate "Save" %}</button>
+      <a class="btn btn-ghost" href="{% url 'accounts:profile' %}">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{% translate "Password" %}</h2>
+  <a class="btn" href="{% url 'accounts:password_change' %}">{% translate "Change password" %}</a>
+</section>
+{% endblock %}

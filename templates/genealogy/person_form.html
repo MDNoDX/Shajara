@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if is_new %}{% translate "Add a new relative" %}{% else %}{% translate "Edit" %} · {{ person.full_name }}{% endif %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% if is_new %}{% translate "Add a new relative" %}{% else %}{{ person.full_name }}{% endif %}</h1>
+  {% if not is_new %}<p>{% translate "Edit personal details" %}</p>{% endif %}
+</div></div>
+<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="5">{% csrf_token %}
+  {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+  {% include "genealogy/_person_fields.html" %}
+  <fieldset>
+    <legend>{% translate "Parents" %}</legend>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.father %}
+      {% include "partials/field.html" with field=form.mother %}
+    </div>
+  </fieldset>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+    <a class="btn btn-ghost" href="{% if person %}{{ person.get_absolute_url }}{% else %}{% url 'genealogy:people' %}{% endif %}">{% translate "Cancel" %}</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Add a new relative" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "Add a new relative" %}</h1>
+  <p>{% blocktranslate with name=anchor.full_name %}Relative of {{ name }}{% endblocktranslate %}</p>
+</div></div>
+<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="5">{% csrf_token %}
+  {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+  <fieldset>
+    {% include "partials/field.html" with field=form.relation %}
+    {% if has_spouses %}<div data-show-if-relation="child">{% include "partials/field.html" with field=form.other_parent %}</div>{% endif %}
+    {% include "partials/field.html" with field=form.existing %}
+  </fieldset>
+  <div data-new-person>
+    {% include "genealogy/_person_fields.html" %}
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+    <a class="btn btn-ghost" href="{{ anchor.get_absolute_url }}">{% translate "Cancel" %}</a>
+  </div>
+</form>
+{% endblock %}

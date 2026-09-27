@@ -1,0 +1,1 @@
+<span class="avatar {{ size }}{% if person.gender == 'female' %} female{% endif %}" aria-hidden="true">{% if person.photo %}<img src="{{ person.photo.url }}" alt="">{% elif person %}{{ person.initials }}{% else %}{{ user.first_name|slice:":1"|upper }}{% endif %}</span>

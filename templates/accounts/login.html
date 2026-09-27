@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Sign in" %}{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>{% translate "Sign in" %}</h1>
+    <p class="muted">{% translate "Sign in to see your family tree." %}</p>
+    <form method="post" novalidate>{% csrf_token %}
+      {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+      {% include "partials/field.html" with field=form.username %}
+      {% include "partials/field.html" with field=form.password %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">{% translate "Sign in" %}</button>
+        <a class="btn btn-ghost" href="{% url 'accounts:password_reset' %}">{% translate "Forgot your password?" %}</a>
+      </div>
+    </form>
+  </div>
+  <p class="muted" style="text-align:center;margin-top:16px">{% translate "No account yet?" %} <a href="{% url 'accounts:register' %}">{% translate "Sign up" %}</a></p>
+</div>
+{% endblock %}

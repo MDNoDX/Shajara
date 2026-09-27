@@ -1,0 +1,8 @@
+<a class="pcard" href="{{ person.get_absolute_url }}">
+  {% include "partials/avatar.html" with person=person size="" %}
+  <span class="who">
+    <span class="name">{{ person.short_name }}</span>
+    {% if person.lifespan %}<span class="meta">{{ person.lifespan }}</span>{% endif %}
+    {% if label %}<br><span class="rel">{{ label }}</span>{% endif %}
+  </span>
+</a>

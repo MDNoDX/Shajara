@@ -1,0 +1,4 @@
+{% load i18n %}<form class="langsw" method="post" action="{% url 'set_language' %}" aria-label="{% translate 'Language' %}">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  {% for opt in language_options %}<button type="submit" name="language" value="{{ opt.code }}" lang="{{ opt.html_lang }}" aria-pressed="{% if opt.active %}true{% else %}false{% endif %}">{{ opt.label }}</button>{% endfor %}
+</form>

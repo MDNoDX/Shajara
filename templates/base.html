@@ -1,0 +1,85 @@
+{% load i18n static %}<!doctype html>
+<html lang="{{ html_lang }}" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · {% translate "Family tree" context "site name" %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="icon" href="{% static 'img/icon.svg' %}" type="image/svg+xml">
+  <script src="{% url 'javascript-catalog' %}"></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<a class="skip" href="#main">{% translate "Skip to content" %}</a>
+{% with url_name=request.resolver_match.url_name %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{% url 'home' %}">
+      {% include "partials/logo.svg" %}
+      <span>{% translate "Family tree" context "site name" %}</span>
+    </a>
+    {% if user.is_authenticated %}
+      <form class="top-search" action="{% url 'genealogy:search' %}" method="get" role="search">
+        <label class="visually-hidden" for="top-q">{% translate "Search" %}</label>
+        <input id="top-q" type="search" name="q" value="{{ query|default:'' }}" placeholder="{% translate 'Search relatives…' %}">
+      </form>
+    {% endif %}
+    <div class="top-actions">
+      {% include "partials/lang_switch.html" %}
+      {% if user.is_authenticated %}
+        <details class="usermenu">
+          <summary>
+            {% include "partials/avatar.html" with person=user.person size="" %}
+            <span class="uname">{{ user.first_name|default:user.username }}</span>
+          </summary>
+          <div class="menu">
+            <a href="{% url 'accounts:profile' %}">{% translate "My profile" %}</a>
+            <a href="{% url 'accounts:settings' %}">{% translate "Settings" %}</a>
+            <hr>
+            <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+              <button type="submit">{% translate "Sign out" %}</button>
+            </form>
+          </div>
+        </details>
+      {% else %}
+        <a class="btn btn-ghost btn-sm" href="{% url 'accounts:login' %}">{% translate "Sign in" %}</a>
+        <a class="btn btn-primary btn-sm" href="{% url 'accounts:register' %}">{% translate "Sign up" %}</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if user.is_authenticated %}
+  <nav class="mainnav" aria-label="{% translate 'Main menu' %}">
+    <a href="{% url 'home' %}" {% if url_name == "home" %}aria-current="page"{% endif %}>{% translate "Home" %}</a>
+    <a href="{% url 'genealogy:tree' %}" {% if url_name == "tree" or url_name == "tree_for" %}aria-current="page"{% endif %}>{% translate "My family tree" %}</a>
+    <a href="{% url 'genealogy:people' %}" {% if url_name == "people" or url_name == "person" or url_name == "person_edit" or url_name == "person_create" or url_name == "relative_add" %}aria-current="page"{% endif %}>{% translate "My relatives" %}</a>
+    <a href="{% url 'genealogy:stories' %}" {% if url_name == "stories" or url_name == "story" or url_name == "story_create" or url_name == "story_edit" %}aria-current="page"{% endif %}>{% translate "Stories" %}</a>
+    <a href="{% url 'friends:list' %}" {% if request.resolver_match.app_name == "friends" %}aria-current="page"{% endif %}>{% translate "My friends" %}{% if pending_requests %} <span class="badge" title="{% translate 'New friend requests' %}">{{ pending_requests }}</span>{% endif %}</a>
+    <a href="{% url 'accounts:profile' %}" {% if url_name == "profile" %}aria-current="page"{% endif %}>{% translate "My profile" %}</a>
+    <a href="{% url 'accounts:settings' %}" {% if url_name == "settings" or url_name == "password_change" %}aria-current="page"{% endif %}>{% translate "Settings" %}</a>
+  </nav>
+  {% endif %}
+</header>
+{% endwith %}
+
+<main id="main" class="container {% block main_class %}{% endblock %}">
+  {% if messages %}
+    <ul class="messages" role="status">
+      {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span>{% translate "Family tree — a family archive for Uzbek families." %}</span>
+    {% include "partials/lang_switch.html" %}
+  </div>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

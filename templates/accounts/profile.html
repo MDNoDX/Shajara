@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n uz %}
+{% block title %}{% translate "My profile" %}{% endblock %}
+{% block content %}
+<div class="card profile-head">
+  {% include "partials/avatar.html" with person=user.person size="lg" %}
+  <div class="spacer">
+    <h1>{{ user.display_name }}</h1>
+    <p class="muted">@{{ user.username }} · {{ user.email }}</p>
+    <p class="muted small">{% blocktranslate with date=user.date_joined|uzdate %}Member since {{ date }}{% endblocktranslate %}</p>
+  </div>
+  <div class="row">
+    {% if user.person %}<a class="btn" href="{{ user.person.get_absolute_url }}">{% translate "My record in the tree" %}</a>{% endif %}
+    <a class="btn" href="{% url 'accounts:settings' %}">{% translate "Settings" %}</a>
+  </div>
+</div>
+<div class="stats" style="margin-top:16px">
+  <a class="stat" href="{% url 'genealogy:people' %}"><b>{{ people_count }}</b><span>{% blocktranslate count counter=people_count context "count" %}relative in the tree{% plural %}relatives in the tree{% endblocktranslate %}</span></a>
+  <a class="stat" href="{% url 'friends:list' %}"><b>{{ friends_count }}</b><span>{% blocktranslate count counter=friends_count context "count" %}friend{% plural %}friends{% endblocktranslate %}</span></a>
+  <a class="stat" href="{% url 'genealogy:stories' %}"><b>{{ stories_count }}</b><span>{% blocktranslate count counter=stories_count context "count" %}story{% plural %}stories{% endblocktranslate %}</span></a>
+</div>
+<div class="card">
+  <h2>{% translate "Interface language" %}</h2>
+  <p class="muted">{% translate "The whole site and your PDF downloads use this language." %}</p>
+  {% include "partials/lang_switch.html" %}
+</div>
+{% if incoming %}
+<div class="card">
+  <h2>{% translate "Friend requests" %}</h2>
+  <a href="{% url 'friends:list' %}">{% blocktranslate count counter=incoming|length %}{{ counter }} new request{% plural %}{{ counter }} new requests{% endblocktranslate %}</a>
+</div>
+{% endif %}
+{% endblock %}

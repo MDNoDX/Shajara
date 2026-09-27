@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% if is_owner %}{% translate "My family tree" %}{% else %}{% translate "Family tree" context "kinship" %} · {{ owner.display_name }}{% endif %}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>{% if is_owner %}{% translate "My family tree" %}{% else %}{% blocktranslate with name=owner.display_name %}{{ name }}'s family tree{% endblocktranslate %}{% endif %}</h1>
+    <p>{% translate "Click a person to put them in the centre. Drag to move around; use the buttons or the mouse wheel to zoom." %}</p>
+  </div>
+  {% if is_owner and focus %}<a class="btn btn-primary" href="{% url 'genealogy:relative_add' focus.pk %}" id="add-relative">{% translate "Add a new relative" %}</a>{% endif %}
+</div>
+
+{% if focus %}
+<div class="tree-shell" id="tree"
+     data-url="{{ data_url }}" data-pdf-url="{{ pdf_url }}" data-focus="{{ focus.pk }}"
+     data-add-url-template="{% if is_owner %}{% url 'genealogy:relative_add' 0 %}{% endif %}">
+  <div class="tree-toolbar">
+    <label class="visually-hidden" for="tree-person">{% translate "Person in the centre" %}</label>
+    <select id="tree-person">
+      {% for p in people %}<option value="{{ p.pk }}"{% if p.pk == focus.pk %} selected{% endif %}>{{ p.full_name }}{% if p.lifespan %} ({{ p.lifespan }}){% endif %}</option>{% endfor %}
+    </select>
+    <span class="spacer"></span>
+    <button class="btn btn-sm" type="button" data-zoom="in" aria-label="{% translate 'Zoom in' %}" title="{% translate 'Zoom in' %}">+</button>
+    <button class="btn btn-sm" type="button" data-zoom="out" aria-label="{% translate 'Zoom out' %}" title="{% translate 'Zoom out' %}">−</button>
+    <button class="btn btn-sm" type="button" data-zoom="fit">{% translate "Fit to screen" %}</button>
+    <a class="btn btn-sm" id="tree-open" href="{{ focus.get_absolute_url }}">{% translate "Open profile" %}</a>
+    <a class="btn btn-sm" id="tree-pdf" href="{{ pdf_url }}?person={{ focus.pk }}">{% translate "Download the family tree (PDF)" %}</a>
+    <button class="btn btn-sm" type="button" id="tree-png">{% translate "Download as image (PNG)" %}</button>
+  </div>
+  <div class="tree-view" id="tree-view" tabindex="0" aria-label="{% translate 'Family tree' context 'kinship' %}">
+    <div class="tree-status" id="tree-status" role="status">{% translate "Loading the family tree…" %}</div>
+  </div>
+  <div class="tree-note">{% translate "Relationship names on the cards are shown as seen from the person in the centre." %}</div>
+</div>
+{% else %}
+<div class="empty"><h3>{% translate "The family tree is empty." %}</h3>
+  {% if is_owner %}<a class="btn btn-primary" href="{% url 'genealogy:person_create' %}">{% translate "Add a new relative" %}</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/tree.js' %}" defer></script>{% endblock %}

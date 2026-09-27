@@ -1,0 +1,10 @@
+{% load i18n static %}<!doctype html>
+<html lang="{% get_current_language as LANG %}{% if LANG == 'uz-cyrl' %}uz-Cyrl{% else %}uz-Latn{% endif %}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% translate "A server error occurred." %}</title>
+<link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
+<body><main class="container"><div class="auth-wrap"><div class="card" style="text-align:center">
+  <h1>{% translate "A server error occurred." %}</h1>
+  <p class="muted">{% translate "Something went wrong on our side. Please try again in a few minutes." %}</p>
+  <a class="btn btn-primary" href="/">{% translate "Go to the home page" %}</a>
+</div></div></main></body></html>

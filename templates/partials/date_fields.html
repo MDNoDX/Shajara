@@ -1,0 +1,11 @@
+<div class="field{% if day.errors or month.errors or year.errors %} has-error{% endif %}">
+  <span class="field-label" id="{{ year.auto_id }}-label">{{ label }}</span>
+  <div class="date3" role="group" aria-labelledby="{{ year.auto_id }}-label">
+    <label><span class="visually-hidden">{{ day.label }}</span>{{ day }}</label>
+    <label><span class="visually-hidden">{{ month.label }}</span>{{ month }}</label>
+    <label><span class="visually-hidden">{{ year.label }}</span>{{ year }}</label>
+  </div>
+  {% for error in day.errors %}<div class="error">{{ error }}</div>{% endfor %}
+  {% for error in month.errors %}<div class="error">{{ error }}</div>{% endfor %}
+  {% for error in year.errors %}<div class="error">{{ error }}</div>{% endfor %}
+</div>

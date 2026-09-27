@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Home" %}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>{% blocktranslate with name=user.first_name|default:user.username %}Welcome, {{ name }}!{% endblocktranslate %}</h1>
+    <p>{% translate "Here is what is happening in your family archive." %}</p>
+  </div>
+  <div class="row">
+    {% if me %}<a class="btn" href="{% url 'genealogy:tree' %}">{% translate "View the family tree" %}</a>{% endif %}
+    <a class="btn btn-primary" href="{% if me %}{% url 'genealogy:relative_add' me.pk %}{% else %}{% url 'genealogy:person_create' %}{% endif %}">{% translate "Add a new relative" %}</a>
+  </div>
+</div>
+
+<div class="stats">
+  <a class="stat" href="{% url 'genealogy:people' %}"><b>{{ people_count }}</b><span>{% blocktranslate count counter=people_count context "count" %}relative in the tree{% plural %}relatives in the tree{% endblocktranslate %}</span></a>
+  <a class="stat" href="{% url 'friends:list' %}"><b>{{ friends_count }}</b><span>{% blocktranslate count counter=friends_count context "count" %}friend{% plural %}friends{% endblocktranslate %}</span></a>
+  <a class="stat" href="{% url 'genealogy:stories' %}"><b>{{ stories_count }}</b><span>{% blocktranslate count counter=stories_count context "count" %}story{% plural %}stories{% endblocktranslate %}</span></a>
+</div>
+
+<div class="cols">
+  <section class="card">
+    <h2>{% translate "Recently updated" %}</h2>
+    {% if people_count > 1 %}
+      <div class="people">
+        {% for person, label in recent %}{% include "partials/person_card.html" %}{% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        <h3>{% translate "No relatives have been added yet." %}</h3>
+        <p>{% translate "Start with your parents: add your father and mother, then your grandparents." %}</p>
+        {% if me %}
+        <div class="row" style="justify-content:center">
+          <a class="btn btn-primary" href="{% url 'genealogy:relative_add' me.pk %}?relation=father">{% translate "Add your father" %}</a>
+          <a class="btn" href="{% url 'genealogy:relative_add' me.pk %}?relation=mother">{% translate "Add your mother" %}</a>
+        </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+  <aside>
+    <section class="card">
+      <h2>{% translate "Friend requests" %}</h2>
+      {% if incoming %}
+        <ul class="kin-list">
+        {% for req in incoming %}
+          <li class="row">
+            <span class="spacer">{{ req.from_user.display_name }}</span>
+            <form method="post" action="{% url 'friends:answer' req.pk %}">{% csrf_token %}
+              <button class="btn btn-primary btn-sm" name="answer" value="accept">{% translate "Accept" %}</button>
+              <button class="btn btn-sm" name="answer" value="decline">{% translate "Decline" %}</button>
+            </form>
+          </li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">{% translate "No new requests." %}</p>
+      {% endif %}
+    </section>
+    <section class="card">
+      <h2>{% translate "Downloads" %}</h2>
+      <div class="stack">
+        <a class="btn" href="{% url 'genealogy:family_book' %}">{% translate "Download the family tree book (PDF)" %}</a>
+        {% if me %}<a class="btn" href="{% url 'genealogy:tree_pdf_for' user.username %}">{% translate "Download the family tree chart (PDF)" %}</a>{% endif %}
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

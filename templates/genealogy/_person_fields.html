@@ -1,0 +1,35 @@
+{% load i18n %}
+<fieldset>
+  <legend>{% translate "Name" %}</legend>
+  <div class="form-grid">
+    {% include "partials/field.html" with field=form.first_name %}
+    {% include "partials/field.html" with field=form.last_name %}
+    {% include "partials/field.html" with field=form.patronymic %}
+  </div>
+  {% include "partials/field.html" with field=form.gender %}
+</fieldset>
+<fieldset>
+  <legend>{% translate "Birth and death" %}</legend>
+  <p class="help" style="margin-top:0">{% translate "If only the year is known, enter just the year." %}</p>
+  <div class="form-grid">
+    {% translate "Date of birth" as birth_label %}
+    {% include "partials/date_fields.html" with label=birth_label day=form.birth_day month=form.birth_month year=form.birth_year %}
+    {% include "partials/field.html" with field=form.birth_place %}
+  </div>
+  {% include "partials/field.html" with field=form.is_deceased %}
+  <div class="form-grid" data-show-if="id_is_deceased">
+    {% translate "Date of death" as death_label %}
+    {% include "partials/date_fields.html" with label=death_label day=form.death_day month=form.death_month year=form.death_year %}
+    {% include "partials/field.html" with field=form.death_place %}
+  </div>
+</fieldset>
+<fieldset>
+  <legend>{% translate "Life" %}</legend>
+  <div class="form-grid">
+    {% include "partials/field.html" with field=form.occupation %}
+    {% include "partials/field.html" with field=form.education %}
+  </div>
+  {% include "partials/field.html" with field=form.biography %}
+  {% include "partials/field.html" with field=form.life_story %}
+  {% include "partials/field.html" with field=form.photo %}
+</fieldset>

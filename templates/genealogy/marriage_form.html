@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Marriage details" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "Marriage details" %}</h1>
+  <p>{{ marriage.husband.full_name }} · {{ marriage.wife.full_name }}</p>
+</div></div>
+<form class="card" method="post" novalidate>{% csrf_token %}
+  {% include "partials/field.html" with field=form.year %}
+  {% include "partials/field.html" with field=form.is_divorced %}
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+    <a class="btn btn-ghost" href="{% url 'genealogy:person' back %}">{% translate "Cancel" %}</a>
+    <span class="spacer"></span>
+    <button class="btn btn-danger" type="submit" name="delete" value="1" data-confirm>{% translate "Delete the marriage record" %}</button>
+  </div>
+</form>
+{% endblock %}
