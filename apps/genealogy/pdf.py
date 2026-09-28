@@ -42,11 +42,14 @@ FONT_BOLD_ITALIC = "DejaVuSans-BoldItalic"
 
 INK = colors.HexColor("#1f2a26")
 MUTED = colors.HexColor("#5f6b66")
-ACCENT = colors.HexColor("#2f6f5e")
+ACCENT = colors.HexColor("#2c6e5a")
 LINE = colors.HexColor("#c9d3ce")
-MALE_BG = colors.HexColor("#e8f0f7")
-FEMALE_BG = colors.HexColor("#f7ecef")
-FOCUS_BG = colors.HexColor("#e3f1ea")
+MALE_BG = colors.HexColor("#e6eef8")
+FEMALE_BG = colors.HexColor("#f9e9ee")
+FOCUS_BG = colors.HexColor("#e2f0e9")
+MALE_LINE = colors.HexColor("#6f97c4")
+FEMALE_LINE = colors.HexColor("#cc7b93")
+TREE_LINE = colors.HexColor("#b9b09e")
 
 _registered = False
 
@@ -343,10 +346,19 @@ def tree_pdf(layout, title, subtitle):
     """The chart from tree.build_tree on one landscape page (A4 or A3)."""
     register_fonts()
     lw, lh = layout["width"], layout["height"]
-    pagesize = landscape(A4) if max(lw, lh) < 2200 else landscape(A3)
-    pw, ph = pagesize
     margin, head_h = 12 * mm, 20 * mm
-    scale = min((pw - 2 * margin) / lw, (ph - 2 * margin - head_h) / lh, 0.9)
+    min_scale = 0.5  # below this the card text is too small to read
+    for size in (landscape(A4), landscape(A3)):
+        pw, ph = size
+        scale = min((pw - 2 * margin) / lw, (ph - 2 * margin - head_h) / lh, 0.9)
+        if scale >= min_scale:
+            break
+    else:
+        # A large family: one wide page (a poster) that PDF viewers can zoom.
+        scale = min_scale
+        pw = lw * scale + 2 * margin
+        ph = max(lh * scale + 2 * margin + head_h, landscape(A4)[1])
+    pagesize = (pw, ph)
     ox = (pw - lw * scale) / 2
     top = ph - margin - head_h
 
@@ -367,9 +379,10 @@ def tree_pdf(layout, title, subtitle):
         return top - y * scale
 
     for line in layout["lines"]:
-        c.setStrokeColor(ACCENT if line["kind"] in ("couple", "divorced") else MUTED)
-        c.setLineWidth(1.1 if line["kind"] == "couple" else 0.8)
-        c.setDash(3, 2) if line["kind"] in ("divorced", "partners") else c.setDash()
+        child = line["kind"] == "child"
+        c.setStrokeColor(TREE_LINE if child else ACCENT)
+        c.setLineWidth((1.6 if child else 2.3) * scale)
+        c.setDash(6 * scale, 4 * scale) if line["kind"] in ("divorced", "partners") else c.setDash()
         path = c.beginPath()
         (x0, y0), *rest = line["points"]
         path.moveTo(tx(x0), ty(y0))
@@ -378,41 +391,65 @@ def tree_pdf(layout, title, subtitle):
         c.drawPath(path, stroke=1, fill=0)
     c.setDash()
 
-    pad = 8 * scale
-    inner = (CARD_W - 16) * scale
+    # Card geometry matches static/js/tree.js.
+    av_cx, av_cy, av_r, text_x, pad_r = 34, 34, 20, 64, 10
+    inner = (CARD_W - text_x - pad_r) * scale
     for n in layout["nodes"]:
+        female = n["gender"] == "female"
         x, y = tx(n["x"]), ty(n["y"] + CARD_H)
         w, h = CARD_W * scale, CARD_H * scale
-        bg = FOCUS_BG if n["focus"] else (MALE_BG if n["gender"] == "male" else FEMALE_BG)
-        c.setFillColor(colors.white if n["dup"] else bg)
+        c.setFillColor(FOCUS_BG if n["focus"] else colors.white)
         c.setStrokeColor(ACCENT if n["focus"] else LINE)
-        c.setLineWidth(1.4 if n["focus"] else 0.6)
+        c.setLineWidth((2.4 if n["focus"] else 1) * scale)
         if n["dup"]:
-            c.setDash(3, 2)
-        c.roundRect(x, y, w, h, 6 * scale, stroke=1, fill=1)
+            c.setDash(5 * scale, 4 * scale)
+        c.roundRect(x, y, w, h, 14 * scale, stroke=1, fill=1)
         c.setDash()
-        name_size = 11 * scale
-        lines = _wrap(n["name"], FONT_BOLD, name_size, inner, 2)
-        cy = ty(n["y"]) - pad - name_size
+        c.setFillColor(FEMALE_LINE if female else MALE_LINE)
+        c.roundRect(x, y + 12 * scale, 4 * scale, h - 24 * scale, 2 * scale, stroke=0, fill=1)
+        c.setFillColor(FEMALE_BG if female else MALE_BG)
+        c.circle(tx(n["x"] + av_cx), ty(n["y"] + av_cy), av_r * scale, stroke=0, fill=1)
+        c.setFillColor(MUTED)
+        c.setFont(FONT_BOLD, 13 * scale)
+        c.drawCentredString(tx(n["x"] + av_cx), ty(n["y"] + av_cy + 4.5), n.get("initials", ""))
+
+        name_size = 13.5 * scale
         c.setFillColor(INK)
         c.setFont(FONT_BOLD, name_size)
-        for ln in lines:
-            c.drawString(x + pad, cy, ln)
-            cy -= name_size * 1.2
-        small = 9 * scale
-        c.setFont(FONT, small)
-        c.setFillColor(MUTED)
+        ly = 25
+        for ln in _wrap(n["name"], FONT_BOLD, name_size, inner, 2):
+            c.drawString(tx(n["x"] + text_x), ty(n["y"] + ly), ln)
+            ly += 16
         if n["years"]:
-            c.drawString(x + pad, cy - 1 * scale, n["years"])
-            cy -= small * 1.3
-        if n["label"]:
-            c.setFillColor(ACCENT)
-            label = _wrap(n["label"], FONT, small, inner, 1)[0]
-            c.drawString(x + pad, ty(n["y"] + CARD_H) + pad, label)
-        if n["hidden_label"]:
+            c.setFont(FONT, 11.5 * scale)
             c.setFillColor(MUTED)
-            c.setFont(FONT, 8 * scale)
-            c.drawCentredString(x + w / 2, ty(n["y"] + CARD_H + 16), n["hidden_label"])
+            c.drawString(tx(n["x"] + text_x), ty(n["y"] + ly + 1), n["years"])
+        if n["label"]:
+            size = 11 * scale
+            label = _wrap(n["label"], FONT_BOLD, size, inner - 12 * scale, 1)[0]
+            lw_ = pdfmetrics.stringWidth(label, FONT_BOLD, size) + 12 * scale
+            c.setFillColor(colors.white if n["focus"] else FOCUS_BG)
+            c.roundRect(tx(n["x"] + text_x), ty(n["y"] + CARD_H - 8), lw_, 17 * scale, 8.5 * scale, stroke=0, fill=1)
+            c.setFillColor(ACCENT)
+            c.setFont(FONT_BOLD, size)
+            c.drawString(tx(n["x"] + text_x + 6), ty(n["y"] + CARD_H - 13), label)
+
+        # Closed branches: "+N" where the button is on screen.
+        badges = []
+        sibs, kids = n.get("sibs"), n.get("kids")
+        if sibs and not sibs["open"]:
+            badges.append((18 if sibs["side"] == "left" else CARD_W - 18, 0, f"+{sibs['count']}"))
+        if kids and not kids["open"]:
+            badges.append((CARD_W - 24, CARD_H, f"+{kids['count']}"))
+        for bx, by, text in badges:
+            bw = max(24, len(text) * 7.5 + 14)
+            c.setFillColor(colors.white)
+            c.setStrokeColor(ACCENT)
+            c.setLineWidth(1.5 * scale)
+            c.roundRect(tx(n["x"] + bx - bw / 2), ty(n["y"] + by + 11), bw * scale, 22 * scale, 11 * scale, stroke=1, fill=1)
+            c.setFillColor(ACCENT)
+            c.setFont(FONT_BOLD, 11.5 * scale)
+            c.drawCentredString(tx(n["x"] + bx), ty(n["y"] + by + 4), text)
     c.showPage()
     c.save()
     return buf.getvalue()

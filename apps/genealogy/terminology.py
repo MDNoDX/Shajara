@@ -10,7 +10,7 @@ linking person (kelin, kuyov, yanga, pochcha, qaynota, qaynona). The English
 msgids below say which exact relationship each term means; the context
 "kinship" keeps them apart from other uses of the same English words.
 """
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 # A term for a person as seen from the focus person ("this is my …").
 KIN = {
@@ -63,6 +63,26 @@ KIN = {
     "relative": pgettext_lazy("kinship", "Relative"),
 }
 
+# Possessive forms ("his/her …") used to build longer names such as
+# "Buvining ukasi" (grandmother's younger brother). Uzbek possessives are not
+# regular enough to derive (singil → singlisi), so each is listed.
+POSSESSIVE = {
+    "older_brother": pgettext_lazy("kinship possessive", "older brother"),
+    "younger_brother": pgettext_lazy("kinship possessive", "younger brother"),
+    "brother": pgettext_lazy("kinship possessive", "brother (age unknown)"),
+    "older_sister": pgettext_lazy("kinship possessive", "older sister"),
+    "younger_sister": pgettext_lazy("kinship possessive", "younger sister"),
+    "sister": pgettext_lazy("kinship possessive", "sister (age unknown)"),
+    "paternal_uncle_child": pgettext_lazy("kinship possessive", "child of father's brother"),
+    "paternal_aunt_child": pgettext_lazy("kinship possessive", "child of father's sister"),
+    "maternal_uncle_child": pgettext_lazy("kinship possessive", "child of mother's brother"),
+    "maternal_aunt_child": pgettext_lazy("kinship possessive", "child of mother's sister"),
+    "son": pgettext_lazy("kinship possessive", "son"),
+    "daughter": pgettext_lazy("kinship possessive", "daughter"),
+    "husband": pgettext_lazy("kinship possessive", "husband"),
+    "wife": pgettext_lazy("kinship possessive", "wife"),
+}
+
 # Generic nouns used in headings, forms and summaries.
 TERMS = {
     "child": pgettext_lazy("kinship", "Child"),
@@ -93,3 +113,8 @@ ADD_RELATION = {
 
 def kin(code):
     return str(KIN.get(code, KIN["relative"]))
+
+
+def chain(whose, code):
+    """ "Buvi" + younger_brother → "Buvining ukasi"; "Togʻa" + wife → "Togʻaning xotini"."""
+    return pgettext("kinship chain", "{whose}'s {what}").format(whose=whose, what=POSSESSIVE[code])

@@ -19,12 +19,13 @@
 <header class="topbar">
   <div class="topbar-inner">
     <a class="brand" href="{% url 'home' %}">
-      {% include "partials/logo.svg" %}
+      <span class="brand-mark">{% include "partials/logo.svg" %}</span>
       <span>{% translate "Family tree" context "site name" %}</span>
     </a>
     {% if user.is_authenticated %}
       <form class="top-search" action="{% url 'genealogy:search' %}" method="get" role="search">
         <label class="visually-hidden" for="top-q">{% translate "Search" %}</label>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="top-q" type="search" name="q" value="{{ query|default:'' }}" placeholder="{% translate 'Search relatives…' %}">
       </form>
     {% endif %}
@@ -33,7 +34,7 @@
       {% if user.is_authenticated %}
         <details class="usermenu">
           <summary>
-            {% include "partials/avatar.html" with person=user.person size="" %}
+            {% include "partials/avatar.html" with person=user.person size="sm" %}
             <span class="uname">{{ user.first_name|default:user.username }}</span>
           </summary>
           <div class="menu">
@@ -52,6 +53,7 @@
     </div>
   </div>
   {% if user.is_authenticated %}
+  <div class="mainnav-wrap">
   <nav class="mainnav" aria-label="{% translate 'Main menu' %}">
     <a href="{% url 'home' %}" {% if url_name == "home" %}aria-current="page"{% endif %}>{% translate "Home" %}</a>
     <a href="{% url 'genealogy:tree' %}" {% if url_name == "tree" or url_name == "tree_for" %}aria-current="page"{% endif %}>{% translate "My family tree" %}</a>
@@ -61,6 +63,7 @@
     <a href="{% url 'accounts:profile' %}" {% if url_name == "profile" %}aria-current="page"{% endif %}>{% translate "My profile" %}</a>
     <a href="{% url 'accounts:settings' %}" {% if url_name == "settings" or url_name == "password_change" %}aria-current="page"{% endif %}>{% translate "Settings" %}</a>
   </nav>
+  </div>
   {% endif %}
 </header>
 {% endwith %}

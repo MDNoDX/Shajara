@@ -138,6 +138,9 @@ def check_javascript():
             code = line.split("//")[0] if not line.strip().startswith("/*") else ""
             for m in JS_STRING.finditer(code):
                 text = m.group(2)
+                # CSS selectors and SVG attribute values are code, not text.
+                if re.match(r"^[.#\[]", text) or text.startswith("xMid"):
+                    continue
                 if text == "use strict" or any(k in text for k in ("Noto Sans", "system-ui", "image/", "same-origin", "application/json")):
                     continue
                 if JS_WRAPPED.search(code[: m.start()]):

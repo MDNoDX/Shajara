@@ -33,6 +33,24 @@ def _focus_for(owner, archive, requested=None):
     return next(iter(archive.people), None)
 
 
+def _ids(value):
+    out = set()
+    for part in (value or "").split(","):
+        if part.strip().isdigit() and len(out) < 500:
+            out.add(int(part))
+    return out
+
+
+def _tree_state(request):
+    """Which branches are open: ?all=1&open=…&closed=…&folded=… (comma-separated ids)."""
+    return {
+        "open_all": request.GET.get("all") == "1",
+        "opened": _ids(request.GET.get("open")),
+        "closed": _ids(request.GET.get("closed")),
+        "folded": _ids(request.GET.get("folded")),
+    }
+
+
 def _pdf_response(data, filename):
     response = HttpResponse(data, content_type="application/pdf")
     response["Content-Disposition"] = content_disposition_header(True, filename)
@@ -205,7 +223,7 @@ def tree_data(request, username):
     focus = _focus_for(owner, archive, request.GET.get("person"))
     if focus is None:
         return JsonResponse({"nodes": [], "lines": [], "width": 0, "height": 0, "focus": None})
-    return JsonResponse(build_tree(archive, focus, viewer_is_owner=owner.pk == request.user.pk))
+    return JsonResponse(build_tree(archive, focus, viewer_is_owner=owner.pk == request.user.pk, **_tree_state(request)))
 
 
 @login_required
@@ -215,7 +233,8 @@ def tree_pdf(request, username):
     focus = _focus_for(owner, archive, request.GET.get("person"))
     if focus is None:
         raise Http404(_("The family tree is empty."))
-    layout = build_tree(archive, focus, photo_urls=False, viewer_is_owner=owner.pk == request.user.pk)
+    layout = build_tree(archive, focus, photo_urls=False, viewer_is_owner=owner.pk == request.user.pk,
+                        **_tree_state(request))
     person = archive.people[focus]
     subtitle = _("Centred on %(name)s. Relationship names are given as seen from this person.") % {
         "name": person.full_name}

@@ -81,6 +81,51 @@ class KinshipTests(TestCase):
         self.assertEqual(label(other, "father"), "Oʻgʻil")
         self.assertEqual(label(friend, "me"), "")
 
+    def test_tree_is_one_connected_chart(self):
+        from collections import Counter, defaultdict
+
+        from apps.genealogy.tree import CARD_W, COUPLE_GAP, build_tree
+
+        # A great-uncle's branch: closed by default, shown when opened.
+        great = Person.objects.create(owner=self.user, first_name="Bobokalon", gender="male")
+        self.p["grandpa"].father = great
+        self.p["grandpa"].save()
+        uncle = Person.objects.create(owner=self.user, first_name="Qobil", gender="male", father=great)
+        Person.objects.create(owner=self.user, first_name="Qobilning qizi", gender="female", father=uncle)
+        a = Archive(self.user)
+
+        compact = build_tree(a, self.p["me"].pk)
+        ids = {n["id"] for n in compact["nodes"]}
+        self.assertNotIn(uncle.pk, ids)
+        grandpa = next(n for n in compact["nodes"] if n["id"] == self.p["grandpa"].pk)
+        self.assertEqual(grandpa["sibs"], {"count": 1, "open": False, "side": "left"})
+        # Parents' brothers and sisters are open by default (the aunt's family).
+        self.assertIn(self.p["cousin"].pk, ids)
+
+        opened = build_tree(a, self.p["me"].pk, opened={self.p["grandpa"].pk})
+        self.assertIn(uncle.pk, {n["id"] for n in opened["nodes"]})
+
+        everything = build_tree(a, self.p["me"].pk, open_all=True)
+        full = Counter(n["id"] for n in everything["nodes"] if not n["dup"])
+        self.assertEqual(set(full), set(a.people))           # everyone …
+        self.assertTrue(all(v == 1 for v in full.values()))  # … exactly once
+        self.assertFalse(any(n["dup"] for n in everything["nodes"]))
+
+        # No two cards overlap, and the parents stand side by side.
+        rows = defaultdict(list)
+        for n in everything["nodes"]:
+            rows[n["y"]].append(n["x"])
+        for xs in rows.values():
+            xs.sort()
+            self.assertTrue(all(b - a_ >= CARD_W for a_, b in zip(xs, xs[1:])))
+        pos = {n["id"]: n for n in everything["nodes"]}
+        father, mother = pos[self.p["father"].pk], pos[self.p["mother"].pk]
+        self.assertEqual(father["y"], mother["y"])
+        self.assertAlmostEqual(mother["x"] - father["x"], CARD_W + COUPLE_GAP, delta=1)
+
+        folded = build_tree(a, self.p["me"].pk, folded={self.p["me"].pk})
+        self.assertNotIn(self.p["son"].pk, {n["id"] for n in folded["nodes"]})
+
     def test_labels_in_both_scripts(self):
         with translation.override("uz"):
             self.assertEqual(self.a.label(self.p["me"].pk, self.p["older_brother"].pk), "Aka")

@@ -10,7 +10,7 @@ from collections import deque
 from apps.accounts.models import Gender
 
 from .models import Marriage, Person
-from .terminology import kin
+from .terminology import POSSESSIVE, chain, kin
 
 
 class Archive:
@@ -24,7 +24,8 @@ class Archive:
                 if parent_id in self.children:
                     self.children[parent_id].append(p.pk)
         for kids in self.children.values():
-            kids.sort(key=lambda pk: self.people[pk].birth_key or (9999,))
+            # By birth; people without a date keep the order they were entered in.
+            kids.sort(key=lambda pk: (self.people[pk].birth_key or (9999,), pk))
         self.unions = {pk: [] for pk in self.people}
         for m in self.marriages:
             if m.husband_id in self.unions and m.wife_id in self.unions:
@@ -43,13 +44,19 @@ class Archive:
     def spouses(self, pk):
         return [sid for sid, _m in self.unions.get(pk, [])]
 
+    def marriage_between(self, a, b):
+        for partner, m in self.unions.get(a, []):
+            if partner == b:
+                return m
+        return None
+
     def siblings(self, pk):
         p = self.people[pk]
         found = []
         for parent_id in (p.father_id, p.mother_id):
             if parent_id in self.children:
                 found.extend(c for c in self.children[parent_id] if c != pk and c not in found)
-        found.sort(key=lambda s: self.people[s].birth_key or (9999,))
+        found.sort(key=lambda s: (self.people[s].birth_key or (9999,), s))
         return found
 
     def ancestors(self, pk):
@@ -89,8 +96,59 @@ class Archive:
         return self._by_marriage(focus, other)
 
     def label(self, focus, other):
+        """The relationship name, in the active language.
+
+        One of the single Uzbek terms where one exists ("Togʻa", "Kelin");
+        otherwise a short description through the nearest named relative
+        ("Buvining ukasi", "Onaning xolavachchasi", "Amakivachchaning qizi",
+        "Togʻaning xotini"); otherwise "Qarindosh".
+        """
         code = self.relation(focus, other)
+        if code and code != "relative":
+            return kin(code)
+        text = self._describe_blood(focus, other) or self._describe_spouse(focus, other)
+        if text:
+            return text
         return kin(code) if code else ""
+
+    def _named(self, code):
+        return code not in (None, "self", "relative") and "/" not in kin(code)
+
+    def _ancestor_on_path(self, pk, ancestor, steps):
+        """pk's ancestor `steps` generations up, on the line to `ancestor`."""
+        cur = pk
+        for _ in range(steps):
+            cur = self._parent_towards(cur, ancestor, self.ancestors(cur)[ancestor])
+            if cur is None:
+                return None
+        return cur
+
+    def _describe_blood(self, focus, other):
+        best = self._common_ancestor(focus, other)
+        if not best:
+            return None
+        up, down, anc = best
+        # A relative of one of focus's ancestors: grandmother's brother,
+        # mother's cousin, …
+        if up > down >= 1:
+            via = self._ancestor_on_path(focus, anc, up - down)
+            code = via and self._blood(via, other)
+            if via and code in POSSESSIVE and self._named(self._blood(focus, via)):
+                return chain(kin(self._blood(focus, via)), code)
+        # A child of a named relative: cousin's daughter, nephew's son, …
+        if down >= 2 and up >= 1:
+            parent = self._parent_towards(other, anc, down)
+            code = parent and self.relation(focus, parent)
+            if parent and self._named(code):
+                return chain(kin(code), "son" if self._male(other) else "daughter")
+        return None
+
+    def _describe_spouse(self, focus, other):
+        for partner, _m in self.unions.get(other, []):
+            code = self._blood(focus, partner)
+            if self._named(code):
+                return chain(kin(code), "husband" if self._male(other) else "wife")
+        return None
 
     def _male(self, pk):
         return self.people[pk].gender == Gender.MALE

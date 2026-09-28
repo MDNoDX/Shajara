@@ -13,6 +13,16 @@
   </div>
 </div>
 
+{% if me and not me.birth_year %}
+<div class="notice">
+  <div>
+    <b>{% translate "Add your date of birth" %}</b>
+    <p>{% translate "Then your brothers and sisters are named correctly as aka, uka, opa or singil." %}</p>
+  </div>
+  <a class="btn btn-sm btn-primary" href="{% url 'genealogy:person_edit' me.pk %}">{% translate "Add" %}</a>
+</div>
+{% endif %}
+
 <div class="stats">
   <a class="stat" href="{% url 'genealogy:people' %}"><b>{{ people_count }}</b><span>{% blocktranslate count counter=people_count context "count" %}relative in the tree{% plural %}relatives in the tree{% endblocktranslate %}</span></a>
   <a class="stat" href="{% url 'friends:list' %}"><b>{{ friends_count }}</b><span>{% blocktranslate count counter=friends_count context "count" %}friend{% plural %}friends{% endblocktranslate %}</span></a>

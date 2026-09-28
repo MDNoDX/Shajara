@@ -66,10 +66,13 @@
     }, 0);
   });
 
-  // Close the user menu when clicking elsewhere.
+  // Close open menus when clicking elsewhere or choosing an item.
   document.addEventListener("click", function (e) {
-    document.querySelectorAll("details.usermenu[open]").forEach(function (d) {
-      if (!d.contains(e.target)) d.removeAttribute("open");
+    document.querySelectorAll("details.usermenu[open], details.dropdown[open]").forEach(function (d) {
+      var summary = d.querySelector("summary");
+      if (!d.contains(e.target) || (!summary.contains(e.target) && e.target.closest(".menu a, .menu button"))) {
+        d.removeAttribute("open");
+      }
     });
   });
 })();
