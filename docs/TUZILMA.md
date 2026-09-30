@@ -172,7 +172,7 @@ Hammasini ishga tushirish: `.venv/bin/python manage.py test` · bittasini: `… 
 | Shajara chizmasi koʻrinishi | joylashuv — `apps/genealogy/tree.py`; chizish, masshtab, yon panel — `static/js/tree.js` |
 | PDF kitob, plakat | `apps/genealogy/pdf.py` |
 | Odam sahifasi | `apps/genealogy/views/people.py` + `templates/genealogy/people/detail.html` |
-| Bosh sahifa («Bugun», toʻliqlik) | `apps/core/views.py` (`home`) + `templates/core/dashboard.html` |
+| Bosh sahifa («Bugun», yaqin sanalar) | `apps/core/views.py` (`home`) + `templates/core/dashboard.html` |
 | Eslatma matni | `apps/notify/messages.py` |
 | Qaysi sanalar eslatilishi | `apps/notify/occasions.py` |
 | Telegram bot javoblari | `apps/notify/telegram.py` |

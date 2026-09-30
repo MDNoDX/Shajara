@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 14:13+0500\n"
+"POT-Creation-Date: 2026-09-30 14:31+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: English\n"
@@ -34,11 +34,11 @@ msgstr ""
 msgid "Letters, digits and the characters @ . + - _ only."
 msgstr ""
 
-#: apps/accounts/forms.py:23 apps/accounts/forms.py:110 apps/accounts/forms.py:199 templates/genealogy/tree.html:112
+#: apps/accounts/forms.py:23 apps/accounts/forms.py:110 apps/accounts/forms.py:199 templates/genealogy/tree.html:106
 msgid "First name"
 msgstr ""
 
-#: apps/accounts/forms.py:24 apps/accounts/forms.py:111 apps/accounts/forms.py:200 templates/genealogy/tree.html:113
+#: apps/accounts/forms.py:24 apps/accounts/forms.py:111 apps/accounts/forms.py:200 templates/genealogy/tree.html:107
 msgid "Last name"
 msgstr ""
 
@@ -46,7 +46,7 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
-#: apps/accounts/forms.py:26 apps/accounts/forms.py:113 apps/accounts/forms.py:201 apps/genealogy/pdf.py:223 templates/genealogy/people/detail.html:59 templates/genealogy/tree.html:116
+#: apps/accounts/forms.py:26 apps/accounts/forms.py:113 apps/accounts/forms.py:201 apps/genealogy/pdf.py:223 templates/genealogy/people/detail.html:59 templates/genealogy/tree.html:110
 msgid "Gender"
 msgstr ""
 
@@ -130,12 +130,12 @@ msgstr ""
 msgid "Code from the app"
 msgstr ""
 
-#: apps/accounts/models.py:12 templates/genealogy/tree.html:117
+#: apps/accounts/models.py:12 templates/genealogy/tree.html:111
 msgctxt "gender"
 msgid "Male"
 msgstr ""
 
-#: apps/accounts/models.py:13 templates/genealogy/tree.html:117
+#: apps/accounts/models.py:13 templates/genealogy/tree.html:111
 msgctxt "gender"
 msgid "Female"
 msgstr ""
@@ -202,7 +202,7 @@ msgstr ""
 msgid "Access has been removed."
 msgstr ""
 
-#: apps/accounts/views/family.py:66 apps/accounts/views/profile.py:42 apps/accounts/views/profile.py:53 apps/core/views.py:282 apps/friends/views.py:81 apps/genealogy/views/album.py:88 apps/genealogy/views/people.py:205 apps/genealogy/views/people.py:305 apps/genealogy/views/people.py:332 apps/notify/views.py:63
+#: apps/accounts/views/family.py:66 apps/accounts/views/profile.py:42 apps/accounts/views/profile.py:53 apps/core/views.py:245 apps/friends/views.py:81 apps/genealogy/views/album.py:88 apps/genealogy/views/people.py:205 apps/genealogy/views/people.py:305 apps/genealogy/views/people.py:332 apps/notify/views.py:63
 msgid "The information has been saved."
 msgstr ""
 
@@ -747,95 +747,60 @@ msgctxt "time zone"
 msgid "Sydney"
 msgstr ""
 
-#: apps/core/views.py:45
+#: apps/core/views.py:44
 #, python-brace-format
 msgid "Happy birthday, {name}! Wishing you health, happiness and every success."
 msgstr ""
 
-#: apps/core/views.py:48
+#: apps/core/views.py:47
 msgid "Congratulations on your wedding anniversary! Wishing you many happy years together."
 msgstr ""
 
-#: apps/core/views.py:85
-#, python-format
-msgid "%(count)d person has no year of birth"
-msgid_plural "%(count)d people have no year of birth"
-msgstr[0] ""
-msgstr[1] ""
-
-#: apps/core/views.py:87
-#, python-format
-msgid "%(count)d birthday cannot be reminded: the day and month are missing"
-msgid_plural "%(count)d birthdays cannot be reminded: the day and month are missing"
-msgstr[0] ""
-msgstr[1] ""
-
-#: apps/core/views.py:90
-#, python-format
-msgid "%(count)d person has no photo"
-msgid_plural "%(count)d people have no photo"
-msgstr[0] ""
-msgstr[1] ""
-
-#: apps/core/views.py:92
-#, python-format
-msgid "%(count)d person is not linked to the family yet"
-msgid_plural "%(count)d people are not linked to the family yet"
-msgstr[0] ""
-msgstr[1] ""
-
-#: apps/core/views.py:95
-#, python-format
-msgid "%(count)d relative who has passed away has no life story"
-msgid_plural "%(count)d relatives who have passed away have no life story"
-msgstr[0] ""
-msgstr[1] ""
-
-#: apps/core/views.py:230
+#: apps/core/views.py:193
 msgid "Users"
 msgstr ""
 
-#: apps/core/views.py:231
+#: apps/core/views.py:194
 msgid "People in all trees"
 msgstr ""
 
-#: apps/core/views.py:232 templates/base.html:55 templates/base.html:120 templates/base.html:151 templates/genealogy/events/list.html:3 templates/genealogy/events/list.html:7 templates/genealogy/people/detail.html:142 templates/genealogy/timeline.html:15
+#: apps/core/views.py:195 templates/base.html:55 templates/base.html:120 templates/base.html:151 templates/genealogy/events/list.html:3 templates/genealogy/events/list.html:7 templates/genealogy/people/detail.html:142 templates/genealogy/timeline.html:15
 msgid "Events"
 msgstr ""
 
-#: apps/core/views.py:233 apps/genealogy/pdf.py:338 templates/base.html:57 templates/base.html:125 templates/base.html:153 templates/genealogy/people/detail.html:155 templates/genealogy/stories/list.html:3 templates/genealogy/stories/list.html:7
+#: apps/core/views.py:196 apps/genealogy/pdf.py:338 templates/base.html:57 templates/base.html:125 templates/base.html:153 templates/genealogy/people/detail.html:155 templates/genealogy/stories/list.html:3 templates/genealogy/stories/list.html:7
 msgid "Stories"
 msgstr ""
 
-#: apps/core/views.py:234 apps/friends/apps.py:8 templates/base.html:58 templates/base.html:126 templates/friends/list.html:7 templates/genealogy/people/detail.html:166
+#: apps/core/views.py:197 apps/friends/apps.py:8 templates/base.html:58 templates/base.html:126 templates/friends/list.html:7 templates/genealogy/people/detail.html:166
 msgid "Friends"
 msgstr ""
 
-#: apps/core/views.py:235 templates/core/control_panel.html:34
+#: apps/core/views.py:198 templates/core/control_panel.html:34
 msgid "Photos"
 msgstr ""
 
-#: apps/core/views.py:236 apps/notify/apps.py:8 templates/base.html:62 templates/base.html:82 templates/notify/list.html:3 templates/notify/list.html:7
+#: apps/core/views.py:199 apps/notify/apps.py:8 templates/base.html:62 templates/base.html:82 templates/notify/list.html:3 templates/notify/list.html:7
 msgid "Notifications"
 msgstr ""
 
-#: apps/core/views.py:237
+#: apps/core/views.py:200
 msgid "Telegram connected"
 msgstr ""
 
-#: apps/core/views.py:270
+#: apps/core/views.py:233
 msgid "Connect Telegram first: Settings → Reminders."
 msgstr ""
 
-#: apps/core/views.py:274
+#: apps/core/views.py:237
 msgid "The backup has been sent to your Telegram."
 msgstr ""
 
-#: apps/core/views.py:276
+#: apps/core/views.py:239
 msgid "The backup is too large for Telegram. Download it here instead."
 msgstr ""
 
-#: apps/core/views.py:297
+#: apps/core/views.py:260
 msgid "The Telegram bot is connected to the site."
 msgstr ""
 
@@ -2006,7 +1971,7 @@ msgctxt "kinship"
 msgid "Friend"
 msgstr ""
 
-#: apps/genealogy/terminology.py:143 templates/base.html:53 templates/base.html:118 templates/base.html:149 templates/core/landing.html:48 templates/genealogy/tree.html:3 templates/genealogy/tree.html:58
+#: apps/genealogy/terminology.py:143 templates/base.html:53 templates/base.html:118 templates/base.html:149 templates/core/landing.html:48 templates/genealogy/tree.html:3 templates/genealogy/tree.html:52
 msgctxt "kinship"
 msgid "Family tree"
 msgstr ""
@@ -2299,7 +2264,7 @@ msgstr ""
 msgid "Wedding of {a} and {b}"
 msgstr ""
 
-#: apps/genealogy/views/tree.py:150 apps/genealogy/views/tree.py:179 templates/genealogy/tree.html:130
+#: apps/genealogy/views/tree.py:150 apps/genealogy/views/tree.py:179 templates/genealogy/tree.html:124
 msgid "The family tree is empty."
 msgstr ""
 
@@ -2668,7 +2633,7 @@ msgstr ""
 msgid "Set a new password"
 msgstr ""
 
-#: templates/accounts/auth/password_reset_confirm.html:11 templates/accounts/settings/general.html:15 templates/accounts/settings/general.html:46 templates/accounts/settings/password_change.html:14 templates/accounts/settings/security.html:10 templates/friends/contact_form.html:22 templates/genealogy/events/form.html:31 templates/genealogy/people/form.html:22 templates/genealogy/people/marriage_form.html:15 templates/genealogy/people/relative_form.html:25 templates/genealogy/stories/form.html:15 templates/genealogy/tree.html:122 templates/notify/settings.html:93
+#: templates/accounts/auth/password_reset_confirm.html:11 templates/accounts/settings/general.html:15 templates/accounts/settings/general.html:46 templates/accounts/settings/password_change.html:14 templates/accounts/settings/security.html:10 templates/friends/contact_form.html:22 templates/genealogy/events/form.html:31 templates/genealogy/people/form.html:22 templates/genealogy/people/marriage_form.html:15 templates/genealogy/people/relative_form.html:25 templates/genealogy/stories/form.html:15 templates/genealogy/tree.html:116 templates/notify/settings.html:93
 msgid "Save"
 msgstr ""
 
@@ -2795,7 +2760,7 @@ msgstr ""
 msgid "Your data"
 msgstr ""
 
-#: templates/accounts/settings/data.html:6 templates/genealogy/tree.html:44
+#: templates/accounts/settings/data.html:6 templates/genealogy/tree.html:38
 msgid "Download"
 msgstr ""
 
@@ -2837,11 +2802,11 @@ msgstr ""
 msgid "Everything, with photos. For a backup or moving to another server."
 msgstr ""
 
-#: templates/accounts/settings/data.html:15 templates/core/dashboard.html:135 templates/genealogy/tree.html:51
+#: templates/accounts/settings/data.html:15 templates/core/dashboard.html:122 templates/genealogy/tree.html:45
 msgid "Family book (PDF)"
 msgstr ""
 
-#: templates/accounts/settings/data.html:15 templates/core/dashboard.html:135
+#: templates/accounts/settings/data.html:15 templates/core/dashboard.html:122
 msgid "Every person with dates, family and life story, ready to print."
 msgstr ""
 
@@ -2902,7 +2867,7 @@ msgstr ""
 msgid "Delete my account"
 msgstr ""
 
-#: templates/accounts/settings/family.html:6 templates/core/dashboard.html:125
+#: templates/accounts/settings/family.html:6 templates/core/dashboard.html:112
 msgid "Invite a relative"
 msgstr ""
 
@@ -3125,7 +3090,7 @@ msgstr ""
 msgid "Save these recovery codes somewhere safe. If you lose your phone, each code lets you sign in once. They are shown only now."
 msgstr ""
 
-#: templates/accounts/settings/two_factor_codes.html:11 templates/core/dashboard.html:131
+#: templates/accounts/settings/two_factor_codes.html:11 templates/core/dashboard.html:118
 msgid "Print"
 msgstr ""
 
@@ -3214,19 +3179,19 @@ msgstr ""
 msgid "Find a relative or a page…"
 msgstr ""
 
-#: templates/base.html:145 templates/core/dashboard.html:13 templates/genealogy/people/form.html:3 templates/genealogy/people/form.html:7 templates/genealogy/people/list.html:12 templates/genealogy/people/relative_form.html:3 templates/genealogy/people/relative_form.html:7 templates/genealogy/tree.html:131
+#: templates/base.html:145 templates/core/dashboard.html:13 templates/genealogy/people/form.html:3 templates/genealogy/people/form.html:7 templates/genealogy/people/list.html:12 templates/genealogy/people/relative_form.html:3 templates/genealogy/people/relative_form.html:7 templates/genealogy/tree.html:125
 msgid "Add a new relative"
 msgstr ""
 
-#: templates/base.html:146 templates/core/dashboard.html:122 templates/genealogy/events/form.html:3 templates/genealogy/events/form.html:6 templates/genealogy/events/list.html:12
+#: templates/base.html:146 templates/core/dashboard.html:109 templates/genealogy/events/form.html:3 templates/genealogy/events/form.html:6 templates/genealogy/events/list.html:12
 msgid "Add a family event"
 msgstr ""
 
-#: templates/base.html:147 templates/core/dashboard.html:123 templates/genealogy/people/detail.html:156 templates/genealogy/stories/form.html:3 templates/genealogy/stories/form.html:6 templates/genealogy/stories/list.html:8
+#: templates/base.html:147 templates/core/dashboard.html:110 templates/genealogy/people/detail.html:156 templates/genealogy/stories/form.html:3 templates/genealogy/stories/form.html:6 templates/genealogy/stories/list.html:8
 msgid "Write a story"
 msgstr ""
 
-#: templates/base.html:148 templates/core/dashboard.html:124 templates/friends/contact_form.html:3 templates/friends/contact_form.html:6 templates/friends/list.html:10 templates/friends/list.html:50 templates/genealogy/people/detail.html:167
+#: templates/base.html:148 templates/core/dashboard.html:111 templates/friends/contact_form.html:3 templates/friends/contact_form.html:6 templates/friends/list.html:10 templates/friends/list.html:50 templates/genealogy/people/detail.html:167
 msgid "Add a friend"
 msgstr ""
 
@@ -3234,7 +3199,7 @@ msgstr ""
 msgid "Reminder settings"
 msgstr ""
 
-#: templates/base.html:176 templates/genealogy/tree.html:90
+#: templates/base.html:176 templates/genealogy/tree.html:84
 msgid "Close"
 msgstr ""
 
@@ -3435,26 +3400,14 @@ msgid "Latest changes"
 msgstr ""
 
 #: templates/core/dashboard.html:107
-msgid "How complete is the archive?"
-msgstr ""
-
-#: templates/core/dashboard.html:110
-msgid "A few more details and the family tree tells the whole story."
-msgstr ""
-
-#: templates/core/dashboard.html:110
-msgid "Everything important is filled in. Well done!"
-msgstr ""
-
-#: templates/core/dashboard.html:120
 msgid "Quick actions"
 msgstr ""
 
-#: templates/core/dashboard.html:140
+#: templates/core/dashboard.html:127
 msgid "Wall poster of the tree (PDF)"
 msgstr ""
 
-#: templates/core/dashboard.html:140
+#: templates/core/dashboard.html:127
 msgid "The whole family on one long sheet for the wall."
 msgstr ""
 
@@ -3550,7 +3503,7 @@ msgstr ""
 msgid "Something went wrong on our side. Please try again in a few minutes."
 msgstr ""
 
-#: templates/friends/contact_form.html:3 templates/friends/list.html:41 templates/genealogy/events/detail.html:20 templates/genealogy/events/form.html:3 templates/genealogy/people/detail.html:23 templates/genealogy/people/form.html:3 templates/genealogy/stories/detail.html:14 templates/genealogy/stories/form.html:3 templates/genealogy/tree.html:101
+#: templates/friends/contact_form.html:3 templates/friends/list.html:41 templates/genealogy/events/detail.html:20 templates/genealogy/events/form.html:3 templates/genealogy/people/detail.html:23 templates/genealogy/people/form.html:3 templates/genealogy/stories/detail.html:14 templates/genealogy/stories/form.html:3 templates/genealogy/tree.html:95
 msgid "Edit"
 msgstr ""
 
@@ -3644,7 +3597,7 @@ msgstr ""
 msgid "These two people are not connected in the tree yet."
 msgstr ""
 
-#: templates/genealogy/changes/_duplicates_notice.html:3 templates/genealogy/tree.html:109
+#: templates/genealogy/changes/_duplicates_notice.html:3 templates/genealogy/tree.html:103
 msgid "Already in the family tree?"
 msgstr ""
 
@@ -4115,90 +4068,82 @@ msgid "Fan of ancestors"
 msgstr ""
 
 #: templates/genealogy/tree.html:25
-msgid "Which side of the family"
-msgstr ""
-
-#: templates/genealogy/tree.html:27
-msgid "Both sides"
-msgstr ""
-
-#: templates/genealogy/tree.html:31
 msgid "What to show"
 msgstr ""
 
-#: templates/genealogy/tree.html:32
+#: templates/genealogy/tree.html:26
 msgid "Compact view"
 msgstr ""
 
-#: templates/genealogy/tree.html:33
+#: templates/genealogy/tree.html:27
 msgid "Open everything"
 msgstr ""
 
-#: templates/genealogy/tree.html:37
+#: templates/genealogy/tree.html:31
 msgid "Zoom out"
 msgstr ""
 
-#: templates/genealogy/tree.html:39
+#: templates/genealogy/tree.html:33
 msgid "Zoom in"
 msgstr ""
 
-#: templates/genealogy/tree.html:41
+#: templates/genealogy/tree.html:35
 msgid "Fit to screen"
 msgstr ""
 
-#: templates/genealogy/tree.html:46
+#: templates/genealogy/tree.html:40
 msgid "Family tree (PDF)"
 msgstr ""
 
-#: templates/genealogy/tree.html:47
+#: templates/genealogy/tree.html:41
 msgid "Wall poster, 42 cm high (PDF)"
 msgstr ""
 
-#: templates/genealogy/tree.html:48
+#: templates/genealogy/tree.html:42
 msgid "Wall poster, 59 cm high (PDF)"
 msgstr ""
 
-#: templates/genealogy/tree.html:49
+#: templates/genealogy/tree.html:43
 msgid "Image (PNG)"
 msgstr ""
 
-#: templates/genealogy/tree.html:67
+#: templates/genealogy/tree.html:61
 msgid "Loading the family tree…"
 msgstr ""
 
-#: templates/genealogy/tree.html:76
+#: templates/genealogy/tree.html:70
 msgid "Direct ancestors"
 msgstr ""
 
-#: templates/genealogy/tree.html:77
+#: templates/genealogy/tree.html:71
 msgid "Married couple"
 msgstr ""
 
-#: templates/genealogy/tree.html:78
+#: templates/genealogy/tree.html:72
 msgid "Show hidden relatives"
 msgstr ""
 
-#: templates/genealogy/tree.html:99
+#: templates/genealogy/tree.html:93
 msgid "Put in the centre"
 msgstr ""
 
-#: templates/genealogy/tree.html:100
+#: templates/genealogy/tree.html:94
 msgid "Open profile"
 msgstr ""
 
-#: templates/genealogy/tree.html:104
+#: templates/genealogy/tree.html:98
 msgid "Add a relative"
 msgstr ""
 
-#: templates/genealogy/tree.html:110
+#: templates/genealogy/tree.html:104
 msgid "Press “Save” again to add a separate person."
 msgstr ""
 
-#: templates/genealogy/tree.html:118
+#: templates/genealogy/tree.html:112
 msgid "Year of birth"
 msgstr ""
 
-#: templates/genealogy/tree.html:123
+#: templates/genealogy/tree.html:117
 msgid "More details…"
 msgstr ""
 

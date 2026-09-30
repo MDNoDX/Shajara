@@ -91,12 +91,18 @@
   var existing = document.getElementById("id_existing");
   if (relation) {
     var newPerson = $("[data-new-person]");
-    var otherParent = $("[data-show-if-relation]");
+    var forRelation = $all("[data-show-if-relation]");
+    var anchorGender = relation.form && relation.form.getAttribute("data-anchor-gender");
     var genderField = document.getElementById("id_gender") && document.getElementById("id_gender").closest(".field");
     var syncRelation = function () {
       if (newPerson && existing) newPerson.hidden = !!existing.value;
-      if (otherParent) otherParent.hidden = relation.value !== otherParent.getAttribute("data-show-if-relation");
+      forRelation.forEach(function (el) { el.hidden = relation.value !== el.getAttribute("data-show-if-relation"); });
       if (genderField) genderField.hidden = relation.value === "father" || relation.value === "mother";
+      // A husband's spouse is a wife and the other way round: chosen in advance, can be changed.
+      if (relation.value === "spouse" && anchorGender && !$("input[name=gender]:checked")) {
+        var other = $("input[name=gender][value=" + (anchorGender === "male" ? "female" : "male") + "]");
+        if (other) other.checked = true;
+      }
     };
     relation.addEventListener("change", syncRelation);
     if (existing) existing.addEventListener("change", syncRelation);
@@ -123,6 +129,30 @@
       btn.setAttribute("data-label", btn.textContent);
       btn.textContent = gettext("Saving…");
     }, 0);
+  });
+
+  // File fields: the browser's own button speaks the browser's language, so
+  // it is replaced by ours (the album's drop zone has its own).
+  $all("input[type=file]").forEach(function (input) {
+    if (input.closest(".dropzone") || !input.id) return;
+    var box = document.createElement("span"), pick = document.createElement("label"), name = document.createElement("span");
+    box.className = "filepick";
+    pick.className = "btn btn-sm";
+    pick.htmlFor = input.id;
+    pick.textContent = gettext("Choose a file");
+    name.className = "filepick-name";
+    var show = function () {
+      var files = input.files || [];
+      box.classList.toggle("chosen", files.length > 0);
+      name.textContent = files.length ? Array.prototype.map.call(files, function (f) { return f.name; }).join(", ")
+                                      : gettext("No file chosen");
+    };
+    input.parentNode.insertBefore(box, input);
+    box.appendChild(pick); box.appendChild(name); box.appendChild(input);
+    input.classList.add("visually-hidden");
+    input.addEventListener("change", show);
+    input.addEventListener("filepick", show);   // after the photo was made smaller, or refused
+    show();
   });
 
   // A search box above long multiple-choice lists (people in an event).
@@ -213,8 +243,10 @@
       if (limit && input.files[0] && input.files[0].size > limit * 1024 * 1024) {
         window.alert(interpolate(gettext("The photo is too large. The maximum size is %(size)s MB."), { size: limit }, true));
         input.value = "";
+        input.dispatchEvent(new Event("filepick"));
         return;
       }
+      input.dispatchEvent(new Event("filepick"));
       if (input.hasAttribute("data-autosubmit")) form.submit();
     });
   });

@@ -22,12 +22,6 @@
       <button type="button" data-view="fan" aria-pressed="false">{% include "partials/icon.html" with name="fan" %}<span class="tb-label">{% translate "Fan of ancestors" %}</span></button>
     </div>
     <div class="tb-group" data-tree-only>
-      <label class="visually-hidden" for="tree-side">{% translate "Which side of the family" %}</label>
-      <select id="tree-side">
-        <option value="">{% translate "Both sides" %}</option>
-        <option value="paternal">{{ branches.paternal }}</option>
-        <option value="maternal">{{ branches.maternal }}</option>
-      </select>
       <div class="segmented" role="group" aria-label="{% translate 'What to show' %}">
         <button type="button" data-expand="compact" aria-pressed="true" title="{% translate 'Compact view' %}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4l4 4 4-4M8 20l4-4 4 4M4 12h16"/></svg><span class="tb-label">{% translate "Compact view" %}</span></button>
         <button type="button" data-expand="all" aria-pressed="false" title="{% translate 'Open everything' %}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l4-4 4 4M8 16l4 4 4-4M4 12h16"/></svg><span class="tb-label">{% translate "Open everything" %}</span></button>

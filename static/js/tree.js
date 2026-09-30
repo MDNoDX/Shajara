@@ -20,7 +20,6 @@
   var sheet = document.getElementById("tree-sheet");
   var sheetInner = document.getElementById("tree-sheet-inner");
   var picker = document.getElementById("tree-person");
-  var sideSelect = document.getElementById("tree-side");
   var dataUrl = root.getAttribute("data-url");
   var fanUrl = root.getAttribute("data-fan-url");
   var pdfUrl = root.getAttribute("data-pdf-url");
@@ -40,10 +39,8 @@
     focus: parseInt(root.getAttribute("data-focus"), 10),
     view: params.get("view") === "fan" ? "fan" : "tree",
     all: params.get("all") === "1",
-    side: params.get("side") === "paternal" || params.get("side") === "maternal" ? params.get("side") : "",
     opened: idSet("open"), closed: idSet("closed"), folded: idSet("folded"), unfolded: idSet("kids"),
   };
-  sideSelect.value = state.side;
   var measureCtx = document.createElement("canvas").getContext("2d");
 
   function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
@@ -55,7 +52,6 @@
     var q = new URLSearchParams();
     q.set("person", state.focus);
     if (state.all) q.set("all", "1");
-    if (state.side) q.set("side", state.side);
     [["open", state.opened], ["closed", state.closed], ["folded", state.folded], ["kids", state.unfolded]].forEach(function (p) {
       if (p[1].size) q.set(p[0], Array.from(p[1]).join(","));
     });
@@ -367,17 +363,30 @@
     return { x: vb.x + (clientX - rect.left) / rect.width * vb.w, y: vb.y + (clientY - rect.top) / rect.height * vb.h };
   }
 
-  // Generation names at the left edge, level with each row of cards.
+  // Generation names at the left edge, level with each row of cards. Zoomed
+  // out, the rows come closer than a wrapped name is tall: names then take
+  // one line each, and one that would still touch its neighbour is left out
+  // (the viewer's own generation is placed first, then outwards from it).
+  var RAIL_LINE = 16, RAIL_WRAPPED = 56;   // px: one line; the tallest wrapped name
   function drawRail() {
     rail.innerHTML = "";
     if (state.view !== "tree" || !state.data || !state.vb) return;
     var h = view.clientHeight, vb = state.vb, card = state.data.card;
-    state.data.rows.forEach(function (row) {
-      var y = (row.y + card.h / 2 - vb.y) / vb.h * h;
-      if (y < 14 || y > h - 14) return;
+    var rows = state.data.rows.map(function (row) {
+      return { label: row.label, gen: row.gen, y: (row.y + card.h / 2 - vb.y) / vb.h * h };
+    }).sort(function (a, b) { return a.y - b.y; });
+    var pitch = Infinity;
+    for (var i = 1; i < rows.length; i++) pitch = Math.min(pitch, rows[i].y - rows[i - 1].y);
+    var tight = pitch < RAIL_WRAPPED, gap = tight ? RAIL_LINE : 0, placed = [];
+    rail.classList.toggle("tight", tight);
+    rows.slice().sort(function (a, b) { return Math.abs(a.gen) - Math.abs(b.gen); }).forEach(function (row) {
+      if (row.y < 14 || row.y > h - 14) return;
+      if (placed.some(function (y) { return Math.abs(y - row.y) < gap; })) return;
+      placed.push(row.y);
       var s = document.createElement("span");
       s.textContent = row.label;
-      s.style.top = y + "px";
+      s.title = row.label;
+      s.style.top = row.y + "px";
       rail.appendChild(s);
     });
   }
@@ -736,7 +745,6 @@
 
   // The name picker (live search) puts the chosen person in the centre.
   picker.addEventListener("livesearch:pick", function (e) { state.focus = e.detail.id; reload(); });
-  sideSelect.addEventListener("change", function () { state.side = sideSelect.value; load(null); });
   root.querySelectorAll("[data-expand]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       state.all = btn.getAttribute("data-expand") === "all";

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 13:32+0500\n"
+"POT-Creation-Date: 2026-09-30 14:31+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: English\n"
@@ -38,87 +38,95 @@ msgstr ""
 msgid "Colour theme"
 msgstr ""
 
-#: static/js/app.js:124
+#: static/js/app.js:130
 msgid "Saving…"
 msgstr ""
 
-#: static/js/app.js:133
+#: static/js/app.js:142
+msgid "Choose a file"
+msgstr ""
+
+#: static/js/app.js:148
+msgid "No file chosen"
+msgstr ""
+
+#: static/js/app.js:163
 msgid "Type a name to filter…"
 msgstr ""
 
-#: static/js/app.js:167
+#: static/js/app.js:197
 msgid "Copied"
 msgstr ""
 
-#: static/js/app.js:214
+#: static/js/app.js:244
 msgid "The photo is too large. The maximum size is %(size)s MB."
 msgstr ""
 
-#: static/js/app.js:256
+#: static/js/app.js:288
 msgid "Close"
 msgstr ""
 
-#: static/js/app.js:327 static/js/app.js:468
+#: static/js/app.js:359 static/js/app.js:500
 msgid "No results found."
 msgstr ""
 
-#: static/js/app.js:538
+#: static/js/app.js:570
 msgid "On for this device"
 msgstr ""
 
-#: static/js/app.js:539
+#: static/js/app.js:571
 msgid "Blocked in the browser settings"
 msgstr ""
 
-#: static/js/app.js:539
+#: static/js/app.js:571
 msgid "Off for this device"
 msgstr ""
 
-#: static/js/tree.js:146 static/js/tree.js:250
+#: static/js/tree.js:142 static/js/tree.js:246
 msgid "Family tree"
 msgstr ""
 
-#: static/js/tree.js:188
+#: static/js/tree.js:184
 msgid "Hide brothers and sisters"
 msgstr ""
 
-#: static/js/tree.js:188
+#: static/js/tree.js:184
 msgid "Show brothers and sisters"
 msgstr ""
 
-#: static/js/tree.js:193
+#: static/js/tree.js:189
 msgid "Hide children"
 msgstr ""
 
-#: static/js/tree.js:193
+#: static/js/tree.js:189
 msgid "Show children"
 msgstr ""
 
-#: static/js/tree.js:297
+#: static/js/tree.js:293
 msgid "Add father"
 msgstr ""
 
-#: static/js/tree.js:297
+#: static/js/tree.js:293
 msgid "Add mother"
 msgstr ""
 
-#: static/js/tree.js:594
+#: static/js/tree.js:603
 msgid "You"
 msgstr ""
 
-#: static/js/tree.js:675 static/js/tree.js:813
+#: static/js/tree.js:684 static/js/tree.js:821
 msgid "An error occurred."
 msgstr ""
 
-#: static/js/tree.js:702
+#: static/js/tree.js:711
 msgid "Could not load the family tree. Please try again."
 msgstr ""
 
-#: static/js/tree.js:711 static/js/tree.js:726
+#: static/js/tree.js:720 static/js/tree.js:735
 msgid "The family tree is empty."
 msgstr ""
 
-#: static/js/tree.js:816
+#: static/js/tree.js:824
 msgctxt "file name"
 msgid "family-tree"
 msgstr "family-tree"

@@ -9,7 +9,6 @@ from django.shortcuts import redirect, render
 from django.utils import timezone, translation
 from django.utils.http import content_disposition_header, url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
-from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from apps.core.muchal import current_cycle_year, muchal
@@ -59,45 +58,9 @@ def home(request):
         "today_items": todays,
         "today_label": format_date(today),
         "soon": [row for row in upcoming if row[2]][:6],
-        "completeness": _completeness(archive, focus),
         "changes": Change.objects.filter(owner=owner).select_related("actor", "person")[:6],
         "cycle_animal": muchal(current_cycle_year(), 6, 1),
     })
-
-
-def _completeness(archive, focus):
-    """How complete the archive is, and what to fill in next."""
-    people = list(archive.people.values())
-    if not people:
-        return None
-    living = [p for p in people if not p.is_deceased]
-    connected = archive.generations(focus) if focus else {}
-    no_year = sum(1 for p in people if not p.birth_year)
-    no_day = sum(1 for p in living if p.birth_year and not (p.birth_month and p.birth_day))
-    no_photo = sum(1 for p in people if not p.photo)
-    unlinked = sum(1 for p in people if p.pk not in connected) if focus else 0
-    no_story = sum(1 for p in people if p.is_deceased and not p.biography and not p.life_story)
-    n = len(people)
-    score = round(100 * (0.35 * (n - no_year) / n + 0.2 * (1 - no_day / max(1, len(living)))
-                         + 0.25 * (n - no_photo) / n + 0.2 * (n - unlinked) / n))
-    tasks = [
-        ("calendar", no_year, "nodate", ngettext(
-            "%(count)d person has no year of birth", "%(count)d people have no year of birth", no_year)),
-        ("bell", no_day, "noday", ngettext(
-            "%(count)d birthday cannot be reminded: the day and month are missing",
-            "%(count)d birthdays cannot be reminded: the day and month are missing", no_day)),
-        ("user", no_photo, "nophoto", ngettext(
-            "%(count)d person has no photo", "%(count)d people have no photo", no_photo)),
-        ("link", unlinked, "unlinked", ngettext(
-            "%(count)d person is not linked to the family yet",
-            "%(count)d people are not linked to the family yet", unlinked)),
-        ("book", no_story, "nostory", ngettext(
-            "%(count)d relative who has passed away has no life story",
-            "%(count)d relatives who have passed away have no life story", no_story)),
-    ]
-    return {"score": max(0, min(100, score)),
-            "tasks": [{"icon": icon, "filter": flt, "text": text % {"count": count}}
-                      for icon, count, flt, text in tasks if count][:4]}
 
 
 @require_POST

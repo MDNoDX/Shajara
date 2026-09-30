@@ -31,7 +31,7 @@
           <a class="btn btn-sm" href="{% url 'friends:create' %}?kimning={{ person.pk }}">{% include "partials/icon.html" with name="plus" %}{% translate "Add" %}</a></h2>
         <div class="people">
           {% for c in contacts %}
-            <div class="pcard">
+            <div class="pcard contact">
               <span class="avatar b-own" aria-hidden="true">{{ c.initials }}</span>
               <span class="who spacer">
                 <span class="name">{{ c.name }}</span>

@@ -17,7 +17,7 @@
 {% if items %}
   <ul class="occ-list">
     {% for n in items %}{% with t=n.text %}
-    <li><a class="occ{% if not n.read_at %} today{% endif %}" href="{% url 'notify:open' n.pk %}">
+    <li><a class="occ{% if not n.read_at %} is-today{% endif %}" href="{% url 'notify:open' n.pk %}">
       {% include "partials/occ_icon.html" with kind=n.kind %}
       <span class="occ-main"><b>{{ t.title }}</b><br><span class="muted small">{{ t.body }}</span></span>
       <span class="occ-when">{% if n.occasion_date %}<b>{{ n.occasion_date|date:"j" }}</b>{{ n.occasion_date|uzmonth }}{% endif %}</span>

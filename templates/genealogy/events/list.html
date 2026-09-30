@@ -19,7 +19,7 @@
     {% if items %}
       <ul class="occ-list">
         {% for o, t, left in items %}
-        <li><a class="occ{% if left == 0 %} today{% endif %}" href="{{ o.url }}">
+        <li><a class="occ{% if left == 0 %} is-today{% endif %}" href="{{ o.url }}">
           {% include "partials/occ_icon.html" with kind=o.kind %}
           <span class="occ-main"><b>{{ t.title }}</b><br><span class="muted small">{{ t.body }}</span></span>
           <span class="occ-when"><b>{{ o.date|date:"j" }}</b>{{ o.date|uzmonth }}</span>

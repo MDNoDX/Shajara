@@ -37,7 +37,6 @@ def _tree_state(request):
         "closed": _ids(request.GET.get("closed")),
         "folded": _ids(request.GET.get("folded")),
         "unfolded": _ids(request.GET.get("kids")),
-        "side": request.GET.get("side") if request.GET.get("side") in ("paternal", "maternal") else None,
     }
 
 

@@ -12,7 +12,7 @@ Hammasi Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` → `
 - **Shajara daraxti** — bitta bogʻlangan chizma. Tarmoqlar rang bilan ajratilgan (oʻz oilasi, ota tomoni,
   ona tomoni), toʻgʻri ajdodlar chizigʻi zarhal; chapda avlod nomlari, burchakda kichik xarita;
   uzoqlashtirganda kartalar soddalashadi. Kartani bosganda yon panel ochiladi va qarindosh **shu yerning oʻzida**
-  qoʻshiladi. «Faqat ota tomoni / ona tomoni» koʻrinishi va **ajdodlar yelpigʻichi** ham bor.
+  qoʻshiladi. **Ajdodlar yelpigʻichi** ham bor.
 - **Birgalikda tuzish** — qarindoshni havola orqali taklif qilasiz (koʻrish yoki tahrirlash huquqi bilan);
   u shajarani oʻz oʻrnidan nomlangan holda koʻradi. **Oʻzgarishlar tarixi**: kim nimani qoʻshgani koʻrinadi,
   xato oʻzgarish yoki oʻchirish ortga qaytariladi.

@@ -6,7 +6,7 @@
   <div>
     <span class="eyebrow">{{ today_label }}</span>
     <h1>{% blocktranslate with name=user.first_name|default:user.username %}Welcome, {{ name }}!{% endblocktranslate %}</h1>
-    {% if cycle_animal %}<p class="sub"><span class="banner-pill">{{ cycle_animal.emoji }} {% blocktranslate with animal=cycle_animal.name %}This is the year of the {{ animal }}{% endblocktranslate %}</span></p>{% endif %}
+    {% if cycle_animal %}<p class="sub"><span class="banner-pill"><span aria-hidden="true">{{ cycle_animal.emoji }}</span>{% blocktranslate with animal=cycle_animal.name %}This is the year of the {{ animal }}{% endblocktranslate %}</span></p>{% endif %}
   </div>
   <div class="row">
     {% if me %}<a class="btn" href="{% url 'genealogy:tree' %}">{% include "partials/icon.html" with name="tree" %}{% translate "View the family tree" %}</a>{% endif %}
@@ -102,19 +102,6 @@
   </div>
 
   <aside>
-    {% if completeness %}
-    <section class="card">
-      <h2>{% translate "How complete is the archive?" %}</h2>
-      <div class="meter">
-        <div class="ring" style="--v:{{ completeness.score }}"><b>{{ completeness.score }}%</b></div>
-        <p class="muted small" style="margin:0">{% if completeness.tasks %}{% translate "A few more details and the family tree tells the whole story." %}{% else %}{% translate "Everything important is filled in. Well done!" %}{% endif %}</p>
-      </div>
-      {% for task in completeness.tasks %}
-        <a class="task" href="{% url 'genealogy:people' %}?f={{ task.filter }}">{% include "partials/icon.html" with name=task.icon %}<span>{{ task.text }}</span><span class="go">{% include "partials/icon.html" with name="chevron" %}</span></a>
-      {% endfor %}
-    </section>
-    {% endif %}
-
     {% if can_edit %}
     <section class="card">
       <h2>{% translate "Quick actions" %}</h2>

@@ -54,8 +54,6 @@ class ViewsTests(TestCase):
             home = self.client.get(reverse("home"))
         self.assertEqual(home.context["today_items"][0]["person"], self.p["me"])
         self.assertTrue(home.context["today_items"][0]["share"].startswith("tg://msg?text="))
-        self.assertLess(home.context["completeness"]["score"], 100)
-        self.assertTrue(home.context["completeness"]["tasks"])
 
     def test_service_worker_and_offline(self):
         sw = self.client.get("/sw.js")
