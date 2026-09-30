@@ -22,9 +22,11 @@ Ikkalasi ham Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` 
 - **Kim kimga kim?** — ikki odam orasidagi qarindoshlik va bogʻlanish zanjiri.
 - **Familiya taklifi** — oʻgʻil nevaraga ota tarafdagi bobosining ismidan (Madaminjon → Madaminov).
 - **Eksport** — PDF (tarjimai hol, daraxt, shajara kitobi) va GEDCOM (boshqa shajara dasturlari uchun).
-- **Yorugʻ / qorongʻi mavzu**, telefon ekraniga moslashgan dizayn, ikki yozuv (lotin va kirill).
+- **Yorugʻ / qorongʻi mavzu** va toʻrtta rang palitrasi, telefon ekraniga moslashgan dizayn, ikki yozuv (lotin va kirill).
+- **Google orqali kirish**, **Boshqaruv paneli** (`/boshqaruv/`) va toʻliq zaxira nusxa.
+- **Mac ilovasi** — [macos/](macos/README.md): alohida oyna, tizim bildirishnomalari, Dock belgisi.
 
-Serverga joylash: [DEPLOY.md](DEPLOY.md).
+Sayt: **https://shajara-liard.vercel.app** · Serverga joylash va koʻchirish: [DEPLOY.md](DEPLOY.md).
 
 ## Ishga tushirish
 
@@ -43,7 +45,8 @@ va `anvar_y` (kutilayotgan doʻstlik soʻrovi). Parol `apps/genealogy/management
 yozilgan va faqat lokal ishlab chiqish uchun moʻljallangan.
 
 PostgreSQL uchun `DATABASE_URL=postgres://…` oʻzgaruvchisini bering (qarang: `.env.example`).
-Oʻzgaruvchi berilmasa, SQLite ishlatiladi.
+Oʻzgaruvchi berilmasa, SQLite ishlatiladi. Rasmlar ham bazada saqlanadi (`apps/core/storage.py`),
+shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 
 ## Tuzilma
 
@@ -63,7 +66,11 @@ Oʻzgaruvchi berilmasa, SQLite ishlatiladi.
 | `apps/friends/` | Doʻstlar (kontaktlar) va shajarani boshqa foydalanuvchilar bilan ulashish |
 | `apps/genealogy/gedcom.py` | GEDCOM 5.5.1 eksport |
 | `apps/core/muchal.py` | Muchal (12 yillik hayvonlar davri, Navroʻzdan boshlanadi) |
-| `apps/notify/` | Eslatmalar: sanalarni hisoblash, qoʻngʻiroqcha, Telegram bot, `run_worker` |
+| `apps/notify/` | Eslatmalar: sanalarni hisoblash, qoʻngʻiroqcha, Telegram bot, `run_worker`, Cron |
+| `apps/accounts/app_bridge.py` | Mac ilovasi uchun Google orqali kirish (`shajara://`) |
+| `apps/core/storage.py` | Rasmlarni PostgreSQL’da saqlash |
+| `vercel.json` | Vercel: migratsiyalar, Cron, hudud |
+| `macos/` | Mac ilovasi (SwiftUI + WebKit) |
 | `locale/uz`, `locale/uz_Cyrl` | `django.po` va `djangojs.po` (kompilyatsiya qilingan `.mo` bilan) |
 | `fonts/` | DejaVu Sans — PDF ichiga joylanadi (Ў Қ Ғ Ҳ va ʻ ʼ belgilari bor) |
 | `tools/i18n_audit.py` | Til auditi (quyida) |

@@ -12,3 +12,4 @@ staticfiles/
 .agents/
 .claude/skills/
 skills-lock.json
+macos/build/

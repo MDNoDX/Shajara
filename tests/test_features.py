@@ -111,6 +111,16 @@ class ReminderTests(TestCase):
         note.refresh_from_db()
         self.assertIsNotNone(note.read_at)
 
+    def test_status_json_for_the_mac_app(self):
+        service.generate(self.user, self.today + datetime.timedelta(days=1))
+        self.assertEqual(self.client.get(reverse("notify:status")).status_code, 302)  # signed out
+        self.client.force_login(self.user)
+        data = self.client.get(reverse("notify:status"), HTTP_ACCEPT_LANGUAGE="uz").json()
+        self.assertEqual(data["unread"], 1)
+        item = data["items"][0]
+        self.assertEqual(set(item), {"id", "url", "title", "body", "icon"})
+        self.assertTrue(item["url"].startswith("http"))
+
 
 @override_settings(TELEGRAM_BOT_TOKEN="123:abc", TELEGRAM_BOT_USERNAME="shajara_test_bot")
 class TelegramTests(TestCase):

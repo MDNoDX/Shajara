@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
@@ -31,6 +32,17 @@ def notification_open(request, pk):
         note.save(update_fields=["read_at"])
     target = note.url if url_has_allowed_host_and_scheme(note.url, {request.get_host()}) else ""
     return redirect(target or "notify:list")
+
+
+@login_required
+def status(request):
+    """Unread reminders for the desktop app (dock badge, system notifications)."""
+    unread = request.user.notifications.filter(read_at=None)[:20]
+    return JsonResponse({
+        "unread": request.user.notifications.filter(read_at=None).count(),
+        "items": [{"id": n.pk, "url": request.build_absolute_uri(reverse("notify:open", args=[n.pk])),
+                   **{k: n.text[k] for k in ("title", "body", "icon")}} for n in unread],
+    })
 
 
 @require_POST
