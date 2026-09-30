@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load i18n uz %}
+{% block title %}{% translate "Events" %}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div>
+    <h1>{% translate "Events" %}</h1>
+    <p>{% translate "Birthdays, anniversaries, memorial days and family events: weddings, a baby on the way, celebrations." %}</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'genealogy:event_create' %}">{% include "partials/icon.html" with name="plus" %}{% translate "Add a family event" %}</a>
+</div>
+
+<div class="cols">
+  <section class="card">
+    <h2>{% blocktranslate count counter=days %}Next {{ counter }} day{% plural %}Next {{ counter }} days{% endblocktranslate %}</h2>
+    {% if items %}
+      <ul class="occ-list">
+        {% for o, t, left in items %}
+        <li><a class="occ{% if left == 0 %} today{% endif %}" href="{{ o.url }}">
+          <span class="occ-icon" aria-hidden="true">{{ t.icon }}</span>
+          <span class="occ-main"><b>{{ t.title }}</b><br><span class="muted small">{{ t.body }}</span></span>
+          <span class="occ-when"><b>{{ o.date|date:"j" }}</b>{{ o.date|uzmonth }}</span>
+        </a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty"><h3>{% translate "No dates coming up." %}</h3>
+        <p>{% translate "Birthdays appear here when a relative’s day and month of birth are known." %}</p></div>
+    {% endif %}
+  </section>
+
+  <aside>
+    <section class="card">
+      <h2>{% translate "Add quickly" %}</h2>
+      <div class="chips">
+        {% for value, label in kinds %}<a class="chip" href="{% url 'genealogy:event_create' %}?kind={{ value }}">{{ label }}</a>{% endfor %}
+      </div>
+    </section>
+    <section class="card">
+      <h2>{% translate "Reminders" %}</h2>
+      <p class="muted">{% translate "You can be reminded of these dates on the site and in Telegram." %}</p>
+      <a class="btn" href="{% url 'notify:settings' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Reminder settings" %}</a>
+    </section>
+  </aside>
+</div>
+
+<section class="card" style="margin-top:16px">
+  <h2>{% translate "Family chronicle" %}</h2>
+  {% if by_year %}
+    {% for year, events in by_year %}
+      <div class="tl-year">{% if year %}{{ year }}{% else %}{% translate "Date unknown" %}{% endif %}</div>
+      <ul class="timeline">
+        {% for e in events %}
+        <li>
+          <a href="{{ e.get_absolute_url }}"><b>{{ e.display_title }}</b></a> <span class="kind-badge">{{ e.get_kind_display }}</span>
+          <div class="muted small">{% if e.date_display %}{{ e.date_display }}{% endif %}{% if e.place %} · {{ e.place }}{% endif %}
+            {% if e.people.all %} · {% for p in e.people.all %}{{ p.short_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</div>
+        </li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  {% else %}
+    <div class="empty"><h3>{% translate "No events have been added yet." %}</h3>
+      <p>{% translate "Record weddings, births, celebrations and memorial gatherings so the family remembers them." %}</p></div>
+  {% endif %}
+</section>
+{% endblock %}

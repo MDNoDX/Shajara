@@ -1,12 +1,15 @@
+import datetime
 import uuid
 
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.accounts.models import Gender
-from apps.core.dates import format_lifespan, format_partial_date, partial_date_key
+from apps.core.dates import age_between, format_lifespan, format_partial_date, partial_date_key
+from apps.core.muchal import muchal
 from apps.core.text import search_key
 
 
@@ -42,6 +45,7 @@ class Person(models.Model):
     death_month = models.PositiveSmallIntegerField(_("month of death"), null=True, blank=True)
     death_day = models.PositiveSmallIntegerField(_("day of death"), null=True, blank=True)
     death_place = models.CharField(_("place of death"), max_length=200, blank=True)
+    burial_place = models.CharField(_("place of burial"), max_length=250, blank=True)
 
     occupation = models.CharField(_("occupation"), max_length=200, blank=True)
     education = models.CharField(_("education"), max_length=200, blank=True)
@@ -111,6 +115,25 @@ class Person(models.Model):
     def initials(self):
         return (self.first_name[:1] + self.last_name[:1]).upper()
 
+    @property
+    def age(self):
+        """Age today, or at death: {"years", "at_death", "exact"} or None."""
+        if self.is_deceased:
+            years = age_between(self.birth_year, self.birth_month, self.birth_day,
+                                self.death_year, self.death_month, self.death_day)
+            exact = bool(self.birth_day and self.death_day)
+        else:
+            today = datetime.date.today()
+            years = age_between(self.birth_year, self.birth_month, self.birth_day, today.year, today.month, today.day)
+            exact = bool(self.birth_day)
+        if years is None:
+            return None
+        return {"years": years, "at_death": self.is_deceased, "exact": exact}
+
+    @property
+    def muchal(self):
+        return muchal(self.birth_year, self.birth_month, self.birth_day)
+
 
 class Marriage(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="marriages")
@@ -119,6 +142,8 @@ class Marriage(models.Model):
     wife = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="marriages_as_wife",
                              verbose_name=_("wife"))
     year = models.PositiveSmallIntegerField(_("year of marriage"), null=True, blank=True)
+    month = models.PositiveSmallIntegerField(_("month of marriage"), null=True, blank=True)
+    day = models.PositiveSmallIntegerField(_("day of marriage"), null=True, blank=True)
     is_divorced = models.BooleanField(_("divorced"), default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -130,6 +155,10 @@ class Marriage(models.Model):
 
     def partner_of(self, person):
         return self.wife if person.pk == self.husband_id else self.husband
+
+    @property
+    def date_display(self):
+        return format_partial_date(self.year, self.month, self.day)
 
 
 class Story(models.Model):
@@ -152,3 +181,64 @@ class Story(models.Model):
 
     def get_absolute_url(self):
         return reverse("genealogy:story", args=[self.pk])
+
+
+class Event(models.Model):
+    """A family event: a wedding, a birth, an expected baby, a memorial day…"""
+
+    class Kind(models.TextChoices):
+        WEDDING = "wedding", pgettext_lazy("event", "Wedding")
+        ENGAGEMENT = "engagement", pgettext_lazy("event", "Engagement (fotiha)")
+        PREGNANCY = "pregnancy", pgettext_lazy("event", "Expecting a baby")
+        BIRTH = "birth", pgettext_lazy("event", "Birth of a child")
+        BESHIK = "beshik", pgettext_lazy("event", "Cradle celebration (beshik toʻyi)")
+        SUNNAT = "sunnat", pgettext_lazy("event", "Circumcision celebration (sunnat toʻyi)")
+        GRADUATION = "graduation", pgettext_lazy("event", "Graduation")
+        WORK = "work", pgettext_lazy("event", "New job")
+        MOVE = "move", pgettext_lazy("event", "Moving house")
+        HAJJ = "hajj", pgettext_lazy("event", "Hajj or umrah")
+        ANNIVERSARY = "anniversary", pgettext_lazy("event", "Jubilee")
+        DEATH = "death", pgettext_lazy("event", "Death")
+        MEMORIAL = "memorial", pgettext_lazy("event", "Memorial gathering (yil oshi)")
+        OTHER = "other", pgettext_lazy("event", "Other event")
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events")
+    kind = models.CharField(_("type of event"), max_length=20, choices=Kind.choices, default=Kind.OTHER)
+    title = models.CharField(_("title"), max_length=200, blank=True)
+    people = models.ManyToManyField(Person, blank=True, related_name="events", verbose_name=_("who"))
+    year = models.PositiveSmallIntegerField(_("year"), null=True, blank=True)
+    month = models.PositiveSmallIntegerField(_("month"), null=True, blank=True)
+    day = models.PositiveSmallIntegerField(_("day"), null=True, blank=True)
+    place = models.CharField(_("place"), max_length=200, blank=True)
+    description = models.TextField(_("details"), blank=True)
+    every_year = models.BooleanField(_("remind every year on this day"), default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("event")
+        verbose_name_plural = _("events")
+        ordering = ["-year", "-month", "-day", "-id"]
+
+    def __str__(self):
+        return self.display_title
+
+    def get_absolute_url(self):
+        return reverse("genealogy:event", args=[self.pk])
+
+    @property
+    def display_title(self):
+        return self.title or str(self.get_kind_display())
+
+    @property
+    def date_display(self):
+        return format_partial_date(self.year, self.month, self.day)
+
+    @property
+    def date(self):
+        if self.year and self.month and self.day:
+            try:
+                return datetime.date(self.year, self.month, self.day)
+            except ValueError:
+                return None
+        return None

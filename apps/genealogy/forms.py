@@ -9,10 +9,11 @@ from apps.accounts.models import Gender
 from apps.core.dates import is_valid_partial_date, month_choices, partial_date_key
 from apps.core.text import normalize_apostrophes
 
-from .models import Marriage, Person, Story
+from .models import Event, Marriage, Person, Story
 from .terminology import ADD_RELATION
 
-SHORT_TEXT_FIELDS = ("first_name", "last_name", "patronymic", "birth_place", "death_place", "occupation", "education")
+SHORT_TEXT_FIELDS = ("first_name", "last_name", "patronymic", "birth_place", "death_place", "burial_place",
+                     "occupation", "education")
 
 
 class MonthSelect(forms.Select):
@@ -23,7 +24,7 @@ class MonthSelect(forms.Select):
         return super().get_context(name, value, attrs)
 
 
-def _date_fields(prefix):
+def _date_fields(prefix, future=False):
     this_year = datetime.date.today().year
     return {
         f"{prefix}_day": forms.IntegerField(
@@ -35,22 +36,29 @@ def _date_fields(prefix):
             choices=[("", "")] + [(i, str(i)) for i in range(1, 13)], widget=MonthSelect,
         ),
         f"{prefix}_year": forms.IntegerField(
-            label=pgettext_lazy("date part", "Year"), required=False, min_value=1000, max_value=this_year,
+            label=pgettext_lazy("date part", "Year"), required=False, min_value=1000,
+            max_value=this_year + 50 if future else this_year,
             widget=forms.NumberInput(attrs={"placeholder": pgettext_lazy("date part", "Year"), "inputmode": "numeric"}),
         ),
     }
 
 
-def clean_partial_date(form, prefix):
+def clean_partial_date(form, prefix, allow_future=False, require_year=True):
+    """Check a day / month / year triple; returns a sortable key or None.
+
+    require_year=False allows a day and month without a year (a friend's
+    birthday, a wedding anniversary).
+    """
     data = form.cleaned_data
     year, month, day = data.get(f"{prefix}_year"), data.get(f"{prefix}_month"), data.get(f"{prefix}_day")
     if day and not month:
         form.add_error(f"{prefix}_month", _("If you enter the day, choose the month as well."))
-    elif (day or month) and not year:
+    elif (day or month) and not year and require_year:
         form.add_error(f"{prefix}_year", _("Enter the year of this date as well."))
     elif not is_valid_partial_date(year, month, day):
         form.add_error(f"{prefix}_day", _("There is no such day in the chosen month."))
-    elif year and partial_date_key(year, month, day) > partial_date_key(*_today_parts(month, day)):
+    elif (year and not allow_future
+          and partial_date_key(year, month, day) > partial_date_key(*_today_parts(month, day))):
         form.add_error(f"{prefix}_year", _("The date cannot be in the future."))
     return partial_date_key(year, month, day)
 
@@ -99,7 +107,7 @@ class PersonForm(forms.ModelForm):
         model = Person
         fields = [
             "first_name", "last_name", "patronymic", "gender",
-            "birth_place", "is_deceased", "death_place",
+            "birth_place", "is_deceased", "death_place", "burial_place",
             "occupation", "education", "biography", "life_story", "photo",
             "father", "mother",
         ]
@@ -282,11 +290,89 @@ class RelativeWithSpouseForm(RelativeForm):
             self.fields["other_parent"].initial = spouses[0].pk
 
 
-class MarriageForm(forms.ModelForm):
+class DatePartsMixin:
+    """Adds day / month / year fields named `<prefix>_…` stored on the model
+    as `<target>year`, `<target>month`, `<target>day`."""
+
+    date_prefix = "date"
+    date_target = ""
+    date_future = False
+    date_require_year = True
+
+    def add_date_fields(self):
+        self.fields.update(_date_fields(self.date_prefix, future=self.date_future))
+        for part in ("year", "month", "day"):
+            self.fields[f"{self.date_prefix}_{part}"].initial = getattr(self.instance, f"{self.date_target}{part}", None)
+
+    def clean_date_parts(self):
+        clean_partial_date(self, self.date_prefix, allow_future=self.date_future, require_year=self.date_require_year)
+
+    def store_date_parts(self, obj):
+        for part in ("year", "month", "day"):
+            setattr(obj, f"{self.date_target}{part}", self.cleaned_data.get(f"{self.date_prefix}_{part}"))
+
+
+class MarriageForm(DatePartsMixin, forms.ModelForm):
+    date_prefix, date_target, date_require_year = "wedding", "", False
+
     class Meta:
         model = Marriage
-        fields = ["year", "is_divorced"]
-        widgets = {"year": forms.NumberInput(attrs={"inputmode": "numeric"})}
+        fields = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_date_fields()
+
+    def clean(self):
+        data = super().clean()
+        self.clean_date_parts()
+        return data
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        self.store_date_parts(obj)
+        if commit:
+            obj.save()
+        return obj
+
+
+class EventForm(DatePartsMixin, forms.ModelForm):
+    date_prefix, date_target, date_future, date_require_year = "event", "", True, True
+
+    def __init__(self, *args, owner, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.owner_user = owner
+        self.fields["people"].queryset = Person.objects.filter(owner=owner).order_by("first_name", "last_name")
+        self.fields["people"].label_from_instance = _person_label
+        self.fields["people"].widget.attrs.update({"size": 8, "data-filterable": ""})
+        self.fields["title"].help_text = _("Optional. For example: “Sardorbek and Madina’s wedding”.")
+        self.add_date_fields()
+        self.order_fields(["kind", "title", "people", "event_day", "event_month", "event_year", "every_year",
+                           "place", "description"])
+
+    class Meta:
+        model = Event
+        fields = ["kind", "title", "people", "every_year", "place", "description"]
+        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
+
+    def clean(self):
+        data = super().clean()
+        self.clean_date_parts()
+        if data.get("every_year") and not (data.get("event_month") and data.get("event_day")):
+            self.add_error("event_day", _("To be reminded every year, enter the day and the month."))
+        for name in ("title", "place"):
+            if data.get(name):
+                data[name] = normalize_apostrophes(data[name].strip())
+        return data
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.owner = self.owner_user
+        self.store_date_parts(obj)
+        if commit:
+            obj.save()
+            self.save_m2m()
+        return obj
 
 
 class StoryForm(forms.ModelForm):

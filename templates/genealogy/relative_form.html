@@ -7,7 +7,8 @@
   <h1>{% translate "Add a new relative" %}</h1>
   <p>{% blocktranslate with name=anchor.full_name %}Relative of {{ name }}{% endblocktranslate %}</p>
 </div></div>
-<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="5">{% csrf_token %}
+<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="5"
+      {% if son_surname %}data-son-surname="{{ son_surname }}" data-father-surname="{{ father_surname }}"{% endif %}>{% csrf_token %}
   {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
   <fieldset>
     {% include "partials/field.html" with field=form.relation %}
@@ -15,6 +16,7 @@
     {% include "partials/field.html" with field=form.existing %}
   </fieldset>
   <div data-new-person>
+    {% if son_surname %}<p class="help">{% blocktranslate with surname=son_surname %}For a son, the surname is suggested from his paternal grandfather’s name: {{ surname }}. You can change it.{% endblocktranslate %}</p>{% endif %}
     {% include "genealogy/_person_fields.html" %}
   </div>
   <div class="form-actions">

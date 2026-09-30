@@ -1,0 +1,8 @@
+{% load i18n %}{% if query %}
+  {% if results %}
+    <p class="muted small">{% blocktranslate count counter=results|length %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktranslate %}</p>
+    <div class="people">{% for person, label in results %}{% include "partials/person_card.html" %}{% endfor %}</div>
+  {% else %}
+    <div class="empty"><h3>{% translate "No results found." %}</h3><p>{% translate "Try another spelling; Latin and Cyrillic both work." %}</p></div>
+  {% endif %}
+{% endif %}

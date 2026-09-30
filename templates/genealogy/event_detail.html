@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ event.display_title }}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<article class="card">
+  <span class="kind-badge">{{ event.get_kind_display }}</span>
+  <h1 style="margin-top:8px">{{ event.display_title }}</h1>
+  <dl class="facts">
+    {% if event.date_display %}<dt>{% translate "Date" %}</dt><dd>{{ event.date_display }}{% if event.every_year %} <span class="muted small">({% translate "remembered every year" %})</span>{% endif %}</dd>{% endif %}
+    {% if event.place %}<dt>{% translate "Place" %}</dt><dd>{{ event.place }}</dd>{% endif %}
+  </dl>
+  {% if event.people.all %}
+    <h2 style="margin-top:18px">{% translate "Who" %}</h2>
+    <div class="people">{% for person in event.people.all %}{% include "partials/person_card.html" with label="" %}{% endfor %}</div>
+  {% endif %}
+  {% if event.description %}<h2 style="margin-top:18px">{% translate "Details" %}</h2><p class="prose">{{ event.description }}</p>{% endif %}
+  {% if is_owner %}
+  <div class="form-actions" style="margin-top:20px">
+    <a class="btn" href="{% url 'genealogy:event_edit' event.pk %}">{% translate "Edit" %}</a>
+    <a class="btn btn-danger" href="{% url 'genealogy:event_delete' event.pk %}">{% translate "Delete" %}</a>
+    <a class="btn btn-ghost" href="{% url 'genealogy:upcoming' %}">{% translate "All events" %}</a>
+  </div>
+  {% endif %}
+</article>
+{% endblock %}

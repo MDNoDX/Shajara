@@ -75,9 +75,8 @@ def is_valid_partial_date(year, month, day):
     if month and not 1 <= month <= 12:
         return False
     if day:
-        if not year:
-            return False
-        return 1 <= day <= calendar.monthrange(year, month)[1]
+        # Without a year, allow 29 February (a leap year is assumed).
+        return 1 <= day <= calendar.monthrange(year or 2000, month)[1]
     return True
 
 
@@ -86,3 +85,17 @@ def partial_date_key(year, month=None, day=None):
     if not year:
         return None
     return (year, month or 6, day or 15)
+
+
+def age_between(y, m, d, end_y, end_m=None, end_d=None):
+    """Whole years between two partial dates, or None if unknown.
+
+    With unknown months the result may be one year too high; callers show it
+    as approximate when `birth` or `end` lacks a month and day.
+    """
+    if not y or not end_y:
+        return None
+    years = end_y - y
+    if m and end_m and (end_m, end_d or 31) < (m, d or 1):
+        years -= 1
+    return years if years >= 0 else None

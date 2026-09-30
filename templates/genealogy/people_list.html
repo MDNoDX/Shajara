@@ -12,19 +12,12 @@
     <a class="btn btn-primary" href="{% if user.person %}{% url 'genealogy:relative_add' user.person.pk %}{% else %}{% url 'genealogy:person_create' %}{% endif %}">{% translate "Add a new relative" %}</a>
   </div>
 </div>
-<form class="row" method="get" role="search" style="margin-bottom:16px">
+<form method="get" role="search" data-live-page="{% url 'genealogy:people' %}" data-target="people-results" style="margin-bottom:18px">
   <label class="visually-hidden" for="q">{% translate "Search" %}</label>
-  <input id="q" type="search" name="q" value="{{ query }}" placeholder="{% translate 'Name in Latin or Cyrillic…' %}" style="max-width:420px">
-  <button class="btn" type="submit">{% translate "Search" %}</button>
-  {% if query %}<a class="btn btn-ghost" href="{% url 'genealogy:people' %}">{% translate "Clear" %}</a>{% endif %}
-</form>
-{% if rows %}
-  <div class="people">
-    {% for person, label in rows %}{% include "partials/person_card.html" %}{% endfor %}
+  <div class="search-big">
+    {% include "partials/icon.html" with name="search" %}
+    <input id="q" type="search" name="q" value="{{ query }}" autocomplete="off" placeholder="{% translate 'Name in Latin or Cyrillic…' %}">
   </div>
-{% elif query %}
-  <div class="empty"><h3>{% translate "No results found." %}</h3><p>{% translate "Try another spelling; Latin and Cyrillic both work." %}</p></div>
-{% else %}
-  <div class="empty"><h3>{% translate "No relatives have been added yet." %}</h3></div>
-{% endif %}
+</form>
+<div id="people-results" aria-live="polite">{% include "genealogy/_people_grid.html" %}</div>
 {% endblock %}

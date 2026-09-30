@@ -1,9 +1,13 @@
+import datetime
+from urllib.parse import quote
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import content_disposition_header
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
@@ -11,11 +15,16 @@ from django.views.decorators.http import require_POST
 
 from apps.core.text import search_tokens
 
-from . import pdf
-from .access import archive_owner, person_for_edit, person_for_view, story_for_edit, story_for_view
-from .forms import MarriageForm, PersonForm, RelativeWithSpouseForm, StoryForm
+from apps.core.muchal import next_muchal_year
+from apps.core.text import surname_from_name
+from apps.notify.messages import render_parts
+from apps.notify.occasions import occasions
+
+from . import gedcom, pdf
+from .access import archive_owner, can_view, person_for_edit, person_for_view, story_for_edit, story_for_view
+from .forms import EventForm, MarriageForm, PersonForm, RelativeWithSpouseForm, StoryForm
 from .kinship import Archive
-from .models import Marriage, Person, Story
+from .models import Event, Marriage, Person, Story
 from .terminology import ADD_RELATION, SECTION
 from .tree import build_tree
 
@@ -71,13 +80,12 @@ def people_list(request):
     query = request.GET.get("q", "").strip()
     archive = Archive(request.user)
     people = Person.objects.filter(owner=request.user)
-    if query:
-        people = _search(people, query)
     focus = _focus_for(request.user, archive)
+    if query:
+        people = _ranked(people, query, 500)
     rows = [(p, archive.label(focus, p.pk) if focus else "") for p in people]
-    return render(request, "genealogy/people_list.html", {
-        "rows": rows, "query": query, "total": len(archive.people),
-    })
+    template = "genealogy/_people_grid.html" if request.GET.get("partial") else "genealogy/people_list.html"
+    return render(request, template, {"rows": rows, "query": query, "total": len(archive.people)})
 
 
 @login_required
@@ -101,6 +109,11 @@ def person_detail(request, pk):
         "children": people(archive.children.get(person.pk, [])),
         "siblings": people(archive.siblings(person.pk)),
         "stories": person.stories.all(),
+        "events": person.events.all(),
+        "friends": person.friends.all(),
+        "muchal": person.muchal,
+        "next_muchal": next_muchal_year(person.birth_year, person.birth_month, person.birth_day)
+        if not person.is_deceased else None,
         "section": SECTION,
         "add_relation": ADD_RELATION,
         "is_me": is_owner and request.user.person_id == person.pk,
@@ -158,8 +171,8 @@ def relative_add(request, pk):
             initial["gender"] = "male"
         elif relation == "mother":
             initial["gender"] = "female"
-        if relation in ("child", "sibling"):
-            initial["last_name"] = anchor.last_name if anchor.is_male or relation == "sibling" else ""
+        if relation == "sibling":
+            initial["last_name"] = anchor.last_name
     form = RelativeWithSpouseForm(
         request.POST or None, request.FILES or None, owner=request.user, archive=archive,
         anchor=anchor, spouses=spouses, initial=initial,
@@ -168,7 +181,13 @@ def relative_add(request, pk):
         form.save()
         messages.success(request, _("The person has been added to the family tree."))
         return redirect(anchor)
-    return render(request, "genealogy/relative_form.html", {"form": form, "anchor": anchor, "has_spouses": bool(spouses)})
+    # A son takes his paternal grandfather's name as surname (Madaminjon → Madaminov).
+    grandfather = archive.people.get(anchor.father_id) if anchor.is_male else None
+    return render(request, "genealogy/relative_form.html", {
+        "form": form, "anchor": anchor, "has_spouses": bool(spouses),
+        "son_surname": surname_from_name(grandfather.first_name) if grandfather else "",
+        "father_surname": anchor.last_name,
+    })
 
 
 @login_required
@@ -311,6 +330,29 @@ def story_delete(request, pk):
 # ---------------------------------------------------------------------------
 # Search
 # ---------------------------------------------------------------------------
+def _ranked(queryset, query, limit):
+    """People matching every word of `query`, best matches first.
+
+    A match at the start of the first name ranks highest, then at the start
+    of any name, then anywhere; ties are ordered by name.
+    """
+    tokens = search_tokens(query)
+    if not tokens:
+        return []
+    found = list(_search(queryset, query)[:400])
+
+    def score(p):
+        words = p.search_key.split()
+        s = 0
+        if words and words[0].startswith(tokens[0]):
+            s -= 4
+        if all(any(w.startswith(t) for w in words) for t in tokens):
+            s -= 2
+        return (s, p.first_name.lower(), p.last_name.lower())
+
+    return sorted(found, key=score)[:limit]
+
+
 @login_required
 def search(request):
     query = request.GET.get("q", "").strip()
@@ -318,9 +360,26 @@ def search(request):
     if query:
         archive = Archive(request.user)
         focus = _focus_for(request.user, archive)
-        found = _search(Person.objects.filter(owner=request.user), query)[:100]
+        found = _ranked(Person.objects.filter(owner=request.user), query, 120)
         results = [(p, archive.label(focus, p.pk) if focus else "") for p in found]
-    return render(request, "genealogy/search.html", {"query": query, "results": results})
+    template = "genealogy/_search_results.html" if request.GET.get("partial") else "genealogy/search.html"
+    return render(request, template, {"query": query, "results": results})
+
+
+@login_required
+def search_json(request):
+    """Live search for the header box and the tree's person picker."""
+    owner = archive_owner(request, request.GET.get("owner"))
+    query = request.GET.get("q", "").strip()
+    archive = Archive(owner)
+    focus = _focus_for(owner, archive)
+    found = _ranked(Person.objects.filter(owner=owner), query, 8) if query else []
+    return JsonResponse({"results": [{
+        "id": p.pk, "name": p.full_name, "years": p.lifespan,
+        "label": archive.label(focus, p.pk) if focus and p.pk != focus else "",
+        "url": p.get_absolute_url(), "initials": p.initials, "gender": p.gender,
+        "photo": p.photo.url if p.photo else "",
+    } for p in found], "all_url": f"{reverse('genealogy:search')}?q={quote(query)}"})
 
 
 @require_POST
@@ -332,3 +391,112 @@ def set_self(request, pk):
     messages.success(request, _("The information has been saved."))
     return redirect(person)
 
+
+
+# ---------------------------------------------------------------------------
+# Events and upcoming dates
+# ---------------------------------------------------------------------------
+@login_required
+def upcoming(request):
+    today = timezone.localdate()
+    days = 120
+    items = [(o, render_parts(o.kind, o.params, (o.date - today).days), (o.date - today).days)
+             for o in occasions(request.user, today, today + datetime.timedelta(days=days))]
+    events = Event.objects.filter(owner=request.user).prefetch_related("people")
+    by_year = {}
+    for e in events:
+        by_year.setdefault(e.year, []).append(e)
+    return render(request, "genealogy/events.html", {
+        "items": items, "days": days, "by_year": sorted(by_year.items(), key=lambda kv: -(kv[0] or 0)),
+        "kinds": Event.Kind.choices,
+    })
+
+
+@login_required
+def event_detail(request, pk):
+    event = get_object_or_404(Event.objects.prefetch_related("people"), pk=pk)
+    if not can_view(request.user, event.owner):
+        raise PermissionDenied(_("Access denied."))
+    return render(request, "genealogy/event_detail.html", {"event": event, "is_owner": event.owner_id == request.user.pk})
+
+
+def _own_event(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    if event.owner_id != request.user.pk:
+        raise PermissionDenied(_("You do not have permission to change this information."))
+    return event
+
+
+@login_required
+def event_create(request):
+    initial = {}
+    if request.GET.get("kind") in dict(Event.Kind.choices):
+        initial["kind"] = request.GET["kind"]
+    if request.GET.get("person", "").isdigit():
+        initial["people"] = [int(request.GET["person"])]
+    form = EventForm(request.POST or None, owner=request.user, initial=initial)
+    if request.method == "POST" and form.is_valid():
+        event = form.save()
+        messages.success(request, _("The event has been saved."))
+        return redirect(event)
+    return render(request, "genealogy/event_form.html", {"form": form, "is_new": True})
+
+
+@login_required
+def event_edit(request, pk):
+    event = _own_event(request, pk)
+    form = EventForm(request.POST or None, instance=event, owner=request.user)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("The event has been saved."))
+        return redirect(event)
+    return render(request, "genealogy/event_form.html", {"form": form, "event": event, "is_new": False})
+
+
+@login_required
+def event_delete(request, pk):
+    event = _own_event(request, pk)
+    if request.method == "POST":
+        event.delete()
+        messages.success(request, _("The event has been deleted."))
+        return redirect("genealogy:upcoming")
+    return render(request, "genealogy/confirm_delete.html", {
+        "object_name": event.display_title, "cancel_url": event.get_absolute_url(),
+    })
+
+
+# ---------------------------------------------------------------------------
+# "Who is who to whom?" and GEDCOM
+# ---------------------------------------------------------------------------
+@login_required
+def calculator(request):
+    archive = Archive(request.user)
+    people = sorted(archive.people.values(), key=lambda p: p.full_name)
+    a = b = None
+    result = None
+    try:
+        a = int(request.GET.get("a") or request.user.person_id or 0)
+        b = int(request.GET.get("b") or 0)
+    except ValueError:
+        a = b = None
+    if a in archive.people and b in archive.people and a != b:
+        chain = archive.path(a, b)
+        steps = []
+        if chain:
+            for prev, cur in zip(chain, chain[1:]):
+                steps.append((archive.people[cur], archive.label(prev, cur)))
+        result = {
+            "a": archive.people[a], "b": archive.people[b],
+            "b_to_a": archive.label(a, b), "a_to_b": archive.label(b, a),
+            "chain_start": archive.people[a], "steps": steps, "connected": chain is not None,
+        }
+    return render(request, "genealogy/calculator.html", {"people": people, "a": a, "b": b, "result": result})
+
+
+@login_required
+def gedcom_export(request):
+    archive = Archive(request.user)
+    data = gedcom.export(archive, request.user.display_name)
+    response = HttpResponse(data.encode("utf-8"), content_type="text/plain; charset=utf-8")
+    response["Content-Disposition"] = content_disposition_header(True, pgettext("file name", "family-tree") + ".ged")
+    return response

@@ -48,6 +48,8 @@ def english_msgids():
     po = polib.pofile(str(settings.BASE_DIR / "locale" / "uz" / "LC_MESSAGES" / "django.po"))
     ids = set()
     for e in po:
+        if e.msgstr == e.msgid:  # names that are the same in Uzbek (Telegram)
+            continue
         for text in filter(None, (e.msgid, e.msgid_plural)):
             plain = re.sub(r"%\(\w+\)[sd]|\{\w+\}|%[sd]", "", text).strip()
             if len(plain) >= 5 and re.search(r"[a-z]{3}", plain):

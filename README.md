@@ -7,6 +7,25 @@ Ikkalasi ham Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` 
 > Oldingi bir faylli prototip `files/` papkasida qoldirilgan. Qarindoshlik mantigʻi
 > va lotin↔kirill qidiruvi oʻsha yerdan Pythonga koʻchirildi.
 
+## Imkoniyatlar
+
+- **Shajara daraxti** — bitta bogʻlangan chizma: ota va onaning oilalari yonma-yon, ajdodlarning aka-uka,
+  opa-singillari «+ / −» bilan ochiladi va yopiladi; PNG va PDF eksport.
+- **Qarindoshlik nomlari** avtomatik: aka/uka, opa/singil, amaki/amma/togʻa/xola, amakivachcha…,
+  kelin/kuyov, qaynota/qaynona, yanga/pochcha, «Buvining ukasi», «Onaning xolavachchasi», «Togʻaning xotini».
+- **Muchal** — har bir odamning muchali (yil Navroʻzda almashadi), keyingi muchal yili, Navroʻzda eslatma.
+- **Oilaviy voqealar** — toʻy, fotiha, farzand kutilmoqda, tugʻilish, beshik toʻyi, sunnat toʻyi, yil oshi
+  va boshqalar; oila xronikasi; kelajakdagi sanalar.
+- **Doʻstlar** — istalgan kishining (oʻzingiz, dadangiz, buvingiz…) doʻstlari, tugʻilgan kunlari bilan.
+- **Eslatmalar** — tugʻilgan kunlar, nikoh yilliklari, xotira kunlari, voqealar, muchal yili; saytdagi
+  qoʻngʻiroqcha va **Telegram bot** orqali; har bir foydalanuvchi oʻzi yoqadi/oʻchiradi.
+- **Kim kimga kim?** — ikki odam orasidagi qarindoshlik va bogʻlanish zanjiri.
+- **Familiya taklifi** — oʻgʻil nevaraga ota tarafdagi bobosining ismidan (Madaminjon → Madaminov).
+- **Eksport** — PDF (tarjimai hol, daraxt, shajara kitobi) va GEDCOM (boshqa shajara dasturlari uchun).
+- **Yorugʻ / qorongʻi mavzu**, telefon ekraniga moslashgan dizayn, ikki yozuv (lotin va kirill).
+
+Serverga joylash: [DEPLOY.md](DEPLOY.md).
+
 ## Ishga tushirish
 
 ```bash
@@ -16,6 +35,7 @@ python3 -m venv .venv
 .venv/bin/python manage.py compilemessages --ignore=.venv
 .venv/bin/python manage.py seed_demo        # namuna oila (ixtiyoriy)
 .venv/bin/python manage.py runserver
+.venv/bin/python manage.py run_worker      # eslatmalar va Telegram (alohida oynada, ixtiyoriy)
 ```
 
 `seed_demo` uchta sinov foydalanuvchisini yaratadi: `namuna` (lotin), `dilnoza_a` (kirill, doʻst)
@@ -40,7 +60,10 @@ Oʻzgaruvchi berilmasa, SQLite ishlatiladi.
 | `apps/genealogy/kinship.py` | Aka/uka, opa/singil, amaki/amma/togʻa/xola, kelin/kuyov… ni aniqlash |
 | `apps/genealogy/tree.py` | Shajara joylashuvi (sayt va PDF uchun umumiy) |
 | `apps/genealogy/pdf.py` | PDF: tarjimai hol, shajara daraxti, shajara kitobi |
-| `apps/friends/` | Doʻstlik soʻrovlari; doʻstlar bir-birining shajarasini koʻra oladi |
+| `apps/friends/` | Doʻstlar (kontaktlar) va shajarani boshqa foydalanuvchilar bilan ulashish |
+| `apps/genealogy/gedcom.py` | GEDCOM 5.5.1 eksport |
+| `apps/core/muchal.py` | Muchal (12 yillik hayvonlar davri, Navroʻzdan boshlanadi) |
+| `apps/notify/` | Eslatmalar: sanalarni hisoblash, qoʻngʻiroqcha, Telegram bot, `run_worker` |
 | `locale/uz`, `locale/uz_Cyrl` | `django.po` va `djangojs.po` (kompilyatsiya qilingan `.mo` bilan) |
 | `fonts/` | DejaVu Sans — PDF ichiga joylanadi (Ў Қ Ғ Ҳ va ʻ ʼ belgilari bor) |
 | `tools/i18n_audit.py` | Til auditi (quyida) |

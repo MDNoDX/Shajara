@@ -8,7 +8,7 @@ from django.utils import translation
 from django.utils.translation import gettext as _
 
 from apps.core.languages import normalize_language
-from apps.friends.services import friends_of, incoming_requests
+from apps.friends.services import incoming_requests
 
 from .forms import (
     LanguageForm,
@@ -52,7 +52,7 @@ def profile(request):
     user = request.user
     return render(request, "accounts/profile.html", {
         "people_count": user.people.count(),
-        "friends_count": friends_of(user).count(),
+        "friends_count": user.contacts.count(),
         "stories_count": user.stories.count(),
         "incoming": incoming_requests(user),
     })

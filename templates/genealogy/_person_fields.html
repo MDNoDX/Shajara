@@ -21,6 +21,7 @@
     {% translate "Date of death" as death_label %}
     {% include "partials/date_fields.html" with label=death_label day=form.death_day month=form.death_month year=form.death_year %}
     {% include "partials/field.html" with field=form.death_place %}
+    {% include "partials/field.html" with field=form.burial_place %}
   </div>
 </fieldset>
 <fieldset>

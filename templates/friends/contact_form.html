@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if is_new %}{% translate "Add a friend" %}{% else %}{% translate "Edit" %} · {{ contact.name }}{% endif %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>{% if is_new %}{% translate "Add a friend" %}{% else %}{{ contact.name }}{% endif %}</h1></div></div>
+<form method="post" novalidate>{% csrf_token %}
+  {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+  <fieldset>
+    {% include "partials/field.html" with field=form.person %}
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.name %}
+      {% include "partials/field.html" with field=form.how_met %}
+    </div>
+    {% translate "Date of birth" as birth_label %}
+    {% include "partials/date_fields.html" with label=birth_label day=form.birth_day month=form.birth_month year=form.birth_year %}
+    <p class="help" style="margin-top:-8px">{% translate "The day and month are enough for a birthday reminder." %}</p>
+    {% include "partials/field.html" with field=form.phone %}
+    {% include "partials/field.html" with field=form.note %}
+  </fieldset>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+    <a class="btn btn-ghost" href="{% url 'friends:list' %}">{% translate "Cancel" %}</a>
+    {% if contact %}<span class="spacer"></span><a class="btn btn-danger" href="{% url 'friends:delete' contact.pk %}">{% translate "Delete" %}</a>{% endif %}
+  </div>
+</form>
+{% endblock %}

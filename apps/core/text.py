@@ -73,3 +73,28 @@ def search_key(*values):
 
 def search_tokens(query):
     return [t for t in search_key(query).split(" ") if t]
+
+
+_NAME_ENDINGS = ("jon", "boy", "bek", "xon", "жон", "бой", "бек", "хон")
+_CYRILLIC = re.compile(r"[\u0400-\u04FF]")
+
+
+def surname_from_name(name):
+    """Uzbek surname from a (grand)father's first name, for suggestions only.
+
+    Madaminjon → Madaminov, Nabijon → Nabiyev, Tavakiljon → Tavakilov,
+    Карим → Каримов, Набижон → Набиев. The endings -jon, -boy, -bek, -xon are
+    dropped, as is usual; the result keeps the script of the name and the
+    user can always correct it.
+    """
+    word = normalize_apostrophes((name or "").strip().split(" ")[0])
+    if not word:
+        return ""
+    base = word
+    for ending in _NAME_ENDINGS:
+        if base.lower().endswith(ending) and len(base) > len(ending) + 2:
+            base = base[: -len(ending)]
+            break
+    if _CYRILLIC.search(base):
+        return base + ("ев" if base[-1].lower() in "аеиоуўэюя" else "ов")
+    return base + ("yev" if base[-1].lower() in "aeiou" else "ov")

@@ -1,22 +1,18 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% translate "Search" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
 {% block content %}
-<div class="pagehead"><div>
+<div class="search-hero">
   <h1>{% translate "Search" %}</h1>
-  <p>{% translate "Search by name in Latin or Cyrillic: “Alisher” also finds “Алишер”." %}</p>
-</div></div>
-<form class="row" method="get" role="search" style="margin-bottom:18px">
-  <label class="visually-hidden" for="sq">{% translate "Search" %}</label>
-  <input id="sq" type="search" name="q" value="{{ query }}" placeholder="{% translate 'Name in Latin or Cyrillic…' %}" style="max-width:460px" autofocus>
-  <button class="btn btn-primary" type="submit">{% translate "Search" %}</button>
-</form>
-{% if query %}
-  {% if results %}
-    <p class="muted">{% blocktranslate count counter=results|length %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktranslate %}</p>
-    <div class="people">{% for person, label in results %}{% include "partials/person_card.html" %}{% endfor %}</div>
-  {% else %}
-    <div class="empty"><h3>{% translate "No results found." %}</h3><p>{% translate "Try another spelling; Latin and Cyrillic both work." %}</p></div>
-  {% endif %}
-{% endif %}
+  <form method="get" role="search" data-live-page="{% url 'genealogy:search' %}" data-target="search-results">
+    <label class="visually-hidden" for="sq">{% translate "Search" %}</label>
+    <div class="search-big">
+      {% include "partials/icon.html" with name="search" %}
+      <input id="sq" type="search" name="q" value="{{ query }}" autocomplete="off"
+             placeholder="{% translate 'Name in Latin or Cyrillic…' %}" autofocus>
+    </div>
+  </form>
+</div>
+<div id="search-results" aria-live="polite">{% include "genealogy/_search_results.html" %}</div>
 {% endblock %}

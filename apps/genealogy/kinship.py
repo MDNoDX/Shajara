@@ -85,6 +85,26 @@ class Archive:
                     queue.append(c)
         return seen
 
+    def path(self, a, b):
+        """Shortest chain of people from a to b through parents, children and
+        spouses: [a, …, b], or None if they are not connected."""
+        if a == b:
+            return [a]
+        prev = {a: None}
+        queue = deque([a])
+        while queue:
+            cur = queue.popleft()
+            for nxt in self.parents(cur) + self.children.get(cur, []) + self.spouses(cur):
+                if nxt not in prev:
+                    prev[nxt] = cur
+                    if nxt == b:
+                        chain = [b]
+                        while prev[chain[-1]] is not None:
+                            chain.append(prev[chain[-1]])
+                        return chain[::-1]
+                    queue.append(nxt)
+        return None
+
     # ---- relationship names ---------------------------------------------
     def relation(self, focus, other):
         """Kinship code of `other` as seen from `focus`, or None if unrelated."""

@@ -12,7 +12,7 @@
   var SVGNS = "http://www.w3.org/2000/svg";
   var view = document.getElementById("tree-view");
   var statusEl = document.getElementById("tree-status");
-  var select = document.getElementById("tree-person");
+  var picker = document.getElementById("tree-person");
   var openLink = document.getElementById("tree-open");
   var pdfLink = document.getElementById("tree-pdf");
   var addLink = document.getElementById("add-relative");
@@ -353,7 +353,7 @@
   function updateLinks(data) {
     var f = data.nodes.filter(function (n) { return n.focus && !n.dup; })[0];
     if (!f) return;
-    select.value = String(f.id);
+    if (document.activeElement !== picker) picker.value = f.name;
     openLink.href = f.url;
     pdfLink.href = pdfUrl + "?" + query();
     if (addLink && addTemplate) addLink.href = addTemplate.replace("/0/", "/" + f.id + "/");
@@ -382,7 +382,8 @@
       });
   }
 
-  select.addEventListener("change", function () { state.focus = parseInt(select.value, 10); load(null); });
+  // The name picker (live search) puts the chosen person in the centre.
+  picker.addEventListener("livesearch:pick", function (e) { state.focus = e.detail.id; load(null); });
 
   root.querySelectorAll("[data-expand]").forEach(function (btn) {
     btn.addEventListener("click", function () {

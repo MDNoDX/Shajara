@@ -16,7 +16,7 @@ CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 # Intentional exceptions: each language's switcher button names itself, the
 # search help shows a cross-script example, and file formats keep their names.
 SELF_NAMES = ("Oʻzbekcha", "Кириллча")
-ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "MB", "Alisher"}
+ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "MB", "Alisher", "GEDCOM", "Ctrl", "Mac", "Start", "stop"}
 
 
 class CatalogueTests(TestCase):
@@ -61,6 +61,15 @@ class PagePurityTests(TestCase):
             reverse("accounts:profile"),
             reverse("accounts:settings"),
             reverse("accounts:password_change"),
+            reverse("genealogy:upcoming"),
+            reverse("genealogy:event_create"),
+            reverse("genealogy:calculator") + f"?a={p['me'].pk}&b={p['cousin'].pk}",
+            reverse("friends:list"),
+            reverse("friends:create"),
+            reverse("friends:sharing"),
+            reverse("notify:list"),
+            reverse("notify:settings"),
+            reverse("genealogy:marriage_edit", args=[p["me"].marriages_as_husband.first().pk]),
             "/bunday-sahifa-yoq/",
         ]
 

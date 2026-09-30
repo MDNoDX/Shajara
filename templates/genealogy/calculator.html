@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Who is who?" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "Who is who?" %}</h1>
+  <p>{% translate "Choose two people to see how they are related and through whom." %}</p>
+</div></div>
+<form class="card" method="get">
+  <div class="form-grid">
+    <div class="field"><label for="calc-a">{% translate "First person" %}</label>
+      <select id="calc-a" name="a">{% for p in people %}<option value="{{ p.pk }}"{% if p.pk == a %} selected{% endif %}>{{ p.full_name }}{% if p.lifespan %} ({{ p.lifespan }}){% endif %}</option>{% endfor %}</select></div>
+    <div class="field"><label for="calc-b">{% translate "Second person" %}</label>
+      <select id="calc-b" name="b"><option value="">—</option>{% for p in people %}<option value="{{ p.pk }}"{% if p.pk == b %} selected{% endif %}>{{ p.full_name }}{% if p.lifespan %} ({{ p.lifespan }}){% endif %}</option>{% endfor %}</select></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">{% translate "Show the relationship" %}</button></div>
+</form>
+
+{% if result %}
+<section class="card">
+  {% if result.connected %}
+    <p class="big-answer">{{ result.b.short_name }} — <em>{{ result.b_to_a|default:_("relative") }}</em></p>
+    <p class="muted">{% blocktranslate with a=result.a.short_name b=result.b.short_name rel=result.a_to_b %}And {{ a }} is “{{ rel }}” to {{ b }}.{% endblocktranslate %}</p>
+    <h2 style="margin-top:18px">{% translate "How they are connected" %}</h2>
+    <div class="chain">
+      {% include "partials/person_card.html" with person=result.chain_start label="" %}
+      {% for person, step in result.steps %}
+        <span class="arrow" aria-hidden="true">→<b>{{ step }}</b></span>
+        {% include "partials/person_card.html" with label="" %}
+      {% endfor %}
+    </div>
+    <p class="help">{% translate "Each arrow shows who the next person is to the previous one." %}</p>
+  {% else %}
+    <p class="big-answer">{% translate "These two people are not connected in the tree yet." %}</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

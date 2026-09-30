@@ -14,6 +14,8 @@ urlpatterns = [
     path("", include("apps.accounts.urls")),
     path("", include("apps.genealogy.urls")),
     path("dostlar/", include("apps.friends.urls")),
+    path("", include("apps.notify.urls")),
+    path("salomatlik/", core_views.health, name="health"),
     path("admin/", admin.site.urls),
 ]
 

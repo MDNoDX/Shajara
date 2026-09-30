@@ -1,0 +1,72 @@
+# Shajara: web (Django), worker (reminders + Telegram), PostgreSQL and Caddy
+# (automatic HTTPS). Settings come from .env — see .env.example and DEPLOY.md.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shajara
+      POSTGRES_USER: shajara
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shajara -d shajara"]
+      interval: 10s
+      retries: 5
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://shajara:${POSTGRES_PASSWORD}@db:5432/shajara
+      DJANGO_DEBUG: "0"
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --access-logfile -"
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/salomatlik/', timeout=5)"]
+      interval: 30s
+      retries: 3
+
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://shajara:${POSTGRES_PASSWORD}@db:5432/shajara
+      DJANGO_DEBUG: "0"
+    command: python manage.py run_worker
+    volumes:
+      - media:/app/media
+    depends_on:
+      web:
+        condition: service_started
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - media:/srv/media:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  media:
+  caddy_data:
+  caddy_config:

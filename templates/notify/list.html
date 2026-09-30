@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n uz %}
+{% block title %}{% translate "Notifications" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <div><h1>{% translate "Notifications" %}</h1>
+    <p>{% translate "Reminders about birthdays, anniversaries, memorial days and family events." %}</p></div>
+  <div class="row">
+    {% if unread_count %}
+    <form method="post" action="{% url 'notify:read_all' %}">{% csrf_token %}
+      <button class="btn" type="submit">{% translate "Mark all as read" %}</button></form>
+    {% endif %}
+    <a class="btn" href="{% url 'notify:settings' %}">{% include "partials/icon.html" with name="settings" %}{% translate "Reminder settings" %}</a>
+  </div>
+</div>
+{% if items %}
+  <ul class="occ-list">
+    {% for n in items %}{% with t=n.text %}
+    <li><a class="occ{% if not n.read_at %} today{% endif %}" href="{% url 'notify:open' n.pk %}">
+      <span class="occ-icon" aria-hidden="true">{{ t.icon }}</span>
+      <span class="occ-main"><b>{{ t.title }}</b><br><span class="muted small">{{ t.body }}</span></span>
+      <span class="occ-when">{% if n.occasion_date %}<b>{{ n.occasion_date|date:"j" }}</b>{{ n.occasion_date|uzmonth }}{% endif %}</span>
+    </a></li>
+    {% endwith %}{% endfor %}
+  </ul>
+{% else %}
+  <div class="empty"><h3>{% translate "No notifications yet." %}</h3>
+    <p>{% translate "Reminders appear here on the day, and in advance if you choose so in the settings." %}</p></div>
+{% endif %}
+{% endblock %}

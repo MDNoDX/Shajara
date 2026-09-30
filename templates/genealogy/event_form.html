@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if is_new %}{% translate "Add a family event" %}{% else %}{% translate "Edit" %} · {{ event.display_title }}{% endif %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div><h1>{% if is_new %}{% translate "Add a family event" %}{% else %}{{ event.display_title }}{% endif %}</h1></div></div>
+<form method="post" novalidate>{% csrf_token %}
+  {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+  <fieldset>
+    <legend>{% translate "Event" %}</legend>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.kind %}
+      {% include "partials/field.html" with field=form.title %}
+    </div>
+    {% translate "Date" as date_label %}
+    {% include "partials/date_fields.html" with label=date_label day=form.event_day month=form.event_month year=form.event_year %}
+    <p class="help" style="margin-top:-8px">{% translate "A future date is allowed: a planned wedding, an expected baby." %}</p>
+    {% include "partials/field.html" with field=form.every_year %}
+    {% include "partials/field.html" with field=form.place %}
+  </fieldset>
+  <fieldset>
+    <legend>{% translate "Who" %}</legend>
+    {% include "partials/field.html" with field=form.people %}
+    <p class="help" style="margin-top:-8px">{% translate "Hold Ctrl (⌘ on a Mac) to choose several people." %}</p>
+  </fieldset>
+  <fieldset>
+    <legend>{% translate "Details" %}</legend>
+    {% include "partials/field.html" with field=form.description %}
+  </fieldset>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+    <a class="btn btn-ghost" href="{% if event %}{{ event.get_absolute_url }}{% else %}{% url 'genealogy:upcoming' %}{% endif %}">{% translate "Cancel" %}</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,9 @@
+{
+  "name": "Shajara",
+  "short_name": "Shajara",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf7f1",
+  "theme_color": "#c2694a",
+  "icons": [{ "src": "img/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

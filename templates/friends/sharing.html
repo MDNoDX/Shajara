@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n uz %}
-{% block title %}{% translate "My friends" %}{% endblock %}
+{% block title %}{% translate "Share the family tree" %}{% endblock %}
 {% block content %}
 <div class="pagehead"><div>
-  <h1>{% translate "My friends" %}</h1>
-  <p>{% translate "Friends can view each other's family trees and stories, but cannot change them." %}</p>
+  <h1>{% translate "Share the family tree" %}</h1>
+  <p>{% translate "Connected people can view each other's family trees and stories, but cannot change them." %}</p>
 </div></div>
 
 <div class="cols">
@@ -21,12 +21,12 @@
         {% for other, state in found %}
           <li class="row">
             <span class="spacer"><b>{{ other.display_name }}</b> <span class="muted small">@{{ other.username }}</span></span>
-            {% if state == "friends" %}<span class="rel">{% translate "Friend" context "kinship" %}</span>
+            {% if state == "friends" %}<span class="rel">{% translate "Connected" %}</span>
             {% elif state == "sent" %}<span class="muted small">{% translate "Request sent" %}</span>
             {% else %}
               <form method="post" action="{% url 'friends:send' other.pk %}">{% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button class="btn btn-sm btn-primary" type="submit">{% if state == "received" %}{% translate "Accept" %}{% else %}{% translate "Send a friend request" %}{% endif %}</button>
+                <button class="btn btn-sm btn-primary" type="submit">{% if state == "received" %}{% translate "Accept" %}{% else %}{% translate "Send a request" %}{% endif %}</button>
               </form>
             {% endif %}
           </li>
@@ -38,7 +38,7 @@
     </section>
 
     <section class="card">
-      <h2>{% translate "Friends" %}</h2>
+      <h2>{% translate "Connected people" %}</h2>
       {% if friends %}
         <ul class="kin-list">
         {% for friend in friends %}
@@ -52,7 +52,7 @@
         {% endfor %}
         </ul>
       {% else %}
-        <div class="empty"><h3>{% translate "No friends yet." %}</h3><p>{% translate "Find your relatives by name and send them a friend request." %}</p></div>
+        <div class="empty"><h3>{% translate "You are not connected with anyone yet." %}</h3><p>{% translate "Find your relatives by name and send them a request." %}</p></div>
       {% endif %}
     </section>
   </div>

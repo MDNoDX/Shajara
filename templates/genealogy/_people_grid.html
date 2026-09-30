@@ -1,0 +1,9 @@
+{% load i18n %}{% if rows %}
+  <div class="people">
+    {% for person, label in rows %}{% include "partials/person_card.html" %}{% endfor %}
+  </div>
+{% elif query %}
+  <div class="empty"><h3>{% translate "No results found." %}</h3><p>{% translate "Try another spelling; Latin and Cyrillic both work." %}</p></div>
+{% else %}
+  <div class="empty"><h3>{% translate "No relatives have been added yet." %}</h3></div>
+{% endif %}

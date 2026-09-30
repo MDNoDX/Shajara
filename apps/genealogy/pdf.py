@@ -40,16 +40,16 @@ FONT_BOLD = "DejaVuSans-Bold"
 FONT_ITALIC = "DejaVuSans-Oblique"
 FONT_BOLD_ITALIC = "DejaVuSans-BoldItalic"
 
-INK = colors.HexColor("#1f2a26")
-MUTED = colors.HexColor("#5f6b66")
-ACCENT = colors.HexColor("#2c6e5a")
-LINE = colors.HexColor("#c9d3ce")
-MALE_BG = colors.HexColor("#e6eef8")
-FEMALE_BG = colors.HexColor("#f9e9ee")
-FOCUS_BG = colors.HexColor("#e2f0e9")
-MALE_LINE = colors.HexColor("#6f97c4")
-FEMALE_LINE = colors.HexColor("#cc7b93")
-TREE_LINE = colors.HexColor("#b9b09e")
+INK = colors.HexColor("#2d2420")
+MUTED = colors.HexColor("#7a6b62")
+ACCENT = colors.HexColor("#c2694a")
+LINE = colors.HexColor("#e0d2c2")
+MALE_BG = colors.HexColor("#eaf2fb")
+FEMALE_BG = colors.HexColor("#fdeef3")
+FOCUS_BG = colors.HexColor("#fbece5")
+MALE_LINE = colors.HexColor("#7ba7d7")
+FEMALE_LINE = colors.HexColor("#e28ba8")
+TREE_LINE = colors.HexColor("#d4c4b3")
 
 _registered = False
 
@@ -145,6 +145,7 @@ def _facts(person):
     if person.is_deceased:
         add(_("Date of death"), person.death_date_display or _("unknown"))
         add(_("Place of death"), person.death_place)
+        add(_("Place of burial"), person.burial_place)
     add(_("Occupation"), person.occupation)
     add(_("Education"), person.education)
     return rows

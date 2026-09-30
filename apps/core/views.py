@@ -1,11 +1,19 @@
+import datetime
+from collections import deque
+
 from django.conf import settings
+from django.db import connection
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.utils import translation
+from django.utils import timezone, translation
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from apps.friends.services import friends_of, incoming_requests
+from apps.core.muchal import current_cycle_year, muchal
+from apps.friends.services import incoming_requests
 from apps.genealogy.kinship import Archive
+from apps.notify.messages import render_parts
+from apps.notify.occasions import occasions
 
 from .languages import normalize_language
 
@@ -17,14 +25,37 @@ def home(request):
     archive = Archive(user)
     focus = user.person_id if user.person_id in archive.people else None
     recent = sorted(archive.people.values(), key=lambda p: p.updated_at, reverse=True)[:6]
+    today = timezone.localdate()
+    soon = [(o, render_parts(o.kind, o.params, (o.date - today).days), (o.date - today).days)
+            for o in occasions(user, today, today + datetime.timedelta(days=30))][:8]
+    generations = len({g for g in _generations(archive, focus).values()}) if focus else 0
     return render(request, "core/dashboard.html", {
         "people_count": len(archive.people),
-        "friends_count": friends_of(user).count(),
+        "friends_count": user.contacts.count(),
+        "events_count": user.events.count(),
         "stories_count": user.stories.count(),
+        "generations": generations,
         "recent": [(p, archive.label(focus, p.pk) if focus else "") for p in recent],
         "incoming": incoming_requests(user)[:5],
         "me": archive.people.get(focus),
+        "soon": soon,
+        "cycle_animal": muchal(current_cycle_year(), 6, 1),
     })
+
+
+def _generations(archive, focus):
+    """Generation number of everyone connected to `focus` (parents −1)."""
+    gen = {focus: 0}
+    queue = deque([focus])
+    while queue:
+        cur = queue.popleft()
+        steps = [(p, -1) for p in archive.parents(cur)] + [(c, 1) for c in archive.children.get(cur, [])]
+        steps += [(s, 0) for s in archive.spouses(cur)]
+        for nxt, d in steps:
+            if nxt not in gen:
+                gen[nxt] = gen[cur] + d
+                queue.append(nxt)
+    return gen
 
 
 @require_POST
@@ -46,6 +77,13 @@ def set_language(request):
         secure=getattr(settings, "LANGUAGE_COOKIE_SECURE", False),
     )
     return response
+
+
+def health(request):
+    """For the load balancer / container health check."""
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+    return JsonResponse({"status": "ok"})
 
 
 def csrf_failure(request, reason=""):

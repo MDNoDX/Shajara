@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 19:39+0500\n"
+"POT-Creation-Date: 2026-09-28 18:42+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: Uzbek (Cyrillic)\n"
@@ -25,6 +25,34 @@ msgstr "Расм ҳажми жуда катта. Энг кўпи %(size)s МБ �
 #: static/js/app.js:65
 msgid "Saving…"
 msgstr "Сақланмоқда…"
+
+#: static/js/app.js:86
+msgid "Automatic"
+msgstr "Автоматик"
+
+#: static/js/app.js:86
+msgid "Light"
+msgstr "Ёруғ"
+
+#: static/js/app.js:86
+msgid "Dark"
+msgstr "Қоронғи"
+
+#: static/js/app.js:87
+msgid "Colour theme"
+msgstr "Ранг мавзуси"
+
+#: static/js/app.js:113
+msgid "Type a name to filter…"
+msgstr "Исмни ёзиб қидиринг…"
+
+#: static/js/app.js:177
+msgid "No results found."
+msgstr "Қидирув натижаси топилмади."
+
+#: static/js/app.js:207
+msgid "All results"
+msgstr "Барча натижалар"
 
 #: static/js/tree.js:123
 msgid "Family tree"
@@ -58,11 +86,11 @@ msgstr "Шажара ҳали бўш."
 msgid "Could not load the family tree. Please try again."
 msgstr "Шажарани юклаб бўлмади. Қайтадан уриниб кўринг."
 
-#: static/js/tree.js:451
+#: static/js/tree.js:452
 msgid "An error occurred."
 msgstr "Хатолик юз берди."
 
-#: static/js/tree.js:454
+#: static/js/tree.js:455
 msgctxt "file name"
 msgid "family-tree"
 msgstr "шажара"

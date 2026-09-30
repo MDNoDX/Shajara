@@ -26,4 +26,12 @@ urlpatterns = [
     path("hikoyalar/<int:pk>/tahrirlash/", views.story_edit, name="story_edit"),
     path("hikoyalar/<int:pk>/ochirish/", views.story_delete, name="story_delete"),
     path("qidiruv/", views.search, name="search"),
+    path("qidiruv/tez/", views.search_json, name="search_json"),
+    path("voqealar/", views.upcoming, name="upcoming"),
+    path("voqealar/yangi/", views.event_create, name="event_create"),
+    path("voqealar/<int:pk>/", views.event_detail, name="event"),
+    path("voqealar/<int:pk>/tahrirlash/", views.event_edit, name="event_edit"),
+    path("voqealar/<int:pk>/ochirish/", views.event_delete, name="event_delete"),
+    path("kim-kimga-kim/", views.calculator, name="calculator"),
+    path("shajara/eksport.ged", views.gedcom_export, name="gedcom"),
 ]
