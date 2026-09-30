@@ -82,17 +82,26 @@ def set_language(request):
 
 
 def media(request, name):
-    """Serve a file from the database storage (photos)."""
+    """Serve a photo from the database storage — only to the owner of the
+    archive it belongs to and to people they share the family tree with."""
     from django.http import Http404, HttpResponse
     from django.utils.http import http_date
 
+    from apps.genealogy.access import can_view
+    from apps.genealogy.models import Person
+
     from .models import StoredFile
 
+    if not request.user.is_authenticated:
+        raise Http404
+    person = Person.objects.filter(photo=name).select_related("owner").first()
+    if person is None or not (person.owner_id == request.user.pk or can_view(request.user, person.owner)):
+        raise Http404
     obj = StoredFile.objects.filter(name=name).first()
     if obj is None:
         raise Http404
     response = HttpResponse(bytes(obj.content), content_type=obj.content_type)
-    response["Cache-Control"] = "public, max-age=31536000, immutable"  # names are unique (uuid)
+    response["Cache-Control"] = "private, max-age=31536000, immutable"  # names are unique (uuid)
     response["Last-Modified"] = http_date(obj.created_at.timestamp())
     response["X-Content-Type-Options"] = "nosniff"
     return response

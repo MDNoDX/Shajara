@@ -1,8 +1,8 @@
 # Shajara — oʻzbek oilalari uchun oilaviy arxiv (Django)
 
-Asosiy til — **Oʻzbekcha (lotin)**, ikkinchi til — **Кириллча (oʻzbek kirill)**.
-Ikkalasi ham Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` → `.mo`,
-`LocaleMiddleware`, `JavaScriptCatalog`). Ingliz tili interfeysda yoʻq.
+Asosiy til — **Oʻzbekcha (lotin)**; toʻliq tarjimalar: **Ўзбекча (kirill)**, **Русский** va **English**.
+Hammasi Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` → `.mo`,
+`LocaleMiddleware`, `JavaScriptCatalog`).
 
 > Oldingi bir faylli prototip `files/` papkasida qoldirilgan. Qarindoshlik mantigʻi
 > va lotin↔kirill qidiruvi oʻsha yerdan Pythonga koʻchirildi.
@@ -22,7 +22,9 @@ Ikkalasi ham Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` 
 - **Kim kimga kim?** — ikki odam orasidagi qarindoshlik va bogʻlanish zanjiri.
 - **Familiya taklifi** — oʻgʻil nevaraga ota tarafdagi bobosining ismidan (Madaminjon → Madaminov).
 - **Eksport** — PDF (tarjimai hol, daraxt, shajara kitobi) va GEDCOM (boshqa shajara dasturlari uchun).
-- **Yorugʻ / qorongʻi mavzu** va toʻrtta rang palitrasi, telefon ekraniga moslashgan dizayn, ikki yozuv (lotin va kirill).
+- **Yorugʻ / qorongʻi mavzu** va toʻrtta rang palitrasi, telefon ekraniga moslashgan dizayn, toʻrt til.
+- **Sozlamalar**: Umumiy (til, ranglar, vaqt mintaqasi), Eslatmalar (Telegram), Xavfsizlik (parol, Google,
+  boshqa qurilmalar), Maʼlumotlar (yuklab olish, arxivni yuklash, hisobni oʻchirish).
 - **Google orqali kirish**, **Boshqaruv paneli** (`/boshqaruv/`) va toʻliq zaxira nusxa.
 - **Mac ilovasi** — [macos/](macos/README.md): alohida oyna, tizim bildirishnomalari, Dock belgisi.
 
@@ -71,16 +73,20 @@ shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 | `apps/core/storage.py` | Rasmlarni PostgreSQL’da saqlash |
 | `vercel.json` | Vercel: migratsiyalar, Cron, hudud |
 | `macos/` | Mac ilovasi (SwiftUI + WebKit) |
-| `locale/uz`, `locale/uz_Cyrl` | `django.po` va `djangojs.po` (kompilyatsiya qilingan `.mo` bilan) |
+| `locale/uz`, `locale/uz_Cyrl`, `locale/ru`, `locale/en` | `django.po` va `djangojs.po` (kompilyatsiya qilingan `.mo` bilan) |
+| `apps/core/timezones.py` | Foydalanuvchi vaqt mintaqalari (eslatma soati shu boʻyicha) |
 | `fonts/` | DejaVu Sans — PDF ichiga joylanadi (Ў Қ Ғ Ҳ va ʻ ʼ belgilari bor) |
 | `tools/i18n_audit.py` | Til auditi (quyida) |
 
 ## Til tizimi
 
-* **Tanlash:** sarlavhadagi va pastki qismdagi *Oʻzbekcha | Кириллча* tugmalari, hamda *Sozlamalar → Til*.
+* **Tanlash:** sarlavhadagi globus menyusi, sahifa pastidagi roʻyxat, hamda *Sozlamalar → Til*.
 * **Saqlash:** tizimga kirgan foydalanuvchi uchun `User.preferred_language` (`uz` yoki `uz-cyrl`)
   maydoniga yoziladi va har safar tizimga kirganda qoʻllanadi. Mehmonlar uchun `til` cookie,
-  keyin brauzer tili, keyin standart holatda lotin yozuvi ishlatiladi. Ingliz yoki rus tilidagi brauzerga lotin yozuvi chiqadi.
+  keyin brauzer tili (faqat oʻzbek lotin/kirill), keyin standart holatda lotin yozuvi ishlatiladi. Rus va ingliz tillari
+  faqat foydalanuvchi oʻzi tanlaganda yoqiladi: sayt avval oʻzbek tilida ochiladi.
+* **Rus tili grammatikasi:** koʻplik uch shaklda (1 год, 2 года, 5 лет), sanada oy qaratqich kelishigida
+  (27 сентября), qarindoshlik zanjiri ham («Младший брат бабушки») — `terminology.KIN_OF`.
 * **URL:** til prefikssiz (`/uz-cyrl/…` yoʻq): til cookie va akkaunt orqali saqlanadi, havolalar ikkala tilda bir xil.
 * **Kirill katalogi:** Django’da `uz_Cyrl` katalogi yoʻq, shuning uchun foydalanuvchi koʻradigan barcha Django
   xabarlari `locale/uz_Cyrl` ichida qayta tarjima qilingan. Lotin katalogida ham Django xabarlari qayta
@@ -95,8 +101,8 @@ shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 ### Yangi matn qoʻshilganda
 
 ```bash
-.venv/bin/python manage.py makemessages -l uz -l uz_Cyrl --ignore=.venv --ignore=files --no-obsolete
-.venv/bin/python manage.py makemessages -d djangojs -l uz -l uz_Cyrl --ignore=.venv --ignore=files
+.venv/bin/python manage.py makemessages -l uz -l uz_Cyrl -l ru -l en --ignore=.venv --ignore=files --ignore=macos --no-obsolete
+.venv/bin/python manage.py makemessages -d djangojs -l uz -l uz_Cyrl -l ru -l en --ignore=.venv --ignore=files --ignore=macos --ignore=staticfiles
 # locale/uz/… va locale/uz_Cyrl/… dagi .po fayllarni tarjima qiling (fuzzy belgisini olib tashlang)
 .venv/bin/python manage.py compilemessages --ignore=.venv
 .venv/bin/python tools/i18n_audit.py
@@ -109,15 +115,16 @@ audit va testlar tarjima qilinmagan satr qolmaganini tekshiradi.
 
 `tools/i18n_audit.py` (test ichida ham ishlaydi) quyidagilarni tekshiradi:
 
-1. Ikkala katalogda har bir satr tarjima qilingan, `fuzzy` yoʻq, oʻrin toʻldiruvchilar mos keladi.
+1. Har bir katalogda har bir satr tarjima qilingan (ingliz tilida manba matn ishlatilishi mumkin), `fuzzy` yoʻq,
+   oʻrin toʻldiruvchilar mos keladi, rus koʻpligi uch shaklda, rus katalogida oʻzbekcha harflar (ў қ ғ ҳ) yoʻq.
 2. Lotin katalogida kirill harfi va notoʻgʻri apostrof (`o'`, `o‘`, `g’` …) yoʻq.
 3. Kirill katalogida lotin harfi yoʻq (istisnolar: PDF, PNG, MB va qidiruvdagi «Alisher» misoli).
 4. Shablonlarda `{% translate %}` dan tashqarida matn qolmagan.
 5. JavaScript’dagi jumlalar `gettext()` orqali oʻtadi.
 6. Python’dagi `messages.*`, `ValidationError`, `add_error`, `Http404` va `PermissionDenied` chaqiruvlari tarjimasiz qoldirilmagan.
 
-`tests/test_i18n.py` har bir sahifani ikkala tilda ochadi va quyidagilarni tekshiradi: kirill sahifada lotin
-matni, lotin sahifada kirill matni va inglizcha manba matn yoʻq. Tekshiruvga validatsiya xatolari, 404/403 sahifalari,
+`tests/test_i18n.py` har bir sahifani toʻrt tilda ochadi va quyidagilarni tekshiradi: kirill sahifada lotin
+matni, lotin sahifada kirill matni, oʻzbek va rus sahifalarida inglizcha manba matn, rus sahifasida oʻzbekcha harf yoʻq. Tekshiruvga validatsiya xatolari, 404/403 sahifalari,
 JS katalogi, shajara JSON va PDF fayl nomlari ham kiradi.
 
 ```bash
@@ -126,7 +133,7 @@ JS katalogi, shajara JSON va PDF fayl nomlari ham kiradi.
 
 ## Maʼlum cheklovlar
 
-* Django admin (`/admin/`) oddiy foydalanuvchi uchun emas. Kirill rejimida u Django’ning lotincha tarjimasida qoladi.
+* Django admin (`/admin/`) oddiy foydalanuvchi uchun emas. Oʻzbek kirill rejimida u Django’ning lotincha tarjimasida qoladi.
 * Veb shrift (Noto Sans) Google Fonts’dan yuklanadi. Internet boʻlmasa, tizim shrifti ishlatiladi:
   macOS, Windows va Android shriftlari oʻzbek kirill harflarini qoʻllaydi.
 * Qarindoshlik nomlari qon qarindoshlik, nikoh, kelin/kuyov, qaynota/qaynona, yanga/pochcha va oʻgay

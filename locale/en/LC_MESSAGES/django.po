@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 08:30+0500\n"
+"POT-Creation-Date: 2026-09-30 12:34+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: English\n"
@@ -30,27 +30,27 @@ msgstr ""
 msgid "Letters, digits and the characters @ . + - _ only."
 msgstr ""
 
-#: apps/accounts/forms.py:23 apps/accounts/forms.py:79 apps/accounts/forms.py:169
+#: apps/accounts/forms.py:23 apps/accounts/forms.py:110 apps/accounts/forms.py:200
 msgid "First name"
 msgstr ""
 
-#: apps/accounts/forms.py:24 apps/accounts/forms.py:80 apps/accounts/forms.py:170
+#: apps/accounts/forms.py:24 apps/accounts/forms.py:111 apps/accounts/forms.py:201
 msgid "Last name"
 msgstr ""
 
-#: apps/accounts/forms.py:25 apps/accounts/forms.py:81 apps/accounts/forms.py:148
+#: apps/accounts/forms.py:25 apps/accounts/forms.py:112 apps/accounts/forms.py:179
 msgid "Email"
 msgstr ""
 
-#: apps/accounts/forms.py:26 apps/accounts/forms.py:82 apps/accounts/forms.py:171 apps/genealogy/pdf.py:142 templates/genealogy/person_detail.html:28
+#: apps/accounts/forms.py:26 apps/accounts/forms.py:113 apps/accounts/forms.py:202 apps/genealogy/pdf.py:142 templates/genealogy/person_detail.html:28
 msgid "Gender"
 msgstr ""
 
-#: apps/accounts/forms.py:34 apps/accounts/forms.py:70
+#: apps/accounts/forms.py:34
 msgid "Username"
 msgstr ""
 
-#: apps/accounts/forms.py:36 apps/accounts/forms.py:71
+#: apps/accounts/forms.py:36 apps/accounts/forms.py:77
 msgid "Password"
 msgstr ""
 
@@ -58,7 +58,7 @@ msgstr ""
 msgid "Confirm password"
 msgstr ""
 
-#: apps/accounts/forms.py:39 apps/accounts/forms.py:142 apps/accounts/forms.py:163
+#: apps/accounts/forms.py:39 apps/accounts/forms.py:173 apps/accounts/forms.py:194
 msgid "Enter the same password again."
 msgstr ""
 
@@ -66,43 +66,51 @@ msgstr ""
 msgid "An account with this email address already exists."
 msgstr ""
 
-#: apps/accounts/forms.py:104 templates/accounts/settings.html:23 templates/accounts/settings.html:25 templates/partials/lang_list.html:1 templates/partials/lang_switch.html:2
+#: apps/accounts/forms.py:76
+msgid "Username or email"
+msgstr ""
+
+#: apps/accounts/forms.py:94
+msgid "Too many attempts. Please try again in 15 minutes."
+msgstr ""
+
+#: apps/accounts/forms.py:135 templates/accounts/settings.html:23 templates/accounts/settings.html:25 templates/partials/lang_list.html:1 templates/partials/lang_switch.html:2
 msgid "Language"
 msgstr ""
 
-#: apps/accounts/forms.py:104 templates/accounts/settings.html:37
+#: apps/accounts/forms.py:135 templates/accounts/settings.html:37
 msgid "Colours"
 msgstr ""
 
-#: apps/accounts/forms.py:104 apps/accounts/forms.py:112
+#: apps/accounts/forms.py:135 apps/accounts/forms.py:143
 msgid "Time zone"
 msgstr ""
 
-#: apps/accounts/forms.py:113
+#: apps/accounts/forms.py:144
 msgid "Reminders are made for your date and sent at your hour."
 msgstr ""
 
-#: apps/accounts/forms.py:118
+#: apps/accounts/forms.py:149
 msgid "Archive file (JSON)"
 msgstr ""
 
-#: apps/accounts/forms.py:125
+#: apps/accounts/forms.py:156
 msgid "The file is too large."
 msgstr ""
 
-#: apps/accounts/forms.py:129 apps/accounts/forms.py:131
+#: apps/accounts/forms.py:160 apps/accounts/forms.py:162
 msgid "This is not a Shajara archive file."
 msgstr ""
 
-#: apps/accounts/forms.py:138
+#: apps/accounts/forms.py:169
 msgid "Current password"
 msgstr ""
 
-#: apps/accounts/forms.py:139 apps/accounts/forms.py:160
+#: apps/accounts/forms.py:170 apps/accounts/forms.py:191
 msgid "New password"
 msgstr ""
 
-#: apps/accounts/forms.py:141 apps/accounts/forms.py:162
+#: apps/accounts/forms.py:172 apps/accounts/forms.py:193
 msgid "Confirm the new password"
 msgstr ""
 
@@ -355,7 +363,7 @@ msgstr ""
 msgid "years unknown"
 msgstr ""
 
-#: apps/core/django_messages.py:16 tests/test_i18n.py:37 tests/test_i18n.py:39
+#: apps/core/django_messages.py:16 tests/test_i18n.py:41 tests/test_i18n.py:43 tests/test_i18n.py:46
 msgid "This field is required."
 msgstr ""
 
@@ -459,7 +467,7 @@ msgid_plural "Ensure this filename has at most %(max)d characters (it has %(leng
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/core/django_messages.py:58 tests/test_i18n.py:40
+#: apps/core/django_messages.py:58 tests/test_i18n.py:44
 msgid "The two password fields didn’t match."
 msgstr ""
 
@@ -693,39 +701,39 @@ msgctxt "time zone"
 msgid "Sydney"
 msgstr ""
 
-#: apps/core/views.py:159
+#: apps/core/views.py:168
 msgid "Users"
 msgstr ""
 
-#: apps/core/views.py:160
+#: apps/core/views.py:169
 msgid "People in all trees"
 msgstr ""
 
-#: apps/core/views.py:161 templates/base.html:118 templates/base.html:134 templates/genealogy/events.html:3 templates/genealogy/events.html:7 templates/genealogy/person_detail.html:54
+#: apps/core/views.py:170 templates/base.html:118 templates/base.html:134 templates/genealogy/events.html:3 templates/genealogy/events.html:7 templates/genealogy/person_detail.html:54
 msgid "Events"
 msgstr ""
 
-#: apps/core/views.py:162 apps/genealogy/pdf.py:242 templates/base.html:119 templates/genealogy/person_detail.html:79 templates/genealogy/story_list.html:3 templates/genealogy/story_list.html:7
+#: apps/core/views.py:171 apps/genealogy/pdf.py:242 templates/base.html:119 templates/genealogy/person_detail.html:79 templates/genealogy/story_list.html:3 templates/genealogy/story_list.html:7
 msgid "Stories"
 msgstr ""
 
-#: apps/core/views.py:163 apps/friends/apps.py:8 templates/base.html:135 templates/friends/list.html:7 templates/genealogy/person_detail.html:67
+#: apps/core/views.py:172 apps/friends/apps.py:8 templates/base.html:135 templates/friends/list.html:7 templates/genealogy/person_detail.html:67
 msgid "Friends"
 msgstr ""
 
-#: apps/core/views.py:164 templates/core/control_panel.html:34
+#: apps/core/views.py:173 templates/core/control_panel.html:34
 msgid "Photos"
 msgstr ""
 
-#: apps/core/views.py:165 apps/notify/apps.py:8 templates/base.html:54 templates/base.html:60 templates/notify/list.html:3 templates/notify/list.html:7
+#: apps/core/views.py:174 apps/notify/apps.py:8 templates/base.html:54 templates/base.html:60 templates/notify/list.html:3 templates/notify/list.html:7
 msgid "Notifications"
 msgstr ""
 
-#: apps/core/views.py:166
+#: apps/core/views.py:175
 msgid "Telegram connected"
 msgstr ""
 
-#: apps/core/views.py:202
+#: apps/core/views.py:211
 msgid "The Telegram bot is connected to the site."
 msgstr ""
 
@@ -2466,7 +2474,7 @@ msgstr ""
 msgid "Security"
 msgstr ""
 
-#: templates/accounts/settings_base.html:14 templates/accounts/settings_data.html:3
+#: templates/accounts/settings_base.html:14 templates/accounts/settings_data.html:3 templates/core/dashboard.html:106
 msgid "Your data"
 msgstr ""
 
@@ -2881,10 +2889,6 @@ msgstr ""
 
 #: templates/core/dashboard.html:105 templates/genealogy/tree.html:37
 msgid "Family tree (PDF)"
-msgstr ""
-
-#: templates/core/dashboard.html:106
-msgid "GEDCOM file (for other genealogy programs)"
 msgstr ""
 
 #: templates/core/landing.html:3

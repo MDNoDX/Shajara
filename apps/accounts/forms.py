@@ -65,10 +65,41 @@ class RegisterForm(auth_forms.UserCreationForm):
 
 
 class LoginForm(auth_forms.AuthenticationForm):
+    """Sign in with a username or an email address; repeated wrong passwords
+    for one account are paused for a while."""
+
+    MAX_ATTEMPTS = 10
+    LOCK_SECONDS = 15 * 60
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["username"].label = _("Username")
+        self.fields["username"].label = _("Username or email")
         self.fields["password"].label = _("Password")
+
+    def _throttle_key(self, username):
+        import hashlib
+
+        return "login-fail:" + hashlib.sha256(username.strip().lower().encode()).hexdigest()[:32]
+
+    def clean(self):
+        from django.core.cache import cache
+
+        username = self.cleaned_data.get("username") or ""
+        if "@" in username:
+            match = User.objects.filter(email__iexact=username.strip()).first()
+            if match:
+                self.cleaned_data["username"] = username = match.username
+        key = self._throttle_key(username)
+        if username and cache.get(key, 0) >= self.MAX_ATTEMPTS:
+            raise forms.ValidationError(_("Too many attempts. Please try again in 15 minutes."))
+        try:
+            cleaned = super().clean()
+        except forms.ValidationError:
+            if username:
+                cache.set(key, cache.get(key, 0) + 1, self.LOCK_SECONDS)
+            raise
+        cache.delete(key)
+        return cleaned
 
 
 class ProfileForm(forms.ModelForm):

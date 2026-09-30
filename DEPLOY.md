@@ -15,8 +15,8 @@ bazasida saqlanadi. Shuning uchun boshqa serverga koʻchish = bazani koʻchirish
 | Sayt (Django) | Vercel Python funksiyasi (`config/wsgi.py`), hudud `fra1` |
 | Baza | Neon PostgreSQL (Vercel Marketplace orqali ulangan, `DATABASE_URL`) |
 | Rasmlar | Bazaning `core_storedfile` jadvalida (`apps/core/storage.py`) |
-| Kunlik eslatmalar | Vercel Cron → `/cron/kunlik/` har kuni 03:00 UTC (08:00 Toshkent) |
-| Telegram bot | Webhook → `/telegram/webhook/` |
+| Eslatmalar | Vercel Cron → `/cron/kunlik/` **har soatda** (24 ta kunlik yozuv — bepul rejimda shunday qilinadi); har kimga oʻzi tanlagan soatda, oʻz vaqt mintaqasida yuboriladi |
+| Telegram bot | Webhook → `/telegram/webhook/` (uzilib qolsa, cron har soatda oʻzi tiklaydi) |
 | Migratsiyalar | Har bir deploy’da avtomatik (`vercel.json` → `buildCommand`) |
 
 ### Muhit oʻzgaruvchilari (Vercel → Project → Settings → Environment Variables)
@@ -27,7 +27,7 @@ bazasida saqlanadi. Shuning uchun boshqa serverga koʻchish = bazani koʻchirish
 | `DJANGO_SECRET_KEY` | ha | uzun tasodifiy qator |
 | `CRON_SECRET` | ha | Vercel Cron shu kalit bilan keladi |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google orqali kirish uchun | quyida |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` | Telegram eslatmalari uchun | quyida |
+| `TELEGRAM_BOT_TOKEN` | Telegram eslatmalari uchun | quyida. Bot nomi tokenning oʻzidan olinadi; `TELEGRAM_BOT_USERNAME` shart emas |
 | `EMAIL_*`, `DJANGO_EMAIL_BACKEND` | parolni tiklash xatlari uchun | `.env.example` ga qarang |
 | `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS` | faqat oʻz domeningiz boʻlsa | `*.vercel.app` manzillari avtomatik qoʻshiladi |
 
@@ -48,9 +48,13 @@ emailiga mos kelsa, oʻsha akkauntga ulanadi; aks holda yangi akkaunt ochiladi v
 ### Telegram bot
 
 1. Telegramda [@BotFather](https://t.me/BotFather) → `/newbot` → nom va foydalanuvchi nomi.
-2. Tokenni Vercel’ga `TELEGRAM_BOT_TOKEN`, nomini (`@` siz) `TELEGRAM_BOT_USERNAME` qilib yozing → Redeploy.
-3. Saytda **Boshqaruv paneli** (`/boshqaruv/`) → **«Botni saytga ulash»** tugmasi.
-4. Foydalanuvchilar **Sozlamalar → Eslatmalar → Telegramni ulash** orqali ulanadi.
+2. Tokenni Vercel’ga `TELEGRAM_BOT_TOKEN` qilib yozing → Redeploy.
+3. Saytda **Boshqaruv paneli** (`/boshqaruv/`) → **«Botni saytga ulash»** tugmasi (bosmasangiz ham, bir soat ichida cron oʻzi ulaydi).
+   Panelda botning haqiqiy nomi (`@…`) va webhook holati koʻrinadi.
+4. Foydalanuvchilar **Sozlamalar → Eslatmalar** sahifasida ulanadi: «@bot ni ochish» tugmasi Telegram **ilovasini** ochadi
+   (brauzerdagi Telegram Web emas), telefonda QR-kod, yoki botga sahifadagi 8 belgili kodni yozib yuborish.
+   Sahifa ulanganini oʻzi sezadi; «Sinov xabarini yuborish» tugmasi bilan tekshiriladi.
+5. Botdagi buyruqlar: `/next` — yaqin sanalar, `/stop` — oʻchirish, `/start` — qayta yoqish.
 
 ### Oʻz domeningiz
 
@@ -146,7 +150,8 @@ Vercel’dan koʻchganda Telegram webhookni oʻchiring (`docker compose exec web
 | Google tugmasi yoʻq | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` berilmagan yoki Redeploy qilinmagan |
 | Google «redirect_uri_mismatch» | Google Console’dagi redirect URI sayt manziliga mos emas |
 | Telegram javob bermayapti | Token notoʻgʻri yoki webhook oʻrnatilmagan (`/boshqaruv/`) |
-| Eslatmalar kelmayapti | `CRON_SECRET` yoʻq; Vercel → Project → **Cron Jobs** loglarini koʻring |
+| Eslatmalar kelmayapti | `CRON_SECRET` yoʻq; Vercel → Project → **Cron Jobs** loglarini koʻring. Foydalanuvchi tanlagan soat hali kelmagan boʻlishi ham mumkin |
+| Telegram brauzerda ochilyapti | «@bot ni ochish» tugmasi `tg://` havolasi — Telegram ilovasi oʻrnatilgan boʻlishi kerak; aks holda kodni botga qoʻlda yuboring |
 
 Loglar: Vercel → Project → **Logs** (yoki `vercel logs`), Docker’da `docker compose logs -f web`.
 
@@ -154,4 +159,6 @@ Loglar: Vercel → Project → **Logs** (yoki `vercel logs`), Docker’da `docke
 
 - `DJANGO_DEBUG=0` (Vercel’da standart), HTTPS, HSTS, xavfsiz cookie yoqilgan.
 - Maxfiy kalitlar faqat Vercel/`.env` da; `.env` gitga qoʻshilmaydi.
+- Suratlar faqat arxiv egasiga va u shajarasini ulashgan odamlarga beriladi (mehmonlarga — yoʻq).
+- Bitta hisobga 10 marta notoʻgʻri parol kiritilsa, kirish 15 daqiqaga toʻxtatiladi.
 - `seed_demo` foydalanuvchilarining paroli repozitoriyda ochiq — ularni production’ga yuklamang.

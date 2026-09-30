@@ -375,6 +375,23 @@ class GoogleAndAppLoginTests(TestCase):
         again = self.client_class().get(reverse("app_login"), {"token": token})
         self.assertRedirects(again, reverse("accounts:login"), fetch_redirect_response=False)
 
+    def test_login_with_email_and_throttle(self):
+        from django.core.cache import cache
+
+        from .helpers import PASSWORD
+
+        cache.clear()
+        user, _p = make_family()
+        response = self.client.post(reverse("accounts:login"), {"username": user.email.upper(), "password": PASSWORD})
+        self.assertEqual(response.status_code, 302)
+        self.client.logout()
+        for _i in range(10):
+            self.client.post(reverse("accounts:login"), {"username": user.username, "password": "xato"})
+        response = self.client.post(reverse("accounts:login"), {"username": user.username, "password": PASSWORD})
+        self.assertEqual(response.status_code, 200)  # locked for a while, even with the right password
+        self.assertIn("15 daqiqa", response.content.decode())
+        cache.clear()
+
     def test_google_button_only_when_configured(self):
         html = self.client.get(reverse("accounts:login")).content.decode()
         self.assertNotIn("google-form", html)
@@ -428,3 +445,10 @@ class ServerlessTests(TestCase):
         served = self.client.get(person.photo.url)
         self.assertEqual(served.status_code, 200)
         self.assertEqual(served["Content-Type"], "image/png")
+        self.assertIn("private", served["Cache-Control"])
+        # Photos are private: not for guests, not for other users.
+        self.client.logout()
+        self.assertEqual(self.client.get(person.photo.url).status_code, 404)
+        stranger, _p = make_family(username="begona")
+        self.client.force_login(stranger)
+        self.assertEqual(self.client.get(person.photo.url).status_code, 404)

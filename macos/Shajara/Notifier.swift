@@ -92,7 +92,7 @@ final class Notifier: NSObject, ObservableObject, UNUserNotificationCenterDelega
                 self.post(id: "shajara-\(item.id)", title: "\(item.icon) \(item.title)", body: item.body, url: item.url)
                 seen.insert(item.id)
             }
-            UserDefaults.standard.set(Array(seen).sorted().suffix(500), forKey: self.seenKey)
+            UserDefaults.standard.set(Array(seen.sorted().suffix(500)), forKey: self.seenKey)
         }
     }
 

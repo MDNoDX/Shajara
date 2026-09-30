@@ -103,7 +103,7 @@
       <div class="stack">
         <a class="btn" href="{% url 'genealogy:family_book' %}">{% include "partials/icon.html" with name="download" %}{% translate "Family tree book (PDF)" %}</a>
         {% if me %}<a class="btn" href="{% url 'genealogy:tree_pdf_for' user.username %}">{% include "partials/icon.html" with name="download" %}{% translate "Family tree (PDF)" %}</a>{% endif %}
-        <a class="btn" href="{% url 'genealogy:gedcom' %}">{% include "partials/icon.html" with name="download" %}{% translate "GEDCOM file (for other genealogy programs)" %}</a>
+        <a class="btn btn-ghost" href="{% url 'accounts:data' %}">{% include "partials/icon.html" with name="database" %}{% translate "Your data" %}</a>
       </div>
     </section>
   </aside>
