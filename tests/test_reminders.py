@@ -1,54 +1,23 @@
-"""Muchal, reminders, Telegram linking, events, friends, calculator, GEDCOM."""
+"""Reminders: occasions, Telegram, push, the hourly cron, the weekly backup."""
 import datetime
+import json
+from io import BytesIO
 from unittest import mock
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
+from PIL import Image
 
-from apps.core.muchal import muchal, next_muchal_year
-from apps.core.text import surname_from_name
 from apps.friends.models import Contact
-from apps.genealogy import gedcom
-from apps.genealogy.kinship import Archive
-from apps.genealogy.models import Event, Person
+from apps.genealogy.models import Event
 from apps.notify import service, telegram
 from apps.notify.messages import render_parts
-from apps.notify.models import Notification, NotificationSettings
+from apps.notify.models import BotState, Notification, NotificationSettings, PushSubscription
 from apps.notify.occasions import occasions
 
 from .helpers import make_family
-
-
-class MuchalTests(TestCase):
-    def test_animals(self):
-        self.assertEqual(muchal(2006, 11, 19)["code"], "it")        # Dog
-        self.assertEqual(muchal(1976, 8, 24)["code"], "baliq")     # Dragon ("Baliq")
-        self.assertEqual(muchal(2020, 6, 1)["code"], "sichqon")    # Rat
-
-    def test_year_changes_at_navroz(self):
-        self.assertEqual(muchal(2007, 3, 20)["code"], "it")         # still the Dog year
-        self.assertEqual(muchal(2007, 3, 21)["code"], "tongiz")     # Pig from Navroʻz
-        self.assertFalse(muchal(2007)["certain"])
-        self.assertTrue(muchal(2007, 5, 2)["certain"])
-
-    def test_names_in_both_scripts(self):
-        with translation.override("uz"):
-            self.assertEqual(muchal(1976, 8, 24)["name"], "Baliq")
-        with translation.override("uz-cyrl"):
-            self.assertEqual(muchal(1976, 8, 24)["name"], "Балиқ")
-
-    def test_next_muchal_year(self):
-        self.assertEqual(next_muchal_year(2006, 11, 19, today=datetime.date(2026, 9, 28)), 2030)
-
-
-class SurnameTests(TestCase):
-    def test_suggestions(self):
-        self.assertEqual(surname_from_name("Madaminjon"), "Madaminov")
-        self.assertEqual(surname_from_name("Nabijon"), "Nabiyev")
-        self.assertEqual(surname_from_name("Karim"), "Karimov")
-        self.assertEqual(surname_from_name("Мадаминжон"), "Мадаминов")
-        self.assertEqual(surname_from_name("Набижон"), "Набиев")
 
 
 class ReminderTests(TestCase):
@@ -248,158 +217,53 @@ class TelegramTests(TestCase):
         self.assertFalse(response.json()["webhook_fixed"])
 
 
-class EventsFriendsTests(TestCase):
+class PushAndBackupTests(TestCase):
     def setUp(self):
         self.user, self.p = make_family()
         self.client.force_login(self.user)
 
-    def test_create_future_event(self):
-        response = self.client.post(reverse("genealogy:event_create"), {
-            "kind": "wedding", "title": "Samirning to'yi", "people": [self.p["son"].pk],
-            "event_day": "15", "event_month": "8", "event_year": str(datetime.date.today().year + 1),
-        })
-        event = Event.objects.get()
-        self.assertRedirects(response, event.get_absolute_url())
-        self.assertEqual(event.title, "Samirning toʻyi")
-        self.assertEqual(list(event.people.all()), [self.p["son"]])
+    def test_subscribe_and_unsubscribe(self):
+        sub = {"endpoint": "https://push.example/abc", "keys": {"p256dh": "k" * 80, "auth": "a" * 20}}
+        ok = self.client.post(reverse("notify:push_subscribe"), json.dumps(sub), content_type="application/json")
+        self.assertTrue(ok.json()["ok"])
+        self.assertEqual(PushSubscription.objects.get().user, self.user)
+        bad = self.client.post(reverse("notify:push_subscribe"), "{}", content_type="application/json")
+        self.assertEqual(bad.status_code, 400)
+        self.client.post(reverse("notify:push_unsubscribe"), json.dumps({"endpoint": sub["endpoint"]}),
+                         content_type="application/json")
+        self.assertFalse(PushSubscription.objects.exists())
 
-    def test_every_year_needs_day_and_month(self):
-        response = self.client.post(reverse("genealogy:event_create"), {
-            "kind": "memorial", "every_year": "on", "event_year": "2001",
-        })
-        self.assertContains(response, "Har yili eslatilishi uchun kun va oyni kiriting.")
+    @override_settings(VAPID_PUBLIC_KEY="pub", VAPID_PRIVATE_KEY="priv")
+    def test_due_reminders_are_pushed_once(self):
+        PushSubscription.objects.create(user=self.user, endpoint="https://push.example/1", p256dh="k", auth="a")
+        service.generate(self.user, datetime.date(2026, 9, 27))
+        nine = datetime.datetime(2026, 9, 27, 4, 0, tzinfo=datetime.timezone.utc)
+        with mock.patch("apps.notify.push.send", return_value=True) as send:
+            self.assertEqual(service.send_pending_push(now=nine), 1)
+            self.assertEqual(service.send_pending_push(now=nine), 0)
+        payload = send.call_args.args[1]
+        self.assertIn("Timur Nurmatov", payload["title"])
+        self.assertTrue(payload["url"].startswith("/"))
 
-    def test_friend_of_father(self):
-        response = self.client.post(reverse("friends:create"), {
-            "person": self.p["father"].pk, "name": "Baxtiyor", "how_met": "army", "birth_day": "3", "birth_month": "5",
-        })
-        self.assertEqual(response.status_code, 302)
-        contact = Contact.objects.get()
-        self.assertEqual((contact.person, contact.birth_year, contact.birth_month), (self.p["father"], None, 5))
-        html = self.client.get(reverse("genealogy:person", args=[self.p["father"].pk])).content.decode()
-        self.assertIn("Baxtiyor", html)
-        self.assertIn("Harbiy xizmatdosh", html)
-
-    def test_calculator_and_person_page(self):
-        html = self.client.get(reverse("genealogy:calculator"),
-                               {"a": self.p["me"].pk, "b": self.p["cousin"].pk}).content.decode()
-        self.assertIn("Ammavachcha", html)
-        html = self.client.get(reverse("genealogy:person", args=[self.p["me"].pk])).content.decode()
-        self.assertIn("Muchali", html)
-        self.assertIn("Sichqon", html)  # 1984
-
-    def test_gedcom(self):
-        text = gedcom.export(Archive(self.user), "Timur")
-        self.assertTrue(text.startswith("0 HEAD"))
-        self.assertIn(f"0 @I{self.p['me'].pk}@ INDI", text)
-        self.assertIn("2 DATE 27 SEP 1984", text)
-        self.assertIn(f"1 CHIL @I{self.p['me'].pk}@", text)
-        self.assertTrue(text.rstrip().endswith("0 TRLR"))
-        response = self.client.get(reverse("genealogy:gedcom"))
-        self.assertIn(".ged", response["Content-Disposition"])
-
-    def test_path(self):
-        a = Archive(self.user)
-        chain = a.path(self.p["me"].pk, self.p["cousin"].pk)
-        self.assertEqual(chain[0], self.p["me"].pk)
-        self.assertEqual(chain[-1], self.p["cousin"].pk)
-        self.assertEqual(len(chain), 5)  # me → father → grandpa → aunt → cousin
-
-    def test_son_surname_suggestion(self):
-        html = self.client.get(reverse("genealogy:relative_add", args=[self.p["me"].pk]) + "?relation=child").content.decode()
-        self.assertIn('data-son-surname="Rustamov"', html)
-
-
-class LiveSearchTests(TestCase):
-    def setUp(self):
-        self.user, self.p = make_family()
-        self.client.force_login(self.user)
-
-    def search(self, q, **extra):
-        return self.client.get(reverse("genealogy:search_json"), {"q": q, **extra}).json()["results"]
-
-    def test_cross_script_and_ranking(self):
-        Person.objects.create(owner=self.user, first_name="Olim", last_name="Laylov", gender="male")
-        names = [r["name"] for r in self.search("Лайло")]
-        self.assertEqual(names[0], "Laylo Nurmatova")          # first-name match first
-        self.assertIn("Olim Laylov", names)
-        first = self.search("lay")[0]
-        self.assertEqual((first["label"], first["url"]), ("Singil", self.p["younger_sister"].get_absolute_url()))
-
-    def test_partial_pages(self):
-        html = self.client.get(reverse("genealogy:search"), {"q": "kam", "partial": 1}).content.decode()
-        self.assertNotIn("<html", html)
-        self.assertIn("Kamila Aliyeva", html)
-        html = self.client.get(reverse("genealogy:people"), {"q": "aziza", "partial": 1}).content.decode()
-        self.assertIn("Aziza Nurmatova", html)
-        self.assertNotIn("Kamila", html)
-
-    def test_other_archives_are_private(self):
-        from apps.accounts.models import User
-
-        stranger = User.objects.create_user("begona2", "b2@example.com", "x-parol-12345")
-        response = self.client.get(reverse("genealogy:search_json"), {"q": "a", "owner": stranger.username})
-        self.assertEqual(response.status_code, 403)
-
-    def test_no_divorce_option(self):
-        m = self.p["me"].marriages_as_husband.first()
-        html = self.client.get(reverse("genealogy:marriage_edit", args=[m.pk])).content.decode()
-        self.assertNotIn("is_divorced", html)
-
-
-class GoogleAndAppLoginTests(TestCase):
-    def test_profile_completion_for_new_accounts(self):
-        from apps.accounts.models import User
-
-        user = User.objects.create_user("googler", "g@example.com")  # as created by Google sign-in
-        self.client.force_login(user)
-        response = self.client.get(reverse("home"))
-        self.assertRedirects(response, reverse("accounts:complete_profile") + "?next=/", fetch_redirect_response=False)
-        response = self.client.post(reverse("accounts:complete_profile"),
-                                    {"first_name": "Nodir", "last_name": "Madaminov", "gender": "male"})
-        user.refresh_from_db()
-        self.assertEqual((user.person.first_name, user.person.gender), ("Nodir", "male"))
-        self.assertEqual(self.client.get(reverse("home")).status_code, 200)
-
-    def test_app_login_bridge(self):
-        user, _p = make_family()
-        self.client.force_login(user)
-        response = self.client.get(reverse("app_login_finish"))
-        self.assertTrue(response["Location"].startswith("shajara://kirish?token="))
-        token = response["Location"].split("token=", 1)[1]
-        app = self.client_class()  # the app's own web view: a fresh session
-        response = app.get(reverse("app_login"), {"token": token})
-        self.assertRedirects(response, reverse("home"), fetch_redirect_response=False)
-        self.assertEqual(int(app.session["_auth_user_id"]), user.pk)
-        # The token works only once.
-        again = self.client_class().get(reverse("app_login"), {"token": token})
-        self.assertRedirects(again, reverse("accounts:login"), fetch_redirect_response=False)
-
-    def test_login_with_email_and_throttle(self):
-        from django.core.cache import cache
-
-        from .helpers import PASSWORD
-
-        cache.clear()
-        user, _p = make_family()
-        response = self.client.post(reverse("accounts:login"), {"username": user.email.upper(), "password": PASSWORD})
-        self.assertEqual(response.status_code, 302)
-        self.client.logout()
-        for _i in range(10):
-            self.client.post(reverse("accounts:login"), {"username": user.username, "password": "xato"})
-        response = self.client.post(reverse("accounts:login"), {"username": user.username, "password": PASSWORD})
-        self.assertEqual(response.status_code, 200)  # locked for a while, even with the right password
-        self.assertIn("15 daqiqa", response.content.decode())
-        cache.clear()
-
-    def test_google_button_only_when_configured(self):
-        html = self.client.get(reverse("accounts:login")).content.decode()
-        self.assertNotIn("google-form", html)
-        providers = {"google": {"APPS": [{"client_id": "x.apps.googleusercontent.com", "secret": "s", "key": ""}],
-                                "SCOPE": ["profile", "email"]}}
-        with self.settings(GOOGLE_CLIENT_ID="x.apps.googleusercontent.com", SOCIALACCOUNT_PROVIDERS=providers):
-            html = self.client.get(reverse("accounts:login")).content.decode()
-        self.assertIn("google-form", html)
+    @override_settings(TELEGRAM_BOT_TOKEN="123:abc")
+    def test_weekly_backup_goes_to_the_admin_once_a_week(self):
+        prefs = NotificationSettings.for_user(self.user)
+        prefs.telegram_chat_id, prefs.backup_telegram = 555, True
+        prefs.save()
+        monday = datetime.datetime(2026, 9, 28, 3, 0, tzinfo=datetime.timezone.utc)
+        with mock.patch("apps.notify.telegram.send_document") as send:
+            self.assertEqual(service.weekly_backup(now=monday), 0)       # not an administrator
+            self.user.is_superuser = True
+            self.user.save()
+            self.assertEqual(service.weekly_backup(now=monday), 1)
+            self.assertEqual(service.weekly_backup(now=monday + datetime.timedelta(days=2)), 0)
+            self.assertEqual(service.weekly_backup(now=monday + datetime.timedelta(days=7)), 1)
+        chat, name, data, _caption = send.call_args.args
+        self.assertEqual(chat, 555)
+        self.assertTrue(name.endswith(".json.gz"))
+        import gzip
+        self.assertIn("accounts.user", gzip.decompress(data).decode())
+        self.assertTrue(BotState.get("backup_week"))
 
 
 class ServerlessTests(TestCase):

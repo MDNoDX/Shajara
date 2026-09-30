@@ -4,8 +4,8 @@ Asosiy til — **Oʻzbekcha (lotin)**; toʻliq tarjimalar: **Ўзбекча (kir
 Hammasi Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` → `.mo`,
 `LocaleMiddleware`, `JavaScriptCatalog`).
 
-> Oldingi bir faylli prototip `files/` papkasida qoldirilgan. Qarindoshlik mantigʻi
-> va lotin↔kirill qidiruvi oʻsha yerdan Pythonga koʻchirildi.
+> Nima qayerda joylashgani: **[docs/TUZILMA.md](docs/TUZILMA.md)** · Serverga joylash: [docs/DEPLOY.md](docs/DEPLOY.md) ·
+> Mac ilovasi: [macos/README.md](macos/README.md)
 
 ## Imkoniyatlar
 
@@ -41,7 +41,7 @@ Hammasi Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` → `
 - **Boshqaruv paneli** (`/boshqaruv/`) — holat, foydalanuvchilar, zaxira.
 - **Mac ilovasi** — [macos/](macos/README.md): alohida oyna, tizim bildirishnomalari, Dock belgisi.
 
-Sayt: **https://shajara-liard.vercel.app** · Serverga joylash va koʻchirish: [DEPLOY.md](DEPLOY.md).
+Sayt: **https://shajara-liard.vercel.app** · Serverga joylash va koʻchirish: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Ishga tushirish
 
@@ -65,40 +65,25 @@ shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 
 ## Tuzilma
 
-| Joy | Vazifasi |
+Toʻliq xarita — [docs/TUZILMA.md](docs/TUZILMA.md) («X ni qayerdan topaman?»). Qisqacha:
+
+| Papka | Ichida |
 |---|---|
-| `config/settings.py` | `LANGUAGE_CODE="uz"`, `LANGUAGES` (`uz`, `uz-cyrl`, `ru`, `en`), `LOCALE_PATHS`, middleware |
-| `static/css/app.css` | Dizayn tizimi: ranglar, shriftlar, radiuslar (8 / 12 / 18), barcha komponentlar |
-| `config/formats/uz`, `config/formats/uz_Cyrl` | Django sana/son formatlari |
-| `apps/core/languages.py` | Tillar va ularning oʻz yozuvidagi nomlari (Oʻzbekcha / Кириллча) |
-| `apps/core/middleware.py` | Tizimga kirgan foydalanuvchiga akkauntida saqlangan tilni yoqadi |
-| `apps/core/dates.py` | Sanalar: *27-sentabr 2026-yil* / *2026 йил 27 сентябрь*; qisman sanalar ham |
-| `apps/core/text.py` | Apostroflarni bir xil koʻrinishga keltirish va lotin/kirill qidiruv kaliti |
-| `apps/core/django_messages.py` | Django’ning oʻz xabarlari (validatsiya, parol) — qayta tarjima uchun |
-| `apps/genealogy/terminology.py` | **Qarindoshlik atamalari lugʻati** (yagona manba) |
-| `apps/genealogy/kinship.py` | Aka/uka, opa/singil, amaki/amma/togʻa/xola, kelin/kuyov… ni aniqlash |
-| `apps/genealogy/tree.py` | Shajara joylashuvi (sayt va PDF uchun umumiy) |
-| `apps/genealogy/pdf.py` | PDF: tarjimai hol, shajara daraxti, devoriy plakat, muqovali shajara kitobi |
-| `apps/friends/` | Doʻstlar (kontaktlar) |
-| `apps/accounts/sharing.py` | Umumiy shajara: aʼzolik (`Membership`), taklif havolalari (`Invite`), huquqlar |
-| `apps/accounts/totp.py` | Ikki bosqichli kirish (TOTP, tiklash kodlari) |
-| `apps/genealogy/history.py` | Oʻzgarishlar tarixi va ortga qaytarish |
-| `apps/genealogy/duplicates.py` | Dublikatlarni topish va birlashtirish |
-| `apps/genealogy/gedcom.py` | GEDCOM 5.5.1 eksport va import |
-| `apps/notify/push.py` | Push-bildirishnomalar (Web Push, VAPID); `templates/sw.js` — service worker |
-| `apps/core/backup.py` | Toʻliq zaxira nusxa (qoʻlda va haftalik) |
-| `apps/core/images.py` | Suratlarni yuklashda kichraytirish |
-| `tools/make_icons.py` | Logotip, sayt va Mac ilovasi belgilarini yaratadi |
-| `apps/core/muchal.py` | Muchal (12 yillik hayvonlar davri, Navroʻzdan boshlanadi) |
-| `apps/notify/` | Eslatmalar: sanalarni hisoblash, qoʻngʻiroqcha, Telegram bot, `run_worker`, Cron |
-| `apps/accounts/app_bridge.py` | Mac ilovasi uchun Google orqali kirish (`shajara://`) |
-| `apps/core/storage.py` | Rasmlarni PostgreSQL’da saqlash |
-| `vercel.json` | Vercel: migratsiyalar, Cron, hudud |
-| `macos/` | Mac ilovasi (SwiftUI + WebKit) |
-| `locale/uz`, `locale/uz_Cyrl`, `locale/ru`, `locale/en` | `django.po` va `djangojs.po` (kompilyatsiya qilingan `.mo` bilan) |
-| `apps/core/timezones.py` | Foydalanuvchi vaqt mintaqalari (eslatma soati shu boʻyicha) |
+| `config/` | Sozlamalar, bosh manzillar, sana formatlari |
+| `apps/genealogy/` | Shajara: odamlar, daraxt, albom, tarix, voqealar, hikoyalar, PDF, GEDCOM (`views/` — mavzu boʻyicha) |
+| `apps/accounts/` | Hisob, kirish, ikki bosqichli kirish, oila aʼzolari va taklif havolalari |
+| `apps/notify/` | Eslatmalar: Telegram, push, cron, haftalik zaxira |
+| `apps/core/` | Bosh sahifa, boshqaruv paneli, tillar, sanalar, fayl saqlash |
+| `apps/friends/` | Doʻstlar |
+| `templates/` | Sahifalar — kod bilan bir xil mavzu papkalarida |
+| `static/` | `css/app.css` (dizayn tizimi), `js/app.js`, `js/tree.js`, belgilar |
+| `locale/` | Tarjimalar: `uz`, `uz_Cyrl`, `ru`, `en` |
 | `fonts/` | DejaVu Sans — PDF ichiga joylanadi (Ў Қ Ғ Ҳ va ʻ ʼ belgilari bor) |
-| `tools/i18n_audit.py` | Til auditi (quyida) |
+| `tests/` | Testlar, mavzu boʻyicha |
+| `tools/` | Til auditi, belgilarni yaratish |
+| `macos/` | Mac ilovasi (SwiftUI + WebKit) |
+| `docs/` | Loyiha xaritasi va serverga joylash qoʻllanmasi |
+| `archive/prototype/` | Eski bir faylli prototip (qarindoshlik mantigʻi va lotin↔kirill qidiruvi oʻsha yerdan koʻchirilgan) |
 
 ## Til tizimi
 
@@ -123,8 +108,8 @@ shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 ### Yangi matn qoʻshilganda
 
 ```bash
-.venv/bin/python manage.py makemessages -l uz -l uz_Cyrl -l ru -l en --ignore=.venv --ignore=files --ignore=macos --no-obsolete
-.venv/bin/python manage.py makemessages -d djangojs -l uz -l uz_Cyrl -l ru -l en --ignore=.venv --ignore=files --ignore=macos --ignore=staticfiles
+.venv/bin/python manage.py makemessages -l uz -l uz_Cyrl -l ru -l en --ignore=.venv --ignore=archive --ignore=files --ignore=macos --no-obsolete
+.venv/bin/python manage.py makemessages -d djangojs -l uz -l uz_Cyrl -l ru -l en --ignore=.venv --ignore=archive --ignore=files --ignore=macos --ignore=staticfiles
 # locale/uz/… va locale/uz_Cyrl/… dagi .po fayllarni tarjima qiling (fuzzy belgisini olib tashlang)
 .venv/bin/python manage.py compilemessages --ignore=.venv
 .venv/bin/python tools/i18n_audit.py

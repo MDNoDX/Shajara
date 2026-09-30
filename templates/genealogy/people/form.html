@@ -9,8 +9,8 @@
 </div></div>
 <form method="post" enctype="multipart/form-data" novalidate data-photo-limit="12">{% csrf_token %}
   {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
-  {% include "genealogy/_duplicates_notice.html" %}
-  {% include "genealogy/_person_fields.html" %}
+  {% include "genealogy/changes/_duplicates_notice.html" %}
+  {% include "genealogy/people/_fields.html" %}
   <fieldset>
     <legend>{% translate "Parents" %}</legend>
     <div class="form-grid">

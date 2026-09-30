@@ -150,7 +150,7 @@ def media(request, name):
 
 def service_worker(request):
     """The service worker must be served from the site root to control every page."""
-    response = render(request, "sw.js", content_type="application/javascript; charset=utf-8")
+    response = render(request, "pwa/sw.js", content_type="application/javascript; charset=utf-8")
     response["Service-Worker-Allowed"] = "/"
     response["Cache-Control"] = "no-cache"
     return response
@@ -160,7 +160,7 @@ def offline(request):
     """What the service worker shows when there is no connection. The page is
     kept on the device, so it carries nothing about who is signed in."""
     request.user = AnonymousUser()
-    return render(request, "offline.html")
+    return render(request, "pwa/offline.html")
 
 
 def health(request):
@@ -171,24 +171,24 @@ def health(request):
 
 
 def csrf_failure(request, reason=""):
-    return render(request, "403_csrf.html", status=403)
+    return render(request, "errors/403_csrf.html", status=403)
 
 
 def bad_request(request, exception=None):
-    return render(request, "400.html", status=400)
+    return render(request, "errors/400.html", status=400)
 
 
 def permission_denied(request, exception=None):
     message = str(exception) if exception and str(exception) else ""
-    return render(request, "403.html", {"message": message}, status=403)
+    return render(request, "errors/403.html", {"message": message}, status=403)
 
 
 def page_not_found(request, exception=None):
-    return render(request, "404.html", status=404)
+    return render(request, "errors/404.html", status=404)
 
 
 def server_error(request):
-    return render(request, "500.html", status=500)
+    return render(request, "errors/500.html", status=500)
 
 
 # ---------------------------------------------------------------------------

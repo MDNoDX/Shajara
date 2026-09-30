@@ -1,0 +1,97 @@
+"""Signing in: e-mail and throttling, Google, the Mac app bridge, two-step sign-in."""
+from django.test import TestCase
+from django.urls import reverse
+
+from apps.accounts import totp
+from apps.accounts.models import User
+
+from .helpers import PASSWORD, make_family
+
+
+class GoogleAndAppLoginTests(TestCase):
+    def test_profile_completion_for_new_accounts(self):
+        from apps.accounts.models import User
+
+        user = User.objects.create_user("googler", "g@example.com")  # as created by Google sign-in
+        self.client.force_login(user)
+        response = self.client.get(reverse("home"))
+        self.assertRedirects(response, reverse("accounts:complete_profile") + "?next=/", fetch_redirect_response=False)
+        response = self.client.post(reverse("accounts:complete_profile"),
+                                    {"first_name": "Nodir", "last_name": "Madaminov", "gender": "male"})
+        user.refresh_from_db()
+        self.assertEqual((user.person.first_name, user.person.gender), ("Nodir", "male"))
+        self.assertEqual(self.client.get(reverse("home")).status_code, 200)
+
+    def test_app_login_bridge(self):
+        user, _p = make_family()
+        self.client.force_login(user)
+        response = self.client.get(reverse("app_login_finish"))
+        self.assertTrue(response["Location"].startswith("shajara://kirish?token="))
+        token = response["Location"].split("token=", 1)[1]
+        app = self.client_class()  # the app's own web view: a fresh session
+        response = app.get(reverse("app_login"), {"token": token})
+        self.assertRedirects(response, reverse("home"), fetch_redirect_response=False)
+        self.assertEqual(int(app.session["_auth_user_id"]), user.pk)
+        # The token works only once.
+        again = self.client_class().get(reverse("app_login"), {"token": token})
+        self.assertRedirects(again, reverse("accounts:login"), fetch_redirect_response=False)
+
+    def test_login_with_email_and_throttle(self):
+        from django.core.cache import cache
+
+        from .helpers import PASSWORD
+
+        cache.clear()
+        user, _p = make_family()
+        response = self.client.post(reverse("accounts:login"), {"username": user.email.upper(), "password": PASSWORD})
+        self.assertEqual(response.status_code, 302)
+        self.client.logout()
+        for _i in range(10):
+            self.client.post(reverse("accounts:login"), {"username": user.username, "password": "xato"})
+        response = self.client.post(reverse("accounts:login"), {"username": user.username, "password": PASSWORD})
+        self.assertEqual(response.status_code, 200)  # locked for a while, even with the right password
+        self.assertIn("15 daqiqa", response.content.decode())
+        cache.clear()
+
+    def test_google_button_only_when_configured(self):
+        html = self.client.get(reverse("accounts:login")).content.decode()
+        self.assertNotIn("google-form", html)
+        providers = {"google": {"APPS": [{"client_id": "x.apps.googleusercontent.com", "secret": "s", "key": ""}],
+                                "SCOPE": ["profile", "email"]}}
+        with self.settings(GOOGLE_CLIENT_ID="x.apps.googleusercontent.com", SOCIALACCOUNT_PROVIDERS=providers):
+            html = self.client.get(reverse("accounts:login")).content.decode()
+        self.assertIn("google-form", html)
+
+
+class TwoFactorTests(TestCase):
+    def test_setup_and_sign_in(self):
+        user, _p = make_family()
+        self.client.force_login(user)
+        self.client.get(reverse("accounts:two_factor_setup"))
+        secret = self.client.session["totp_new"]
+        wrong = self.client.post(reverse("accounts:two_factor_setup"), {"code": "000000"})
+        self.assertEqual(wrong.status_code, 200)
+        page = self.client.post(reverse("accounts:two_factor_setup"), {"code": totp.code_at(secret, int(__import__("time").time() // 30))})
+        user.refresh_from_db()
+        self.assertTrue(user.totp_enabled)
+        self.assertEqual(len(user.recovery_codes), 8)
+        recovery = page.context["codes"][0]
+
+        # The password alone is no longer enough.
+        self.client.logout()
+        response = self.client.post(reverse("accounts:login"), {"username": user.username, "password": PASSWORD})
+        self.assertRedirects(response, reverse("accounts:two_factor"), fetch_redirect_response=False)
+        self.assertEqual(self.client.get(reverse("home")).context.get("people_count"), None)  # still a guest
+        self.client.post(reverse("accounts:two_factor"), {"code": "123456"})
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.client.post(reverse("accounts:two_factor"), {"code": recovery})       # a recovery code works once
+        self.assertEqual(self.client.session["_auth_user_id"], str(user.pk))
+        user.refresh_from_db()
+        self.assertEqual(len(user.recovery_codes), 7)
+
+    def test_codes(self):
+        secret = "JBSWY3DPEHPK3PXP"
+        self.assertEqual(totp.code_at(secret, 1), "996554")     # RFC 4226-style reference value
+        self.assertTrue(totp.verify(secret, totp.code_at(secret, 50), now=50 * 30 + 5))
+        self.assertTrue(totp.verify(secret, totp.code_at(secret, 49), now=50 * 30 + 5))   # clock drift
+        self.assertFalse(totp.verify(secret, totp.code_at(secret, 40), now=50 * 30 + 5))

@@ -9,3 +9,6 @@ staticfiles
 files
 .env
 .DS_Store
+archive
+docs
+macos

@@ -5,6 +5,22 @@
    Type: Source Serif 4 (headings) + Inter (interface). Both contain the
    Uzbek Latin ʻ ʼ and the Uzbek Cyrillic Ў Қ Ғ Ҳ.
    Scale: radii 8 / 12 / 18, text never below 12.5px.
+
+   Contents
+     1. Tokens (colours, type, radii; light and dark)
+     2. Base
+     3. App shell (sidebar, mobile bar, tab bar, menus)
+     4. Layout (page head, grids, cards)
+     5. Controls (buttons, fields, switches, chips, segmented)
+     6. Feedback (toasts, badges, empty states, spinners)
+     7. People (avatars, cards, the person page, album)
+     8. Dashboard
+     9. Dates, timelines, history
+    10. Family tree (toolbar, cards, rail, mini-map, side sheet, fan)
+    11. Command palette and pickers
+    12. Settings and sharing
+    13. Landing and sign-in
+    14. Footer, motion, responsive, print
    ========================================================================== */
 
 /* ---------- 1. Tokens ---------- */

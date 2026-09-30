@@ -13,3 +13,5 @@ Dockerfile
 docker-compose.yml
 .env
 .env.*
+archive
+docs

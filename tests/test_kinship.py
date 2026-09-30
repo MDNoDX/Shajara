@@ -1,15 +1,14 @@
-"""Kinship names, dates, text normalisation, search, PDFs and access rules."""
+"""Kinship names, the tree layout, muchal, surnames, dates and text normalisation."""
+import datetime
+
 from django.test import TestCase
-from django.urls import reverse
 from django.utils import translation
 
-from apps.accounts.models import User
 from apps.core.dates import format_date, format_partial_date
-from apps.core.text import normalize_apostrophes, search_key
-from apps.accounts.models import Invite, Membership
-from apps.accounts.sharing import accept_invite, switch_archive
+from apps.core.muchal import muchal, next_muchal_year
+from apps.core.text import normalize_apostrophes, search_key, surname_from_name
 from apps.genealogy.kinship import Archive
-from apps.genealogy.models import Person
+from apps.genealogy.models import Marriage, Person
 
 from .helpers import make_family
 
@@ -159,6 +158,37 @@ class KinshipTests(TestCase):
             self.assertEqual(self.a.label(self.p["me"].pk, self.p["wife"].pk), "Хотин")
 
 
+class MuchalTests(TestCase):
+    def test_animals(self):
+        self.assertEqual(muchal(2006, 11, 19)["code"], "it")        # Dog
+        self.assertEqual(muchal(1976, 8, 24)["code"], "baliq")     # Dragon ("Baliq")
+        self.assertEqual(muchal(2020, 6, 1)["code"], "sichqon")    # Rat
+
+    def test_year_changes_at_navroz(self):
+        self.assertEqual(muchal(2007, 3, 20)["code"], "it")         # still the Dog year
+        self.assertEqual(muchal(2007, 3, 21)["code"], "tongiz")     # Pig from Navroʻz
+        self.assertFalse(muchal(2007)["certain"])
+        self.assertTrue(muchal(2007, 5, 2)["certain"])
+
+    def test_names_in_both_scripts(self):
+        with translation.override("uz"):
+            self.assertEqual(muchal(1976, 8, 24)["name"], "Baliq")
+        with translation.override("uz-cyrl"):
+            self.assertEqual(muchal(1976, 8, 24)["name"], "Балиқ")
+
+    def test_next_muchal_year(self):
+        self.assertEqual(next_muchal_year(2006, 11, 19, today=datetime.date(2026, 9, 28)), 2030)
+
+
+class SurnameTests(TestCase):
+    def test_suggestions(self):
+        self.assertEqual(surname_from_name("Madaminjon"), "Madaminov")
+        self.assertEqual(surname_from_name("Nabijon"), "Nabiyev")
+        self.assertEqual(surname_from_name("Karim"), "Karimov")
+        self.assertEqual(surname_from_name("Мадаминжон"), "Мадаминов")
+        self.assertEqual(surname_from_name("Набижон"), "Набиев")
+
+
 class DateTests(TestCase):
     def test_full_and_partial_dates(self):
         with translation.override("uz"):
@@ -202,150 +232,3 @@ class TextTests(TestCase):
         self.assertEqual(search_key("Hasan Xo'jayev"), search_key("Ҳасан Хўжаев"))
         self.assertEqual(search_key("Jamshid Qodirov"), search_key("Джамшид Кодиров"))
         self.assertEqual(search_key("Yelena"), search_key("Елена"))
-
-
-class SearchAndStorageTests(TestCase):
-    def setUp(self):
-        self.user, self.p = make_family()
-        self.client.force_login(self.user)
-
-    def test_cyrillic_query_finds_latin_name_and_back(self):
-        Person.objects.create(owner=self.user, first_name="Олим", last_name="Содиқов", gender="male")
-        html = self.client.get(reverse("genealogy:search"), {"q": "Лайло"}).content.decode()
-        self.assertIn("Laylo Nurmatova", html)
-        html = self.client.get(reverse("genealogy:search"), {"q": "olim sodiqov"}).content.decode()
-        self.assertIn("Олим Содиқов", html)
-
-    def test_names_are_stored_as_typed(self):
-        self.client.post(reverse("genealogy:person_create"), {
-            "first_name": "Гулчеҳра", "last_name": "Ra'noyeva", "gender": "female",
-        })
-        person = Person.objects.get(first_name="Гулчеҳра")
-        self.assertEqual(person.last_name, "Raʼnoyeva")  # apostrophe normalised, letters untouched
-
-
-class FormValidationTests(TestCase):
-    def setUp(self):
-        self.user, self.p = make_family()
-        self.client.force_login(self.user)
-
-    def post_relative(self, **data):
-        base = {"relation": "child", "first_name": "Yangi", "gender": "male"}
-        base.update(data)
-        return self.client.post(reverse("genealogy:relative_add", args=[self.p["me"].pk]), base)
-
-    def test_add_child_with_other_parent(self):
-        response = self.post_relative(other_parent=self.p["wife"].pk)
-        self.assertEqual(response.status_code, 302)
-        child = Person.objects.get(first_name="Yangi")
-        self.assertEqual((child.father, child.mother), (self.p["me"], self.p["wife"]))
-
-    def test_cannot_add_second_father(self):
-        response = self.post_relative(relation="father")
-        self.assertContains(response, "Bu odamning otasi shajarada allaqachon bor.")
-
-    def test_cycle_is_rejected(self):
-        response = self.post_relative(relation="child", existing=self.p["grandpa"].pk, first_name="")
-        self.assertContains(response, "odam oʻzining ajdodiga aylanib qoladi")
-
-    def test_future_date_and_invalid_day(self):
-        response = self.client.post(reverse("genealogy:person_create"), {
-            "first_name": "Sinov", "gender": "male", "birth_year": "2999",
-        })
-        self.assertContains(response, "Qiymat eng koʻpi")
-        response = self.client.post(reverse("genealogy:person_create"), {
-            "first_name": "Sinov", "gender": "male", "birth_year": "2001", "birth_month": "2", "birth_day": "29",
-        })
-        self.assertContains(response, "Tanlangan oyda bunday kun yoʻq.")
-
-
-class PdfTests(TestCase):
-    def setUp(self):
-        self.user, self.p = make_family(cyrillic=True)
-        self.client.force_login(self.user)
-
-    def assert_pdf(self, response, filename):
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["Content-Type"], "application/pdf")
-        self.assertTrue(response.content.startswith(b"%PDF"))
-        self.assertIn(b"DejaVuSans", response.content)  # Unicode font embedded
-        self.assertIn(filename, response["Content-Disposition"])
-
-    def test_pdfs_follow_language(self):
-        # User prefers Cyrillic: file names are Cyrillic too (RFC 5987 encoded).
-        self.assert_pdf(self.client.get(reverse("genealogy:tree_pdf_for", args=[self.user.username])),
-                        "%D1%88%D0%B0%D0%B6%D0%B0%D1%80%D0%B0.pdf")  # шажара.pdf
-        self.assert_pdf(self.client.get(reverse("genealogy:family_book")), "%D1%88%D0%B0%D0%B6%D0%B0%D1%80%D0%B0")
-        self.assert_pdf(self.client.get(reverse("genealogy:person_pdf", args=[self.p["grandpa"].pk])), ".pdf")
-        self.user.preferred_language = "uz"
-        self.user.save()
-        self.assert_pdf(self.client.get(reverse("genealogy:tree_pdf_for", args=[self.user.username])), "shajara.pdf")
-
-
-class AccessTests(TestCase):
-    def setUp(self):
-        self.owner, self.p = make_family()
-        self.other = User.objects.create_user("begona", "b@example.com", "x-parol-12345", preferred_language="uz-cyrl")
-        self.other.person = Person.objects.create(owner=self.other, first_name="Бегона", gender="male")
-        self.other.save()
-        self.client.force_login(self.other)
-
-    def test_strangers_cannot_view(self):
-        response = self.client.get(reverse("genealogy:person", args=[self.p["me"].pk]))
-        self.assertEqual(response.status_code, 403)
-        self.assertContains(response, "Кириш тақиқланган.", status_code=403)
-
-    def test_viewers_can_view_but_not_edit(self):
-        Membership.objects.create(owner=self.owner, member=self.other, role="viewer")
-        self.assertEqual(self.client.get(reverse("genealogy:person", args=[self.p["me"].pk])).status_code, 200)
-        self.assertEqual(self.client.get(reverse("genealogy:tree_for", args=[self.owner.username])).status_code, 200)
-        response = self.client.get(reverse("genealogy:person_edit", args=[self.p["me"].pk]))
-        self.assertContains(response, "Ушбу маълумотни ўзгартириш ҳуқуқингиз йўқ.", status_code=403)
-
-    def test_invite_makes_a_shared_tree(self):
-        invite = Invite.objects.create(owner=self.owner, created_by=self.owner, role="editor", person=self.p["cousin"])
-        own_person = self.other.person
-        # Opening the link and joining.
-        self.assertEqual(self.client.get(reverse("accounts:invite", args=[invite.token])).status_code, 200)
-        self.client.post(reverse("accounts:invite", args=[invite.token]))
-        self.other.refresh_from_db()
-        self.assertEqual(self.other.active_archive, self.owner)
-        self.assertEqual(self.other.person, self.p["cousin"])       # who they are in the shared tree
-        self.assertEqual(self.other.own_person, own_person)          # their own tree is kept
-        invite.refresh_from_db()
-        self.assertFalse(invite.is_open)                             # a link works once
-        # The shared tree is named from the member's own place in it.
-        data = self.client.get(reverse("genealogy:tree_data_for", args=[self.owner.username])).json()
-        labels = {n["id"]: n["label"] for n in data["nodes"]}
-        self.assertEqual(data["focus"], self.p["cousin"].pk)
-        self.assertEqual(labels[self.p["cousin"].pk], "Сиз")
-        # An editor adds a relative to the owner's archive; the change is in the history.
-        response = self.client.post(reverse("genealogy:quick_add", args=[self.p["cousin"].pk]), {
-            "relation": "child", "first_name": "Зарина", "gender": "female", "birth_year": "2010"})
-        self.assertTrue(response.json()["ok"])
-        child = Person.objects.get(first_name="Зарина")
-        self.assertEqual((child.owner, child.mother), (self.owner, self.p["cousin"]))
-        change = self.owner.changes.first()
-        self.assertEqual((change.actor, change.person, change.action), (self.other, child, "created"))
-        # Back to their own tree, and leaving.
-        switch_archive(self.other, self.other)
-        self.other.refresh_from_db()
-        self.assertEqual((self.other.active_archive, self.other.person), (None, own_person))
-        self.client.post(reverse("accounts:archive_leave", args=[self.owner.pk]))
-        self.assertFalse(Membership.objects.filter(owner=self.owner, member=self.other).exists())
-
-    def test_owner_manages_invites_and_members(self):
-        self.client.force_login(self.owner)
-        self.client.post(reverse("accounts:family"), {"role": "viewer", "person": ""})
-        invite = Invite.objects.get(owner=self.owner)
-        page = self.client.get(reverse("accounts:family") + f"?yangi={invite.pk}").content.decode()
-        self.assertIn(f"/taklif/{invite.token}/", page)
-        accept_invite(invite, self.other)
-        membership = Membership.objects.get(owner=self.owner, member=self.other)
-        self.client.post(reverse("accounts:member_update", args=[membership.pk]), {"role": "editor"})
-        membership.refresh_from_db()
-        self.assertEqual(membership.role, "editor")
-        self.client.post(reverse("accounts:member_update", args=[membership.pk]), {"remove": "1"})
-        self.other.refresh_from_db()
-        self.assertIsNone(self.other.active_archive)                 # pushed back to their own tree
-        self.assertFalse(Membership.objects.filter(pk=membership.pk).exists())

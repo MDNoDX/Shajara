@@ -29,7 +29,7 @@ def start(request):
     finish = reverse("app_login_finish")
     if request.user.is_authenticated:
         return redirect(finish)
-    return render(request, "accounts/app_login_start.html", {
+    return render(request, "accounts/auth/app_login_start.html", {
         "finish": finish, "provider": request.GET.get("provider", ""),
     })
 
