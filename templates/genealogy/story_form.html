@@ -7,7 +7,7 @@
 <form class="card" method="post" novalidate>{% csrf_token %}
   {% include "partials/field.html" with field=form.title %}
   <div class="form-grid">
-    {% include "partials/field.html" with field=form.person %}
+    {% include "partials/person_picker.html" with field=form.person %}
     {% include "partials/field.html" with field=form.year %}
   </div>
   {% include "partials/field.html" with field=form.body %}

@@ -32,7 +32,7 @@
     data: null, vb: null, svg: null,
     focus: parseInt(root.getAttribute("data-focus"), 10),
     all: params.get("all") === "1",
-    opened: idSet("open"), closed: idSet("closed"), folded: idSet("folded"),
+    opened: idSet("open"), closed: idSet("closed"), folded: idSet("folded"), unfolded: idSet("kids"),
   };
   var measureCtx = document.createElement("canvas").getContext("2d");
 
@@ -47,7 +47,7 @@
     var q = new URLSearchParams();
     q.set("person", state.focus);
     if (state.all) q.set("all", "1");
-    [["open", state.opened], ["closed", state.closed], ["folded", state.folded]].forEach(function (p) {
+    [["open", state.opened], ["closed", state.closed], ["folded", state.folded], ["kids", state.unfolded]].forEach(function (p) {
       if (p[1].size) q.set(p[0], Array.from(p[1]).join(","));
     });
     return q.toString();
@@ -345,8 +345,8 @@
       if (t.dataset.action === "sibs") {
         if (t.dataset.open) { state.closed.add(id); state.opened.delete(id); }
         else { state.opened.add(id); state.closed.delete(id); }
-      } else if (state.folded.has(id)) state.folded.delete(id);
-      else state.folded.add(id);
+      } else if (t.dataset.open) { state.folded.add(id); state.unfolded.delete(id); }
+      else { state.unfolded.add(id); state.folded.delete(id); }
       load(String(id));
       return;
     }
@@ -400,7 +400,7 @@
   root.querySelectorAll("[data-expand]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       state.all = btn.getAttribute("data-expand") === "all";
-      state.opened.clear(); state.closed.clear(); state.folded.clear();
+      state.opened.clear(); state.closed.clear(); state.folded.clear(); state.unfolded.clear();
       load(String(state.focus));
     });
   });

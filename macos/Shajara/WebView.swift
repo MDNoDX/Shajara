@@ -29,19 +29,23 @@ struct WebView: NSViewRepresentable {
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            guard let url = action.request.url else { return decisionHandler(.allow) }
+            guard let url = action.request.url, let scheme = url.scheme?.lowercased() else { return decisionHandler(.allow) }
             if action.shouldPerformDownload { return decisionHandler(.download) }
             // Google does not allow its sign-in page inside apps: use the system window.
             if url.host == "accounts.google.com" || url.path.hasPrefix("/accounts/google/login") {
                 decisionHandler(.cancel)
-                browser.signInWithGoogle()
+                if url.query?.contains("process=connect") == true { browser.connectGoogleInBrowser() }
+                else { browser.signInWithGoogle() }
                 return
             }
-            if url.scheme == "mailto" || url.scheme == "tel" || !browser.isOwnSite(url) && url.scheme?.hasPrefix("http") == true {
-                if action.navigationType == .linkActivated || action.targetFrame == nil {
-                    NSWorkspace.shared.open(url)
-                    return decisionHandler(.cancel)
-                }
+            // tg://, mailto:, tel: … belong to other apps (tg:// opens the Telegram app).
+            if !["http", "https", "about", "blob", "data"].contains(scheme) {
+                NSWorkspace.shared.open(url)
+                return decisionHandler(.cancel)
+            }
+            if !browser.isOwnSite(url) && (action.navigationType == .linkActivated || action.targetFrame == nil) {
+                NSWorkspace.shared.open(url)
+                return decisionHandler(.cancel)
             }
             decisionHandler(.allow)
         }
@@ -61,14 +65,20 @@ struct WebView: NSViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            browser.errorMessage = nil
+            browser.pageLoaded()
             Notifier.shared.checkSoon()
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
             let code = (error as NSError).code
-            if code == NSURLErrorCancelled || code == 102 { return }  // 102: frame load interrupted (downloads)
+            // Cancelled, "frame load interrupted" (downloads) and unsupported schemes are not connection problems.
+            if [NSURLErrorCancelled, 102, NSURLErrorUnsupportedURL].contains(code) { return }
             browser.errorMessage = error.localizedDescription
+        }
+
+        // If the page's process crashes (e.g. after sleep), load it again.
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            webView.reload()
         }
 
         // Links that open a new window (target=_blank) load in the same window.
@@ -86,7 +96,7 @@ struct WebView: NSViewRepresentable {
                      initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
             let alert = NSAlert()
             alert.messageText = message
-            alert.addButton(withTitle: "OK")
+            alert.addButton(withTitle: L.t("ok"))
             alert.runModal()
             completionHandler()
         }
@@ -96,18 +106,18 @@ struct WebView: NSViewRepresentable {
             let alert = NSAlert()
             alert.messageText = message
             alert.alertStyle = .warning
-            alert.addButton(withTitle: "Ha")
-            alert.addButton(withTitle: "Bekor qilish")
+            alert.addButton(withTitle: L.t("yes"))
+            alert.addButton(withTitle: L.t("cancel"))
             completionHandler(alert.runModal() == .alertFirstButtonReturn)
         }
 
-        // <input type="file">: choosing a photo.
+        // <input type="file">: a photo, or an archive (JSON) to import.
         func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters,
                      initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
             let panel = NSOpenPanel()
             panel.allowsMultipleSelection = parameters.allowsMultipleSelection
             panel.canChooseDirectories = false
-            panel.allowedContentTypes = [.image]
+            panel.allowedContentTypes = [.image, .json]
             panel.begin { completionHandler($0 == .OK ? panel.urls : nil) }
         }
 

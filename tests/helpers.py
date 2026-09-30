@@ -57,13 +57,15 @@ def english_msgids():
     return ids
 
 
-def make_family(cyrillic=False, username="timur"):
-    """A small family around `timur`, with names in the requested script."""
+def make_family(cyrillic=False, username="timur", language=None):
+    """A small family around `timur`, with names in the script of the language."""
+    language = language or ("uz-cyrl" if cyrillic else "uz")
+    cyrillic = language in ("uz-cyrl", "ru")
     n = (lambda lat, cyr: cyr if cyrillic else lat)
     user = User.objects.create_user(
         username, f"{username}@example.com", PASSWORD,
         first_name=n("Timur", "Тимур"), last_name=n("Nurmatov", "Нурматов"), gender="male",
-        preferred_language="uz-cyrl" if cyrillic else "uz",
+        preferred_language=language,
     )
 
     def person(first, last, gender, year=None, **kw):

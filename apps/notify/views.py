@@ -62,20 +62,64 @@ def notification_settings(request):
         prefs.save(update_fields=["last_generated"])
         messages.success(request, _("The information has been saved."))
         return redirect("notify:settings")
+    link = {}
+    connected = bool(prefs.telegram_enabled and prefs.telegram_chat_id)
+    if telegram.configured() and not prefs.telegram_chat_id:
+        link = telegram.link_urls(prefs)
+        if link:
+            link["qr"] = telegram.qr_svg(link["web"])
     return render(request, "notify/settings.html", {
-        "form": form, "prefs": prefs, "telegram_available": telegram.configured(),
+        "form": form, "prefs": prefs, "telegram_available": telegram.configured(), "link": link,
+        "connected": connected, "bot": telegram.bot_username() if telegram.configured() else "",
+        "settings_tab": "reminders",
     })
+
+
+@login_required
+def telegram_status(request):
+    prefs = NotificationSettings.for_user(request.user)
+    return JsonResponse({"connected": bool(prefs.telegram_chat_id), "name": prefs.telegram_name})
 
 
 @require_POST
 @login_required
 def telegram_connect(request):
+    """A fresh code (the old one expired or the user asked for a new one)."""
     prefs = NotificationSettings.for_user(request.user)
-    url = telegram.link_url(prefs) if telegram.configured() else ""
-    if not url:
+    if not telegram.configured() or not telegram.link_urls(prefs, renew=True):
         messages.error(request, _("Telegram reminders are not available at the moment."))
+    return redirect(reverse("notify:settings") + "#telegram")
+
+
+@require_POST
+@login_required
+def telegram_toggle(request):
+    """Pause or resume Telegram messages without unlinking."""
+    prefs = NotificationSettings.for_user(request.user)
+    if prefs.telegram_chat_id:
+        prefs.telegram_enabled = not prefs.telegram_enabled
+        prefs.save(update_fields=["telegram_enabled"])
+    return redirect(reverse("notify:settings") + "#telegram")
+
+
+@require_POST
+@login_required
+def telegram_test(request):
+    prefs = NotificationSettings.for_user(request.user)
+    if not prefs.telegram_chat_id:
         return redirect("notify:settings")
-    return redirect(url)
+    try:
+        service.test_message(prefs)
+        messages.success(request, _("A test message has been sent. Check Telegram."))
+    except telegram.TelegramError as exc:
+        if exc.forbidden:
+            prefs.telegram_enabled = False
+            prefs.telegram_chat_id = None
+            prefs.save(update_fields=["telegram_enabled", "telegram_chat_id"])
+            messages.error(request, _("The bot is blocked in Telegram. Connect it again."))
+        else:
+            messages.error(request, _("Telegram did not accept the message. Try again later."))
+    return redirect(reverse("notify:settings") + "#telegram")
 
 
 @require_POST
@@ -87,7 +131,7 @@ def telegram_disconnect(request):
     prefs.telegram_name = ""
     prefs.save(update_fields=["telegram_enabled", "telegram_chat_id", "telegram_name"])
     messages.info(request, _("Telegram has been disconnected."))
-    return redirect("notify:settings")
+    return redirect(reverse("notify:settings") + "#telegram")
 
 
 # ---------------------------------------------------------------------------
@@ -99,9 +143,11 @@ def cron_daily(request):
     secret = settings.CRON_SECRET
     if not secret or not constant_time_compare(request.headers.get("Authorization", ""), f"Bearer {secret}"):
         return HttpResponse(status=401)
+    # Runs every hour (Vercel Hobby: 24 daily cron entries, one per hour).
+    webhook_fixed = telegram.ensure_webhook()
     created = service.run_daily()
-    sent = service.send_pending_telegram(ignore_hour=True)
-    return JsonResponse({"created": created, "telegram_sent": sent})
+    sent = service.send_pending_telegram(ignore_hour=request.GET.get("all") == "1")
+    return JsonResponse({"created": created, "telegram_sent": sent, "webhook_fixed": webhook_fixed})
 
 
 @csrf_exempt

@@ -13,8 +13,8 @@
   <fieldset>
     <legend>{% translate "Parents" %}</legend>
     <div class="form-grid">
-      {% include "partials/field.html" with field=form.father %}
-      {% include "partials/field.html" with field=form.mother %}
+      {% include "partials/person_picker.html" with field=form.father gender="male" %}
+      {% include "partials/person_picker.html" with field=form.mother gender="female" %}
     </div>
   </fieldset>
   <div class="form-actions">

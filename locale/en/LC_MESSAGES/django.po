@@ -1,0 +1,3581 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: shajara\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-30 08:30+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Shajara team\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/accounts/admin.py:11 apps/genealogy/apps.py:8 apps/genealogy/pdf.py:128 apps/genealogy/pdf.py:283 apps/genealogy/pdf.py:298 apps/genealogy/views.py:271
+msgid "Family tree"
+msgstr ""
+
+#: apps/accounts/apps.py:8
+msgid "Accounts"
+msgstr ""
+
+#: apps/accounts/forms.py:15
+msgid "Letters, digits and the characters @ . + - _ only."
+msgstr ""
+
+#: apps/accounts/forms.py:23 apps/accounts/forms.py:79 apps/accounts/forms.py:169
+msgid "First name"
+msgstr ""
+
+#: apps/accounts/forms.py:24 apps/accounts/forms.py:80 apps/accounts/forms.py:170
+msgid "Last name"
+msgstr ""
+
+#: apps/accounts/forms.py:25 apps/accounts/forms.py:81 apps/accounts/forms.py:148
+msgid "Email"
+msgstr ""
+
+#: apps/accounts/forms.py:26 apps/accounts/forms.py:82 apps/accounts/forms.py:171 apps/genealogy/pdf.py:142 templates/genealogy/person_detail.html:28
+msgid "Gender"
+msgstr ""
+
+#: apps/accounts/forms.py:34 apps/accounts/forms.py:70
+msgid "Username"
+msgstr ""
+
+#: apps/accounts/forms.py:36 apps/accounts/forms.py:71
+msgid "Password"
+msgstr ""
+
+#: apps/accounts/forms.py:38
+msgid "Confirm password"
+msgstr ""
+
+#: apps/accounts/forms.py:39 apps/accounts/forms.py:142 apps/accounts/forms.py:163
+msgid "Enter the same password again."
+msgstr ""
+
+#: apps/accounts/forms.py:51
+msgid "An account with this email address already exists."
+msgstr ""
+
+#: apps/accounts/forms.py:104 templates/accounts/settings.html:23 templates/accounts/settings.html:25 templates/partials/lang_list.html:1 templates/partials/lang_switch.html:2
+msgid "Language"
+msgstr ""
+
+#: apps/accounts/forms.py:104 templates/accounts/settings.html:37
+msgid "Colours"
+msgstr ""
+
+#: apps/accounts/forms.py:104 apps/accounts/forms.py:112
+msgid "Time zone"
+msgstr ""
+
+#: apps/accounts/forms.py:113
+msgid "Reminders are made for your date and sent at your hour."
+msgstr ""
+
+#: apps/accounts/forms.py:118
+msgid "Archive file (JSON)"
+msgstr ""
+
+#: apps/accounts/forms.py:125
+msgid "The file is too large."
+msgstr ""
+
+#: apps/accounts/forms.py:129 apps/accounts/forms.py:131
+msgid "This is not a Shajara archive file."
+msgstr ""
+
+#: apps/accounts/forms.py:138
+msgid "Current password"
+msgstr ""
+
+#: apps/accounts/forms.py:139 apps/accounts/forms.py:160
+msgid "New password"
+msgstr ""
+
+#: apps/accounts/forms.py:141 apps/accounts/forms.py:162
+msgid "Confirm the new password"
+msgstr ""
+
+#: apps/accounts/models.py:12
+msgctxt "gender"
+msgid "Male"
+msgstr ""
+
+#: apps/accounts/models.py:13
+msgctxt "gender"
+msgid "Female"
+msgstr ""
+
+#: apps/accounts/models.py:17
+msgctxt "palette"
+msgid "Atlas"
+msgstr ""
+
+#: apps/accounts/models.py:18
+msgctxt "palette"
+msgid "Sky"
+msgstr ""
+
+#: apps/accounts/models.py:19
+msgctxt "palette"
+msgid "Garden"
+msgstr ""
+
+#: apps/accounts/models.py:20
+msgctxt "palette"
+msgid "Pomegranate"
+msgstr ""
+
+#: apps/accounts/models.py:25
+msgid "interface language"
+msgstr ""
+
+#: apps/accounts/models.py:27 apps/genealogy/models.py:37
+msgid "gender"
+msgstr ""
+
+#: apps/accounts/models.py:28
+msgid "colours"
+msgstr ""
+
+#: apps/accounts/models.py:29
+msgid "time zone"
+msgstr ""
+
+#: apps/accounts/models.py:33
+msgid "own record in the family tree"
+msgstr ""
+
+#: apps/accounts/models.py:42
+msgid "user"
+msgstr ""
+
+#: apps/accounts/models.py:43
+msgid "users"
+msgstr ""
+
+#: apps/accounts/views.py:34 apps/accounts/views.py:220
+msgid "Welcome! Your account has been created."
+msgstr ""
+
+#: apps/accounts/views.py:80 apps/accounts/views.py:91 apps/friends/views.py:152 apps/genealogy/views.py:152 apps/genealogy/views.py:218 apps/genealogy/views.py:405 apps/notify/views.py:63
+msgid "The information has been saved."
+msgstr ""
+
+#: apps/accounts/views.py:89
+msgid "The interface language has been changed."
+msgstr ""
+
+#: apps/accounts/views.py:111
+msgid "Your password has been changed."
+msgstr ""
+
+#: apps/accounts/views.py:112
+msgid "The password has been set. You can now sign in with it too."
+msgstr ""
+
+#: apps/accounts/views.py:137
+msgid "You have been signed out on your other devices."
+msgstr ""
+
+#: apps/accounts/views.py:146
+msgid "Set a password first, otherwise you could not sign in any more."
+msgstr ""
+
+#: apps/accounts/views.py:149
+msgid "Google has been disconnected from your account."
+msgstr ""
+
+#: apps/accounts/views.py:167 templates/accounts/settings_data.html:33
+msgid "An archive can only be imported into an empty family tree."
+msgstr ""
+
+#: apps/accounts/views.py:177
+#, python-format
+msgid "The archive has been imported: %(people)d people."
+msgstr ""
+
+#: apps/accounts/views.py:237
+msgid "Your account and all its data have been deleted."
+msgstr ""
+
+#: apps/accounts/views.py:239
+msgid "The username does not match."
+msgstr ""
+
+#: apps/core/dates.py:17
+msgctxt "month name"
+msgid "January"
+msgstr ""
+
+#: apps/core/dates.py:18
+msgctxt "month name"
+msgid "February"
+msgstr ""
+
+#: apps/core/dates.py:19
+msgctxt "month name"
+msgid "March"
+msgstr ""
+
+#: apps/core/dates.py:20
+msgctxt "month name"
+msgid "April"
+msgstr ""
+
+#: apps/core/dates.py:21
+msgctxt "month name"
+msgid "May"
+msgstr ""
+
+#: apps/core/dates.py:22
+msgctxt "month name"
+msgid "June"
+msgstr ""
+
+#: apps/core/dates.py:23
+msgctxt "month name"
+msgid "July"
+msgstr ""
+
+#: apps/core/dates.py:24
+msgctxt "month name"
+msgid "August"
+msgstr ""
+
+#: apps/core/dates.py:25
+msgctxt "month name"
+msgid "September"
+msgstr ""
+
+#: apps/core/dates.py:26
+msgctxt "month name"
+msgid "October"
+msgstr ""
+
+#: apps/core/dates.py:27
+msgctxt "month name"
+msgid "November"
+msgstr ""
+
+#: apps/core/dates.py:28
+msgctxt "month name"
+msgid "December"
+msgstr ""
+
+#: apps/core/dates.py:35
+msgctxt "month name in a date"
+msgid "January"
+msgstr ""
+
+#: apps/core/dates.py:36
+msgctxt "month name in a date"
+msgid "February"
+msgstr ""
+
+#: apps/core/dates.py:37
+msgctxt "month name in a date"
+msgid "March"
+msgstr ""
+
+#: apps/core/dates.py:38
+msgctxt "month name in a date"
+msgid "April"
+msgstr ""
+
+#: apps/core/dates.py:39
+msgctxt "month name in a date"
+msgid "May"
+msgstr ""
+
+#: apps/core/dates.py:40
+msgctxt "month name in a date"
+msgid "June"
+msgstr ""
+
+#: apps/core/dates.py:41
+msgctxt "month name in a date"
+msgid "July"
+msgstr ""
+
+#: apps/core/dates.py:42
+msgctxt "month name in a date"
+msgid "August"
+msgstr ""
+
+#: apps/core/dates.py:43
+msgctxt "month name in a date"
+msgid "September"
+msgstr ""
+
+#: apps/core/dates.py:44
+msgctxt "month name in a date"
+msgid "October"
+msgstr ""
+
+#: apps/core/dates.py:45
+msgctxt "month name in a date"
+msgid "November"
+msgstr ""
+
+#: apps/core/dates.py:46
+msgctxt "month name in a date"
+msgid "December"
+msgstr ""
+
+#: apps/core/dates.py:67
+#, python-brace-format
+msgctxt "full date"
+msgid "{month} {day}, {year}"
+msgstr ""
+
+#: apps/core/dates.py:71
+#, python-brace-format
+msgctxt "month and year"
+msgid "{month} {year}"
+msgstr ""
+
+#: apps/core/dates.py:72 apps/genealogy/pdf.py:246
+#, python-brace-format
+msgctxt "year only"
+msgid "{year}"
+msgstr ""
+
+#: apps/core/dates.py:93
+msgid "years unknown"
+msgstr ""
+
+#: apps/core/django_messages.py:16 tests/test_i18n.py:37 tests/test_i18n.py:39
+msgid "This field is required."
+msgstr ""
+
+#: apps/core/django_messages.py:17
+msgid "Enter a whole number."
+msgstr ""
+
+#: apps/core/django_messages.py:18
+msgid "Enter a number."
+msgstr ""
+
+#: apps/core/django_messages.py:19
+msgid "Enter a valid date."
+msgstr ""
+
+#: apps/core/django_messages.py:20
+msgid "Enter a valid value."
+msgstr ""
+
+#: apps/core/django_messages.py:21
+msgid "Enter a valid email address."
+msgstr ""
+
+#: apps/core/django_messages.py:22
+msgid "Enter a valid URL."
+msgstr ""
+
+#: apps/core/django_messages.py:23
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: apps/core/django_messages.py:24
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: apps/core/django_messages.py:25
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+
+#: apps/core/django_messages.py:26
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: apps/core/django_messages.py:27
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: apps/core/django_messages.py:28
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: apps/core/django_messages.py:29
+msgid "No file was submitted."
+msgstr ""
+
+#: apps/core/django_messages.py:30
+msgid "The submitted file is empty."
+msgstr ""
+
+#: apps/core/django_messages.py:31
+msgid "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
+msgstr ""
+
+#: apps/core/django_messages.py:32
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: apps/core/django_messages.py:34
+msgid "Currently"
+msgstr ""
+
+#: apps/core/django_messages.py:35
+msgid "Change"
+msgstr ""
+
+#: apps/core/django_messages.py:36
+msgid "Clear"
+msgstr ""
+
+#: apps/core/django_messages.py:41
+#, python-format
+msgid "Ensure this value has at most %(limit_value)d character (it has %(show_value)d)."
+msgid_plural "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/core/django_messages.py:46
+#, python-format
+msgid "Ensure this value has at least %(limit_value)d character (it has %(show_value)d)."
+msgid_plural "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/core/django_messages.py:51
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural "Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/core/django_messages.py:58 tests/test_i18n.py:40
+msgid "The two password fields didn’t match."
+msgstr ""
+
+#: apps/core/django_messages.py:59
+msgid "Enter the same password as before, for verification."
+msgstr ""
+
+#: apps/core/django_messages.py:60
+#, python-format
+msgid "Please enter a correct %(username)s and password. Note that both fields may be case-sensitive."
+msgstr ""
+
+#: apps/core/django_messages.py:61 templates/account/account_inactive.html:6
+msgid "This account is inactive."
+msgstr ""
+
+#: apps/core/django_messages.py:62
+msgid "Your old password was entered incorrectly. Please enter it again."
+msgstr ""
+
+#: apps/core/django_messages.py:63
+msgid "A user with that username already exists."
+msgstr ""
+
+#: apps/core/django_messages.py:64
+msgid "Enter a valid username. This value may contain only letters, numbers, and @/./+/-/_ characters."
+msgstr ""
+
+#: apps/core/django_messages.py:65
+msgid "This password is too common."
+msgstr ""
+
+#: apps/core/django_messages.py:66
+msgid "This password is entirely numeric."
+msgstr ""
+
+#: apps/core/django_messages.py:67
+#, python-format
+msgid "The password is too similar to the %(verbose_name)s."
+msgstr ""
+
+#: apps/core/django_messages.py:68
+msgid "Your password can’t be too similar to your other personal information."
+msgstr ""
+
+#: apps/core/django_messages.py:69
+msgid "Your password can’t be a commonly used password."
+msgstr ""
+
+#: apps/core/django_messages.py:70
+msgid "Your password can’t be entirely numeric."
+msgstr ""
+
+#: apps/core/django_messages.py:72
+msgid "username"
+msgstr ""
+
+#: apps/core/django_messages.py:73 apps/genealogy/models.py:34
+msgid "first name"
+msgstr ""
+
+#: apps/core/django_messages.py:74 apps/genealogy/models.py:35
+msgid "last name"
+msgstr ""
+
+#: apps/core/django_messages.py:75
+msgid "email address"
+msgstr ""
+
+#: apps/core/django_messages.py:77
+#, python-format
+msgid "This password is too short. It must contain at least %d character."
+msgid_plural "This password is too short. It must contain at least %d characters."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/core/django_messages.py:82
+#, python-format
+msgid "Your password must contain at least %(min_length)d character."
+msgid_plural "Your password must contain at least %(min_length)d characters."
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/core/muchal.py:14
+msgctxt "muchal"
+msgid "Rat"
+msgstr ""
+
+#: apps/core/muchal.py:15
+msgctxt "muchal"
+msgid "Ox"
+msgstr ""
+
+#: apps/core/muchal.py:16
+msgctxt "muchal"
+msgid "Tiger"
+msgstr ""
+
+#: apps/core/muchal.py:17
+msgctxt "muchal"
+msgid "Rabbit"
+msgstr ""
+
+#: apps/core/muchal.py:18
+msgctxt "muchal"
+msgid "Dragon"
+msgstr ""
+
+#: apps/core/muchal.py:19
+msgctxt "muchal"
+msgid "Snake"
+msgstr ""
+
+#: apps/core/muchal.py:20
+msgctxt "muchal"
+msgid "Horse"
+msgstr ""
+
+#: apps/core/muchal.py:21
+msgctxt "muchal"
+msgid "Sheep"
+msgstr ""
+
+#: apps/core/muchal.py:22
+msgctxt "muchal"
+msgid "Monkey"
+msgstr ""
+
+#: apps/core/muchal.py:23
+msgctxt "muchal"
+msgid "Rooster"
+msgstr ""
+
+#: apps/core/muchal.py:24
+msgctxt "muchal"
+msgid "Dog"
+msgstr ""
+
+#: apps/core/muchal.py:25
+msgctxt "muchal"
+msgid "Pig"
+msgstr ""
+
+#: apps/core/timezones.py:13
+msgctxt "time zone"
+msgid "Tashkent"
+msgstr ""
+
+#: apps/core/timezones.py:14
+msgctxt "time zone"
+msgid "Almaty"
+msgstr ""
+
+#: apps/core/timezones.py:15
+msgctxt "time zone"
+msgid "Bishkek"
+msgstr ""
+
+#: apps/core/timezones.py:16
+msgctxt "time zone"
+msgid "Dushanbe"
+msgstr ""
+
+#: apps/core/timezones.py:17
+msgctxt "time zone"
+msgid "Ashgabat"
+msgstr ""
+
+#: apps/core/timezones.py:18
+msgctxt "time zone"
+msgid "Moscow"
+msgstr ""
+
+#: apps/core/timezones.py:19
+msgctxt "time zone"
+msgid "Istanbul"
+msgstr ""
+
+#: apps/core/timezones.py:20
+msgctxt "time zone"
+msgid "Dubai"
+msgstr ""
+
+#: apps/core/timezones.py:21
+msgctxt "time zone"
+msgid "Riyadh"
+msgstr ""
+
+#: apps/core/timezones.py:22
+msgctxt "time zone"
+msgid "Seoul"
+msgstr ""
+
+#: apps/core/timezones.py:23
+msgctxt "time zone"
+msgid "Tokyo"
+msgstr ""
+
+#: apps/core/timezones.py:24
+msgctxt "time zone"
+msgid "Beijing"
+msgstr ""
+
+#: apps/core/timezones.py:25
+msgctxt "time zone"
+msgid "Berlin"
+msgstr ""
+
+#: apps/core/timezones.py:26
+msgctxt "time zone"
+msgid "London"
+msgstr ""
+
+#: apps/core/timezones.py:27
+msgctxt "time zone"
+msgid "New York"
+msgstr ""
+
+#: apps/core/timezones.py:28
+msgctxt "time zone"
+msgid "Chicago"
+msgstr ""
+
+#: apps/core/timezones.py:29
+msgctxt "time zone"
+msgid "Los Angeles"
+msgstr ""
+
+#: apps/core/timezones.py:30
+msgctxt "time zone"
+msgid "Sydney"
+msgstr ""
+
+#: apps/core/views.py:159
+msgid "Users"
+msgstr ""
+
+#: apps/core/views.py:160
+msgid "People in all trees"
+msgstr ""
+
+#: apps/core/views.py:161 templates/base.html:118 templates/base.html:134 templates/genealogy/events.html:3 templates/genealogy/events.html:7 templates/genealogy/person_detail.html:54
+msgid "Events"
+msgstr ""
+
+#: apps/core/views.py:162 apps/genealogy/pdf.py:242 templates/base.html:119 templates/genealogy/person_detail.html:79 templates/genealogy/story_list.html:3 templates/genealogy/story_list.html:7
+msgid "Stories"
+msgstr ""
+
+#: apps/core/views.py:163 apps/friends/apps.py:8 templates/base.html:135 templates/friends/list.html:7 templates/genealogy/person_detail.html:67
+msgid "Friends"
+msgstr ""
+
+#: apps/core/views.py:164 templates/core/control_panel.html:34
+msgid "Photos"
+msgstr ""
+
+#: apps/core/views.py:165 apps/notify/apps.py:8 templates/base.html:54 templates/base.html:60 templates/notify/list.html:3 templates/notify/list.html:7
+msgid "Notifications"
+msgstr ""
+
+#: apps/core/views.py:166
+msgid "Telegram connected"
+msgstr ""
+
+#: apps/core/views.py:202
+msgid "The Telegram bot is connected to the site."
+msgstr ""
+
+#: apps/friends/forms.py:31
+msgid "For example: where they met, what they did together."
+msgstr ""
+
+#: apps/friends/models.py:13 templates/friends/sharing.html:79
+msgid "Waiting for an answer"
+msgstr ""
+
+#: apps/friends/models.py:14
+msgid "Accepted"
+msgstr ""
+
+#: apps/friends/models.py:15
+msgid "Declined"
+msgstr ""
+
+#: apps/friends/models.py:24
+msgid "friend request"
+msgstr ""
+
+#: apps/friends/models.py:25
+msgid "friend requests"
+msgstr ""
+
+#: apps/friends/models.py:41
+msgctxt "how met"
+msgid "Classmate"
+msgstr ""
+
+#: apps/friends/models.py:42
+msgctxt "how met"
+msgid "University friend"
+msgstr ""
+
+#: apps/friends/models.py:43
+msgctxt "how met"
+msgid "Colleague"
+msgstr ""
+
+#: apps/friends/models.py:44
+msgctxt "how met"
+msgid "Neighbour"
+msgstr ""
+
+#: apps/friends/models.py:45
+msgctxt "how met"
+msgid "Childhood friend"
+msgstr ""
+
+#: apps/friends/models.py:46
+msgctxt "how met"
+msgid "Served together in the army"
+msgstr ""
+
+#: apps/friends/models.py:47
+msgctxt "how met"
+msgid "Family friend"
+msgstr ""
+
+#: apps/friends/models.py:48
+msgctxt "how met"
+msgid "Other"
+msgstr ""
+
+#: apps/friends/models.py:52
+msgid "whose friend"
+msgstr ""
+
+#: apps/friends/models.py:53
+msgid "full name"
+msgstr ""
+
+#: apps/friends/models.py:54
+msgid "how they know each other"
+msgstr ""
+
+#: apps/friends/models.py:55
+msgid "phone"
+msgstr ""
+
+#: apps/friends/models.py:56 apps/genealogy/models.py:39
+msgid "year of birth"
+msgstr ""
+
+#: apps/friends/models.py:57 apps/genealogy/models.py:40
+msgid "month of birth"
+msgstr ""
+
+#: apps/friends/models.py:58 apps/genealogy/models.py:41
+msgid "day of birth"
+msgstr ""
+
+#: apps/friends/models.py:59
+msgid "notes"
+msgstr ""
+
+#: apps/friends/models.py:64
+msgid "friend"
+msgstr ""
+
+#: apps/friends/models.py:65
+msgid "friends"
+msgstr ""
+
+#: apps/friends/views.py:52 apps/friends/views.py:56
+msgid "Your friend request has been sent."
+msgstr ""
+
+#: apps/friends/views.py:59 apps/friends/views.py:77
+msgid "You are now friends."
+msgstr ""
+
+#: apps/friends/views.py:61
+msgid "A request has already been sent."
+msgstr ""
+
+#: apps/friends/views.py:82
+msgid "The request has been declined."
+msgstr ""
+
+#: apps/friends/views.py:91
+msgid "The request has been cancelled."
+msgstr ""
+
+#: apps/friends/views.py:100
+msgid "Removed from your friends."
+msgstr ""
+
+#: apps/friends/views.py:141
+msgid "The friend has been added."
+msgstr ""
+
+#: apps/friends/views.py:162 apps/genealogy/views.py:165
+msgid "The record has been deleted."
+msgstr ""
+
+#: apps/genealogy/access.py:23
+msgid "Person not found."
+msgstr ""
+
+#: apps/genealogy/access.py:25 apps/genealogy/access.py:41 apps/genealogy/access.py:60 apps/genealogy/views.py:433 templates/403.html:3 templates/403.html:6 templates/403_csrf.html:3
+msgid "Access denied."
+msgstr ""
+
+#: apps/genealogy/access.py:32 apps/genealogy/access.py:48 apps/genealogy/views.py:208 apps/genealogy/views.py:440
+msgid "You do not have permission to change this information."
+msgstr ""
+
+#: apps/genealogy/access.py:39
+msgid "Story not found."
+msgstr ""
+
+#: apps/genealogy/access.py:58
+msgid "User not found."
+msgstr ""
+
+#: apps/genealogy/forms.py:23 apps/genealogy/forms.py:35
+msgctxt "date part"
+msgid "Month"
+msgstr ""
+
+#: apps/genealogy/forms.py:31 apps/genealogy/forms.py:32
+msgctxt "date part"
+msgid "Day"
+msgstr ""
+
+#: apps/genealogy/forms.py:39 apps/genealogy/forms.py:41
+msgctxt "date part"
+msgid "Year"
+msgstr ""
+
+#: apps/genealogy/forms.py:55
+msgid "If you enter the day, choose the month as well."
+msgstr ""
+
+#: apps/genealogy/forms.py:57
+msgid "Enter the year of this date as well."
+msgstr ""
+
+#: apps/genealogy/forms.py:59
+msgid "There is no such day in the chosen month."
+msgstr ""
+
+#: apps/genealogy/forms.py:62
+msgid "The date cannot be in the future."
+msgstr ""
+
+#: apps/genealogy/forms.py:101 apps/genealogy/forms.py:288
+msgctxt "choice"
+msgid "— not specified —"
+msgstr ""
+
+#: apps/genealogy/forms.py:103
+msgctxt "person form"
+msgid "Father"
+msgstr ""
+
+#: apps/genealogy/forms.py:104
+msgctxt "person form"
+msgid "Mother"
+msgstr ""
+
+#: apps/genealogy/forms.py:128
+msgid "The date of death cannot be earlier than the date of birth."
+msgstr ""
+
+#: apps/genealogy/forms.py:141
+msgid "A person cannot be their own parent."
+msgstr ""
+
+#: apps/genealogy/forms.py:143 apps/genealogy/forms.py:238
+msgid "This link would make a person their own ancestor."
+msgstr ""
+
+#: apps/genealogy/forms.py:149
+#, python-format
+msgid "The photo is too large. The maximum size is %(size)d MB."
+msgstr ""
+
+#: apps/genealogy/forms.py:171
+msgid "Relationship"
+msgstr ""
+
+#: apps/genealogy/forms.py:173
+msgid "Or link someone already in the tree"
+msgstr ""
+
+#: apps/genealogy/forms.py:188
+msgctxt "choice"
+msgid "— add a new person —"
+msgstr ""
+
+#: apps/genealogy/forms.py:202
+msgid "Choose an existing person or enter the new person's first name."
+msgstr ""
+
+#: apps/genealogy/forms.py:204
+msgid "Choose the gender."
+msgstr ""
+
+#: apps/genealogy/forms.py:209 apps/genealogy/forms.py:232
+msgid "This person already has a father in the tree."
+msgstr ""
+
+#: apps/genealogy/forms.py:211
+msgid "The father must be a man."
+msgstr ""
+
+#: apps/genealogy/forms.py:215 apps/genealogy/forms.py:234
+msgid "This person already has a mother in the tree."
+msgstr ""
+
+#: apps/genealogy/forms.py:217
+msgid "The mother must be a woman."
+msgstr ""
+
+#: apps/genealogy/forms.py:220
+msgid "A husband and wife must be a man and a woman."
+msgstr ""
+
+#: apps/genealogy/forms.py:224
+msgid "These two people are already recorded as married."
+msgstr ""
+
+#: apps/genealogy/forms.py:227
+msgid "To add a brother or sister, first add this person's father or mother."
+msgstr ""
+
+#: apps/genealogy/forms.py:282
+msgid "The child's other parent"
+msgstr ""
+
+#: apps/genealogy/forms.py:348
+msgid "Optional. For example: “Sardorbek and Madina’s wedding”."
+msgstr ""
+
+#: apps/genealogy/forms.py:362
+msgid "To be reminded every year, enter the day and the month."
+msgstr ""
+
+#: apps/genealogy/forms.py:382
+msgctxt "choice"
+msgid "— the whole family —"
+msgstr ""
+
+#: apps/genealogy/models.py:32
+msgid "owner"
+msgstr ""
+
+#: apps/genealogy/models.py:36
+msgid "patronymic"
+msgstr ""
+
+#: apps/genealogy/models.py:42
+msgid "place of birth"
+msgstr ""
+
+#: apps/genealogy/models.py:44
+msgid "deceased"
+msgstr ""
+
+#: apps/genealogy/models.py:45
+msgid "year of death"
+msgstr ""
+
+#: apps/genealogy/models.py:46
+msgid "month of death"
+msgstr ""
+
+#: apps/genealogy/models.py:47
+msgid "day of death"
+msgstr ""
+
+#: apps/genealogy/models.py:48
+msgid "place of death"
+msgstr ""
+
+#: apps/genealogy/models.py:49
+msgid "place of burial"
+msgstr ""
+
+#: apps/genealogy/models.py:51
+msgid "occupation"
+msgstr ""
+
+#: apps/genealogy/models.py:52
+msgid "education"
+msgstr ""
+
+#: apps/genealogy/models.py:53
+msgid "biography"
+msgstr ""
+
+#: apps/genealogy/models.py:54
+msgid "life story"
+msgstr ""
+
+#: apps/genealogy/models.py:55
+msgid "photo"
+msgstr ""
+
+#: apps/genealogy/models.py:59
+msgid "father"
+msgstr ""
+
+#: apps/genealogy/models.py:63
+msgid "mother"
+msgstr ""
+
+#: apps/genealogy/models.py:71
+msgid "person"
+msgstr ""
+
+#: apps/genealogy/models.py:72
+msgid "people"
+msgstr ""
+
+#: apps/genealogy/models.py:145
+msgid "husband"
+msgstr ""
+
+#: apps/genealogy/models.py:147
+msgid "wife"
+msgstr ""
+
+#: apps/genealogy/models.py:148
+msgid "year of marriage"
+msgstr ""
+
+#: apps/genealogy/models.py:149
+msgid "month of marriage"
+msgstr ""
+
+#: apps/genealogy/models.py:150
+msgid "day of marriage"
+msgstr ""
+
+#: apps/genealogy/models.py:151
+msgid "divorced"
+msgstr ""
+
+#: apps/genealogy/models.py:155
+msgid "marriage"
+msgstr ""
+
+#: apps/genealogy/models.py:156
+msgid "marriages"
+msgstr ""
+
+#: apps/genealogy/models.py:171
+msgid "about whom"
+msgstr ""
+
+#: apps/genealogy/models.py:172 apps/genealogy/models.py:211
+msgid "title"
+msgstr ""
+
+#: apps/genealogy/models.py:173
+msgid "text"
+msgstr ""
+
+#: apps/genealogy/models.py:174 apps/genealogy/models.py:213
+msgid "year"
+msgstr ""
+
+#: apps/genealogy/models.py:179
+msgid "story"
+msgstr ""
+
+#: apps/genealogy/models.py:180
+msgid "stories"
+msgstr ""
+
+#: apps/genealogy/models.py:194
+msgctxt "event"
+msgid "Wedding"
+msgstr "Wedding (nikah)"
+
+#: apps/genealogy/models.py:195
+msgctxt "event"
+msgid "Engagement (fotiha)"
+msgstr ""
+
+#: apps/genealogy/models.py:196
+msgctxt "event"
+msgid "Expecting a baby"
+msgstr ""
+
+#: apps/genealogy/models.py:197
+msgctxt "event"
+msgid "Birth of a child"
+msgstr ""
+
+#: apps/genealogy/models.py:198
+msgctxt "event"
+msgid "Cradle celebration (beshik toʻyi)"
+msgstr "Cradle celebration (beshik to‘yi)"
+
+#: apps/genealogy/models.py:199
+msgctxt "event"
+msgid "Circumcision celebration (sunnat toʻyi)"
+msgstr "Circumcision celebration (sunnat to‘yi)"
+
+#: apps/genealogy/models.py:200
+msgctxt "event"
+msgid "Graduation"
+msgstr ""
+
+#: apps/genealogy/models.py:201
+msgctxt "event"
+msgid "New job"
+msgstr ""
+
+#: apps/genealogy/models.py:202
+msgctxt "event"
+msgid "Moving house"
+msgstr ""
+
+#: apps/genealogy/models.py:203
+msgctxt "event"
+msgid "Hajj or umrah"
+msgstr ""
+
+#: apps/genealogy/models.py:204
+msgctxt "event"
+msgid "Jubilee"
+msgstr ""
+
+#: apps/genealogy/models.py:205
+msgctxt "event"
+msgid "Death"
+msgstr ""
+
+#: apps/genealogy/models.py:206
+msgctxt "event"
+msgid "Memorial gathering (yil oshi)"
+msgstr ""
+
+#: apps/genealogy/models.py:207
+msgctxt "event"
+msgid "Other event"
+msgstr ""
+
+#: apps/genealogy/models.py:210
+msgid "type of event"
+msgstr ""
+
+#: apps/genealogy/models.py:212
+msgid "who"
+msgstr ""
+
+#: apps/genealogy/models.py:214
+msgid "month"
+msgstr ""
+
+#: apps/genealogy/models.py:215
+msgid "day"
+msgstr ""
+
+#: apps/genealogy/models.py:216
+msgid "place"
+msgstr ""
+
+#: apps/genealogy/models.py:217
+msgid "details"
+msgstr ""
+
+#: apps/genealogy/models.py:218
+msgid "remind every year on this day"
+msgstr ""
+
+#: apps/genealogy/models.py:223
+msgid "event"
+msgstr ""
+
+#: apps/genealogy/models.py:224
+msgid "events"
+msgstr ""
+
+#: apps/genealogy/pdf.py:115
+#, python-format
+msgid "Page %(page)d of %(total)d"
+msgstr ""
+
+#: apps/genealogy/pdf.py:120
+#, python-format
+msgid "Created on %(date)s · Family tree"
+msgstr ""
+
+#: apps/genealogy/pdf.py:143 templates/friends/contact_form.html:15 templates/genealogy/_person_fields.html:15 templates/genealogy/person_detail.html:30
+msgid "Date of birth"
+msgstr ""
+
+#: apps/genealogy/pdf.py:144 templates/genealogy/person_detail.html:31
+msgid "Place of birth"
+msgstr ""
+
+#: apps/genealogy/pdf.py:146 templates/genealogy/_person_fields.html:21 templates/genealogy/person_detail.html:33
+msgid "Date of death"
+msgstr ""
+
+#: apps/genealogy/pdf.py:146 templates/genealogy/person_detail.html:30 templates/genealogy/person_detail.html:33
+msgid "unknown"
+msgstr ""
+
+#: apps/genealogy/pdf.py:147 templates/genealogy/person_detail.html:34
+msgid "Place of death"
+msgstr ""
+
+#: apps/genealogy/pdf.py:148 templates/genealogy/person_detail.html:35
+msgid "Place of burial"
+msgstr ""
+
+#: apps/genealogy/pdf.py:149 templates/genealogy/person_detail.html:39
+msgid "Occupation"
+msgstr ""
+
+#: apps/genealogy/pdf.py:150 templates/genealogy/person_detail.html:40
+msgid "Education"
+msgstr ""
+
+#: apps/genealogy/pdf.py:226 templates/accounts/settings.html:6 templates/genealogy/person_detail.html:26
+msgid "Personal details"
+msgstr ""
+
+#: apps/genealogy/pdf.py:231 templates/genealogy/person_detail.html:92
+msgid "Family"
+msgstr ""
+
+#: apps/genealogy/pdf.py:236 templates/genealogy/person_detail.html:45
+msgid "Biography"
+msgstr ""
+
+#: apps/genealogy/pdf.py:239 templates/genealogy/person_detail.html:49
+msgid "Life story"
+msgstr ""
+
+#: apps/genealogy/pdf.py:287
+#, python-format
+msgid "%(count)d person"
+msgid_plural "%(count)d people"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/genealogy/pdf.py:291
+#, python-format
+msgid "Generation %(number)d"
+msgstr ""
+
+#: apps/genealogy/pdf.py:295
+msgid "Not yet linked to the family"
+msgstr ""
+
+#: apps/genealogy/terminology.py:17 templates/core/landing.html:22 templates/genealogy/person_detail.html:13
+msgctxt "kinship"
+msgid "You"
+msgstr ""
+
+#: apps/genealogy/terminology.py:18 templates/core/landing.html:21
+msgctxt "kinship"
+msgid "Father"
+msgstr ""
+
+#: apps/genealogy/terminology.py:19
+msgctxt "kinship"
+msgid "Mother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:20
+msgctxt "kinship"
+msgid "Son"
+msgstr ""
+
+#: apps/genealogy/terminology.py:21
+msgctxt "kinship"
+msgid "Daughter"
+msgstr ""
+
+#: apps/genealogy/terminology.py:22 templates/core/landing.html:20
+msgctxt "kinship"
+msgid "Grandfather"
+msgstr ""
+
+#: apps/genealogy/terminology.py:23 templates/core/landing.html:20
+msgctxt "kinship"
+msgid "Grandmother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:24
+msgctxt "kinship"
+msgid "Great-grandfather"
+msgstr ""
+
+#: apps/genealogy/terminology.py:25
+msgctxt "kinship"
+msgid "Great-grandmother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:26
+msgctxt "kinship"
+msgid "Distant male ancestor"
+msgstr "Ancestor"
+
+#: apps/genealogy/terminology.py:27
+msgctxt "kinship"
+msgid "Distant female ancestor"
+msgstr "Ancestor"
+
+#: apps/genealogy/terminology.py:28
+msgctxt "kinship"
+msgid "Grandchild"
+msgstr ""
+
+#: apps/genealogy/terminology.py:29
+msgctxt "kinship"
+msgid "Great-grandchild"
+msgstr ""
+
+#: apps/genealogy/terminology.py:30
+msgctxt "kinship"
+msgid "Great-great-grandchild"
+msgstr ""
+
+#: apps/genealogy/terminology.py:31
+msgctxt "kinship"
+msgid "Descendant"
+msgstr ""
+
+#: apps/genealogy/terminology.py:32
+msgctxt "kinship"
+msgid "Older brother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:33
+msgctxt "kinship"
+msgid "Younger brother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:34
+msgctxt "kinship"
+msgid "Brother (age unknown)"
+msgstr "Brother"
+
+#: apps/genealogy/terminology.py:35
+msgctxt "kinship"
+msgid "Older sister"
+msgstr ""
+
+#: apps/genealogy/terminology.py:36
+msgctxt "kinship"
+msgid "Younger sister"
+msgstr ""
+
+#: apps/genealogy/terminology.py:37
+msgctxt "kinship"
+msgid "Sister (age unknown)"
+msgstr "Sister"
+
+#: apps/genealogy/terminology.py:38 templates/core/landing.html:22
+msgctxt "kinship"
+msgid "Father's brother"
+msgstr "Paternal uncle"
+
+#: apps/genealogy/terminology.py:39 templates/core/landing.html:21
+msgctxt "kinship"
+msgid "Father's sister"
+msgstr "Paternal aunt"
+
+#: apps/genealogy/terminology.py:40
+msgctxt "kinship"
+msgid "Mother's brother"
+msgstr "Maternal uncle"
+
+#: apps/genealogy/terminology.py:41
+msgctxt "kinship"
+msgid "Mother's sister"
+msgstr "Maternal aunt"
+
+#: apps/genealogy/terminology.py:42
+msgctxt "kinship"
+msgid "Child of father's brother"
+msgstr "Paternal cousin"
+
+#: apps/genealogy/terminology.py:43
+msgctxt "kinship"
+msgid "Child of father's sister"
+msgstr "Paternal cousin"
+
+#: apps/genealogy/terminology.py:44
+msgctxt "kinship"
+msgid "Child of mother's brother"
+msgstr "Maternal cousin"
+
+#: apps/genealogy/terminology.py:45
+msgctxt "kinship"
+msgid "Child of mother's sister"
+msgstr "Maternal cousin"
+
+#: apps/genealogy/terminology.py:46
+msgctxt "kinship"
+msgid "Nephew or niece"
+msgstr ""
+
+#: apps/genealogy/terminology.py:47
+msgctxt "kinship"
+msgid "Husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:48
+msgctxt "kinship"
+msgid "Wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:49
+msgctxt "kinship"
+msgid "Former husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:50
+msgctxt "kinship"
+msgid "Former wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:51
+msgctxt "kinship"
+msgid "Son-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:52
+msgctxt "kinship"
+msgid "Daughter-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:53
+msgctxt "kinship"
+msgid "Granddaughter's husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:54
+msgctxt "kinship"
+msgid "Grandson's wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:55
+msgctxt "kinship"
+msgid "Father-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:56
+msgctxt "kinship"
+msgid "Mother-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:57
+msgctxt "kinship"
+msgid "Brother's wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:58
+msgctxt "kinship"
+msgid "Sister's husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:59
+msgctxt "kinship"
+msgid "Stepfather"
+msgstr ""
+
+#: apps/genealogy/terminology.py:60
+msgctxt "kinship"
+msgid "Stepmother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:61
+msgctxt "kinship"
+msgid "Stepson"
+msgstr ""
+
+#: apps/genealogy/terminology.py:62
+msgctxt "kinship"
+msgid "Stepdaughter"
+msgstr ""
+
+#: apps/genealogy/terminology.py:63
+msgctxt "kinship"
+msgid "Relative"
+msgstr ""
+
+#: apps/genealogy/terminology.py:70
+msgctxt "kinship, owner"
+msgid "Father"
+msgstr ""
+
+#: apps/genealogy/terminology.py:71
+msgctxt "kinship, owner"
+msgid "Mother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:72
+msgctxt "kinship, owner"
+msgid "Son"
+msgstr ""
+
+#: apps/genealogy/terminology.py:73
+msgctxt "kinship, owner"
+msgid "Daughter"
+msgstr ""
+
+#: apps/genealogy/terminology.py:74
+msgctxt "kinship, owner"
+msgid "Grandfather"
+msgstr ""
+
+#: apps/genealogy/terminology.py:75
+msgctxt "kinship, owner"
+msgid "Grandmother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:76
+msgctxt "kinship, owner"
+msgid "Great-grandfather"
+msgstr ""
+
+#: apps/genealogy/terminology.py:77
+msgctxt "kinship, owner"
+msgid "Great-grandmother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:78
+msgctxt "kinship, owner"
+msgid "Distant male ancestor"
+msgstr "Ancestor"
+
+#: apps/genealogy/terminology.py:79
+msgctxt "kinship, owner"
+msgid "Distant female ancestor"
+msgstr "Ancestor"
+
+#: apps/genealogy/terminology.py:80
+msgctxt "kinship, owner"
+msgid "Grandchild"
+msgstr ""
+
+#: apps/genealogy/terminology.py:81
+msgctxt "kinship, owner"
+msgid "Great-grandchild"
+msgstr ""
+
+#: apps/genealogy/terminology.py:82
+msgctxt "kinship, owner"
+msgid "Great-great-grandchild"
+msgstr ""
+
+#: apps/genealogy/terminology.py:83
+msgctxt "kinship, owner"
+msgid "Descendant"
+msgstr ""
+
+#: apps/genealogy/terminology.py:84
+msgctxt "kinship, owner"
+msgid "Older brother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:85
+msgctxt "kinship, owner"
+msgid "Younger brother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:86
+msgctxt "kinship, owner"
+msgid "Brother (age unknown)"
+msgstr "Brother"
+
+#: apps/genealogy/terminology.py:87
+msgctxt "kinship, owner"
+msgid "Older sister"
+msgstr ""
+
+#: apps/genealogy/terminology.py:88
+msgctxt "kinship, owner"
+msgid "Younger sister"
+msgstr ""
+
+#: apps/genealogy/terminology.py:89
+msgctxt "kinship, owner"
+msgid "Sister (age unknown)"
+msgstr "Sister"
+
+#: apps/genealogy/terminology.py:90
+msgctxt "kinship, owner"
+msgid "Father's brother"
+msgstr "Paternal uncle"
+
+#: apps/genealogy/terminology.py:91
+msgctxt "kinship, owner"
+msgid "Father's sister"
+msgstr "Paternal aunt"
+
+#: apps/genealogy/terminology.py:92
+msgctxt "kinship, owner"
+msgid "Mother's brother"
+msgstr "Maternal uncle"
+
+#: apps/genealogy/terminology.py:93
+msgctxt "kinship, owner"
+msgid "Mother's sister"
+msgstr "Maternal aunt"
+
+#: apps/genealogy/terminology.py:94
+msgctxt "kinship, owner"
+msgid "Child of father's brother"
+msgstr "Paternal cousin"
+
+#: apps/genealogy/terminology.py:95
+msgctxt "kinship, owner"
+msgid "Child of father's sister"
+msgstr "Paternal cousin"
+
+#: apps/genealogy/terminology.py:96
+msgctxt "kinship, owner"
+msgid "Child of mother's brother"
+msgstr "Maternal cousin"
+
+#: apps/genealogy/terminology.py:97
+msgctxt "kinship, owner"
+msgid "Child of mother's sister"
+msgstr "Maternal cousin"
+
+#: apps/genealogy/terminology.py:98
+msgctxt "kinship, owner"
+msgid "Nephew or niece"
+msgstr ""
+
+#: apps/genealogy/terminology.py:99
+msgctxt "kinship, owner"
+msgid "Husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:100
+msgctxt "kinship, owner"
+msgid "Wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:101
+msgctxt "kinship, owner"
+msgid "Former husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:102
+msgctxt "kinship, owner"
+msgid "Former wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:103
+msgctxt "kinship, owner"
+msgid "Son-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:104
+msgctxt "kinship, owner"
+msgid "Daughter-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:105
+msgctxt "kinship, owner"
+msgid "Granddaughter's husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:106
+msgctxt "kinship, owner"
+msgid "Grandson's wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:107
+msgctxt "kinship, owner"
+msgid "Father-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:108
+msgctxt "kinship, owner"
+msgid "Mother-in-law"
+msgstr ""
+
+#: apps/genealogy/terminology.py:109
+msgctxt "kinship, owner"
+msgid "Brother's wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:110
+msgctxt "kinship, owner"
+msgid "Sister's husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:111
+msgctxt "kinship, owner"
+msgid "Stepfather"
+msgstr ""
+
+#: apps/genealogy/terminology.py:112
+msgctxt "kinship, owner"
+msgid "Stepmother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:113
+msgctxt "kinship, owner"
+msgid "Stepson"
+msgstr ""
+
+#: apps/genealogy/terminology.py:114
+msgctxt "kinship, owner"
+msgid "Stepdaughter"
+msgstr ""
+
+#: apps/genealogy/terminology.py:115
+msgctxt "kinship, owner"
+msgid "Relative"
+msgstr ""
+
+#: apps/genealogy/terminology.py:122
+msgctxt "kinship possessive"
+msgid "older brother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:123
+msgctxt "kinship possessive"
+msgid "younger brother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:124
+msgctxt "kinship possessive"
+msgid "brother (age unknown)"
+msgstr "brother"
+
+#: apps/genealogy/terminology.py:125
+msgctxt "kinship possessive"
+msgid "older sister"
+msgstr ""
+
+#: apps/genealogy/terminology.py:126
+msgctxt "kinship possessive"
+msgid "younger sister"
+msgstr ""
+
+#: apps/genealogy/terminology.py:127
+msgctxt "kinship possessive"
+msgid "sister (age unknown)"
+msgstr "sister"
+
+#: apps/genealogy/terminology.py:128
+msgctxt "kinship possessive"
+msgid "child of father's brother"
+msgstr "cousin"
+
+#: apps/genealogy/terminology.py:129
+msgctxt "kinship possessive"
+msgid "child of father's sister"
+msgstr "cousin"
+
+#: apps/genealogy/terminology.py:130
+msgctxt "kinship possessive"
+msgid "child of mother's brother"
+msgstr "cousin"
+
+#: apps/genealogy/terminology.py:131
+msgctxt "kinship possessive"
+msgid "child of mother's sister"
+msgstr "cousin"
+
+#: apps/genealogy/terminology.py:132
+msgctxt "kinship possessive"
+msgid "son"
+msgstr ""
+
+#: apps/genealogy/terminology.py:133
+msgctxt "kinship possessive"
+msgid "daughter"
+msgstr ""
+
+#: apps/genealogy/terminology.py:134
+msgctxt "kinship possessive"
+msgid "husband"
+msgstr ""
+
+#: apps/genealogy/terminology.py:135
+msgctxt "kinship possessive"
+msgid "wife"
+msgstr ""
+
+#: apps/genealogy/terminology.py:140
+msgctxt "kinship"
+msgid "Child"
+msgstr ""
+
+#: apps/genealogy/terminology.py:141
+msgctxt "kinship"
+msgid "Spouse"
+msgstr ""
+
+#: apps/genealogy/terminology.py:142
+msgctxt "kinship"
+msgid "Friend"
+msgstr ""
+
+#: apps/genealogy/terminology.py:143 templates/core/landing.html:36 templates/friends/sharing.html:47 templates/genealogy/tree.html:3 templates/genealogy/tree.html:45
+msgctxt "kinship"
+msgid "Family tree"
+msgstr ""
+
+#: apps/genealogy/terminology.py:144
+msgctxt "kinship"
+msgid "Family member"
+msgstr ""
+
+#: apps/genealogy/terminology.py:149
+msgctxt "person section"
+msgid "Father"
+msgstr ""
+
+#: apps/genealogy/terminology.py:150
+msgctxt "person section"
+msgid "Mother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:151
+msgctxt "person section"
+msgid "Spouse"
+msgstr ""
+
+#: apps/genealogy/terminology.py:152
+msgctxt "person section"
+msgid "Children"
+msgstr ""
+
+#: apps/genealogy/terminology.py:153
+msgctxt "person section"
+msgid "Brothers and sisters"
+msgstr ""
+
+#: apps/genealogy/terminology.py:158
+msgctxt "add relation"
+msgid "Father"
+msgstr ""
+
+#: apps/genealogy/terminology.py:159
+msgctxt "add relation"
+msgid "Mother"
+msgstr ""
+
+#: apps/genealogy/terminology.py:160
+msgctxt "add relation"
+msgid "Spouse"
+msgstr ""
+
+#: apps/genealogy/terminology.py:161
+msgctxt "add relation"
+msgid "Child"
+msgstr ""
+
+#: apps/genealogy/terminology.py:162
+msgctxt "add relation"
+msgid "Brother or sister"
+msgstr ""
+
+#: apps/genealogy/terminology.py:173
+#, python-brace-format
+msgctxt "kinship chain"
+msgid "{whose}'s {what}"
+msgstr ""
+
+#: apps/genealogy/tree.py:387
+#, python-format
+msgid "%(count)d child"
+msgid_plural "%(count)d children"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/genealogy/tree.py:389
+#, python-format
+msgid "%(count)d brother or sister"
+msgid_plural "%(count)d brothers and sisters"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/genealogy/views.py:140 apps/genealogy/views.py:193
+msgid "The person has been added to the family tree."
+msgstr ""
+
+#: apps/genealogy/views.py:161
+msgid "Your own record cannot be deleted."
+msgstr ""
+
+#: apps/genealogy/views.py:214
+msgid "The marriage record has been deleted."
+msgstr ""
+
+#: apps/genealogy/views.py:265 apps/genealogy/views.py:281 templates/genealogy/tree.html:56
+msgid "The family tree is empty."
+msgstr ""
+
+#: apps/genealogy/views.py:269
+#, python-format
+msgid "Centred on %(name)s. Relationship names are given as seen from this person."
+msgstr ""
+
+#: apps/genealogy/views.py:272 apps/genealogy/views.py:517
+msgctxt "file name"
+msgid "family-tree"
+msgstr "family-tree"
+
+#: apps/genealogy/views.py:283
+msgctxt "file name"
+msgid "family-book"
+msgstr "family-book"
+
+#: apps/genealogy/views.py:313 apps/genealogy/views.py:324
+msgid "The story has been saved."
+msgstr ""
+
+#: apps/genealogy/views.py:334
+msgid "The story has been deleted."
+msgstr ""
+
+#: apps/genealogy/views.py:454 apps/genealogy/views.py:465
+msgid "The event has been saved."
+msgstr ""
+
+#: apps/genealogy/views.py:475
+msgid "The event has been deleted."
+msgstr ""
+
+#: apps/notify/messages.py:16
+msgctxt "reminder"
+msgid "Today"
+msgstr ""
+
+#: apps/notify/messages.py:18
+msgctxt "reminder"
+msgid "Tomorrow"
+msgstr ""
+
+#: apps/notify/messages.py:19
+#, python-format
+msgid "In %(days)d day"
+msgid_plural "In %(days)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/notify/messages.py:24
+#, python-format
+msgctxt "duration"
+msgid "%(count)d year"
+msgid_plural "%(count)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: apps/notify/messages.py:39
+#, python-brace-format
+msgid "Birthday: {name}"
+msgstr ""
+
+#. Translators: placeholders {when} {age} {age_phrase}
+#: apps/notify/messages.py:42 apps/notify/messages.py:48
+#, no-python-brace-format
+msgid "{when} they turn {age}."
+msgstr "{when} they turn {age}."
+
+#: apps/notify/messages.py:43 apps/notify/messages.py:49
+#, python-brace-format
+msgid "{when} is their birthday."
+msgstr ""
+
+#: apps/notify/messages.py:45
+#, python-brace-format
+msgid "Friend's birthday: {name}"
+msgstr ""
+
+#: apps/notify/messages.py:50
+#, python-brace-format
+msgid "Friend of {whose}."
+msgstr ""
+
+#: apps/notify/messages.py:52
+#, python-brace-format
+msgid "Memorial day: {name}"
+msgstr ""
+
+#. Translators: placeholders {when} {years} {years_phrase}
+#: apps/notify/messages.py:55
+#, no-python-brace-format
+msgid "{when} it will be {years_phrase} since they passed away."
+msgstr ""
+
+#: apps/notify/messages.py:56
+#, python-brace-format
+msgid "{when} is the day they passed away."
+msgstr ""
+
+#: apps/notify/messages.py:58
+#, python-brace-format
+msgid "Wedding anniversary: {names}"
+msgstr ""
+
+#. Translators: placeholders {when} {years} {years_phrase}
+#: apps/notify/messages.py:61
+#, no-python-brace-format
+msgid "{when} they will have been married for {years_phrase}."
+msgstr ""
+
+#: apps/notify/messages.py:62
+#, python-brace-format
+msgid "{when} is their wedding anniversary."
+msgstr ""
+
+#: apps/notify/messages.py:66
+#, python-brace-format
+msgid "{when}."
+msgstr ""
+
+#. Translators: placeholders {when} {years} {years_phrase}
+#: apps/notify/messages.py:70
+#, no-python-brace-format
+msgid "{when} it will be {years_phrase} since then."
+msgstr ""
+
+#: apps/notify/messages.py:72
+#, python-brace-format
+msgid "Place: {place}."
+msgstr ""
+
+#: apps/notify/messages.py:75
+#, python-brace-format
+msgid "Muchal year: {animal}"
+msgstr ""
+
+#: apps/notify/messages.py:76
+#, python-brace-format
+msgid "A {animal} year begins at Navroʻz. It is the muchal year of: {names}."
+msgstr "The year of the {animal} begins at Navruz. It is the muchal year of: {names}."
+
+#: apps/notify/messages.py:97
+msgid "Open in Shajara"
+msgstr ""
+
+#: apps/notify/models.py:9
+msgid "On the day"
+msgstr ""
+
+#: apps/notify/models.py:9
+msgid "One day before"
+msgstr ""
+
+#: apps/notify/models.py:9
+msgid "Three days before"
+msgstr ""
+
+#: apps/notify/models.py:10
+msgid "One week before"
+msgstr ""
+
+#: apps/notify/models.py:13
+msgid "reminders are on"
+msgstr ""
+
+#: apps/notify/models.py:14
+msgid "remind in advance"
+msgstr ""
+
+#: apps/notify/models.py:15
+msgid "birthdays of relatives"
+msgstr ""
+
+#: apps/notify/models.py:16
+msgid "birthdays of friends"
+msgstr ""
+
+#: apps/notify/models.py:17
+msgid "wedding anniversaries"
+msgstr ""
+
+#: apps/notify/models.py:18
+msgid "memorial days"
+msgstr ""
+
+#: apps/notify/models.py:19
+msgid "family events"
+msgstr ""
+
+#: apps/notify/models.py:20
+msgid "muchal years"
+msgstr ""
+
+#: apps/notify/models.py:22
+msgid "send to Telegram"
+msgstr ""
+
+#: apps/notify/models.py:27
+msgid "send at (hour)"
+msgstr ""
+
+#: apps/notify/models.py:32 apps/notify/models.py:33
+msgid "notification settings"
+msgstr ""
+
+#: apps/notify/service.py:99
+#, python-format
+msgid "No dates in the next %(days)d days."
+msgstr ""
+
+#: apps/notify/service.py:100 apps/notify/telegram.py:146
+msgid "Upcoming dates"
+msgstr ""
+
+#: apps/notify/service.py:109
+msgid "Test message: Telegram reminders work."
+msgstr ""
+
+#: apps/notify/telegram.py:147
+msgid "How to use the bot"
+msgstr ""
+
+#: apps/notify/telegram.py:148
+msgid "Turn reminders off"
+msgstr ""
+
+#: apps/notify/telegram.py:229
+msgid "Hello! This bot sends reminders from your family tree: birthdays, anniversaries, memorial days and family events."
+msgstr ""
+
+#: apps/notify/telegram.py:231
+msgid "/next — upcoming dates"
+msgstr ""
+
+#: apps/notify/telegram.py:231
+msgid "/stop — turn reminders off"
+msgstr ""
+
+#: apps/notify/telegram.py:233
+msgid "To connect, open Settings → Reminders on the site and send me the code shown there."
+msgstr ""
+
+#: apps/notify/telegram.py:254
+msgid "Your account is connected. Reminders about birthdays and family events will come here. Send /stop to turn them off."
+msgstr ""
+
+#: apps/notify/telegram.py:260
+msgid "This code is not valid or has expired. Open Settings → Reminders on the site: a new code is shown there."
+msgstr ""
+
+#: apps/notify/telegram.py:268
+msgid "Reminders are turned off. Send /start to turn them on again."
+msgstr ""
+
+#: apps/notify/telegram.py:273
+msgid "Reminders are on."
+msgstr ""
+
+#: apps/notify/views.py:90 templates/notify/settings.html:8 templates/notify/settings.html:58
+msgid "Telegram reminders are not available at the moment."
+msgstr ""
+
+#: apps/notify/views.py:113
+msgid "A test message has been sent. Check Telegram."
+msgstr ""
+
+#: apps/notify/views.py:119
+msgid "The bot is blocked in Telegram. Connect it again."
+msgstr ""
+
+#: apps/notify/views.py:121
+msgid "Telegram did not accept the message. Try again later."
+msgstr ""
+
+#: apps/notify/views.py:133
+msgid "Telegram has been disconnected."
+msgstr ""
+
+#: templates/400.html:3 templates/400.html:6
+msgid "Invalid request."
+msgstr ""
+
+#: templates/400.html:7
+msgid "The request could not be processed. Please try again."
+msgstr ""
+
+#: templates/400.html:8 templates/403.html:8 templates/403_csrf.html:8 templates/404.html:8 templates/500.html:9
+msgid "Go to the home page"
+msgstr ""
+
+#: templates/403.html:7
+msgid "You do not have permission to view this page."
+msgstr ""
+
+#: templates/403_csrf.html:6
+msgid "The form has expired."
+msgstr ""
+
+#: templates/403_csrf.html:7
+msgid "For your security the form could not be sent. Go back, reload the page and try again. Make sure cookies are enabled in your browser."
+msgstr ""
+
+#: templates/404.html:3 templates/404.html:6
+msgid "Page not found."
+msgstr ""
+
+#: templates/404.html:7
+msgid "The address may be wrong, or the page has been deleted."
+msgstr ""
+
+#: templates/500.html:4 templates/500.html:7
+msgid "A server error occurred."
+msgstr ""
+
+#: templates/500.html:8
+msgid "Something went wrong on our side. Please try again in a few minutes."
+msgstr ""
+
+#: templates/account/account_inactive.html:3 templates/accounts/app_login_start.html:3 templates/accounts/login.html:3 templates/accounts/login.html:7 templates/accounts/login.html:19 templates/accounts/password_reset_complete.html:8 templates/accounts/register.html:29 templates/base.html:107 templates/core/landing.html:12 templates/socialaccount/authentication_error.html:3 templates/socialaccount/login.html:3 templates/socialaccount/login.html:6 templates/socialaccount/login_cancelled.html:3 templates/socialaccount/signup.html:3
+msgid "Sign in"
+msgstr ""
+
+#: templates/account/account_inactive.html:7 templates/accounts/password_reset_done.html:8 templates/socialaccount/authentication_error.html:8 templates/socialaccount/login_cancelled.html:8 templates/socialaccount/signup.html:8
+msgid "Back to sign in"
+msgstr ""
+
+#: templates/accounts/app_login_start.html:8
+msgid "Sign in to the app"
+msgstr ""
+
+#: templates/accounts/app_login_start.html:9
+msgid "After signing in you will be returned to the Shajara app."
+msgstr ""
+
+#: templates/accounts/app_login_start.html:12
+msgid "Sign in with a username and password"
+msgstr ""
+
+#: templates/accounts/complete_profile.html:3 templates/accounts/complete_profile.html:7
+msgid "Almost done"
+msgstr ""
+
+#: templates/accounts/complete_profile.html:8 templates/accounts/register.html:8
+msgid "Your own record in the family tree is created from these details."
+msgstr ""
+
+#: templates/accounts/complete_profile.html:15
+msgid "Continue"
+msgstr ""
+
+#: templates/accounts/delete_account.html:3 templates/accounts/delete_account.html:6 templates/accounts/settings_data.html:38 templates/accounts/settings_data.html:40
+msgid "Delete account"
+msgstr ""
+
+#: templates/accounts/delete_account.html:7
+msgid "Your account and your whole family archive — people, photos, events, stories and friends — will be deleted permanently."
+msgstr ""
+
+#: templates/accounts/delete_account.html:8
+msgid "Download your data first if you want to keep a copy."
+msgstr ""
+
+#: templates/accounts/delete_account.html:9
+msgid "Download my data (JSON)"
+msgstr ""
+
+#: templates/accounts/delete_account.html:12
+#, python-format
+msgid "Type your username (%(username)s) to confirm"
+msgstr ""
+
+#: templates/accounts/delete_account.html:17
+msgid "Delete my account"
+msgstr ""
+
+#: templates/accounts/delete_account.html:18 templates/accounts/password_change.html:15 templates/accounts/password_reset.html:13 templates/friends/contact_form.html:23 templates/friends/sharing.html:81 templates/genealogy/confirm_delete.html:12 templates/genealogy/event_form.html:32 templates/genealogy/marriage_form.html:16 templates/genealogy/person_form.html:22 templates/genealogy/relative_form.html:25 templates/genealogy/story_form.html:16
+msgid "Cancel"
+msgstr ""
+
+#: templates/accounts/login.html:8
+msgid "Sign in to see your family tree."
+msgstr ""
+
+#: templates/accounts/login.html:11 templates/accounts/register.html:11
+msgid "or"
+msgstr ""
+
+#: templates/accounts/login.html:20
+msgid "Forgot your password?"
+msgstr ""
+
+#: templates/accounts/login.html:24
+msgid "No account yet?"
+msgstr ""
+
+#: templates/accounts/login.html:24 templates/accounts/register.html:3 templates/accounts/register.html:7 templates/base.html:108
+msgid "Sign up"
+msgstr ""
+
+#: templates/accounts/password_change.html:3 templates/accounts/password_change.html:7 templates/accounts/settings_security.html:6
+msgid "Change password"
+msgstr ""
+
+#: templates/accounts/password_change.html:14 templates/accounts/password_reset_confirm.html:11 templates/accounts/settings.html:15 templates/accounts/settings.html:54 templates/accounts/settings_security.html:10 templates/friends/contact_form.html:22 templates/genealogy/event_form.html:31 templates/genealogy/marriage_form.html:15 templates/genealogy/person_form.html:21 templates/genealogy/relative_form.html:24 templates/genealogy/story_form.html:15 templates/notify/settings.html:77
+msgid "Save"
+msgstr ""
+
+#: templates/accounts/password_reset.html:3 templates/accounts/password_reset.html:7
+msgid "Reset your password"
+msgstr ""
+
+#: templates/accounts/password_reset.html:8
+msgid "Enter the email address of your account. We will send you a link for setting a new password."
+msgstr ""
+
+#: templates/accounts/password_reset.html:12
+msgid "Send the link"
+msgstr ""
+
+#: templates/accounts/password_reset_complete.html:3 templates/accounts/password_reset_complete.html:6
+msgid "Password changed"
+msgstr ""
+
+#: templates/accounts/password_reset_complete.html:7
+msgid "Your new password has been saved. You can now sign in."
+msgstr ""
+
+#: templates/accounts/password_reset_confirm.html:3 templates/accounts/password_reset_confirm.html:6
+msgid "Set a new password"
+msgstr ""
+
+#: templates/accounts/password_reset_confirm.html:14
+msgid "This link is no longer valid, possibly because it has already been used. Please request a new one."
+msgstr ""
+
+#: templates/accounts/password_reset_confirm.html:15
+msgid "Request a new link"
+msgstr ""
+
+#: templates/accounts/password_reset_done.html:3 templates/accounts/password_reset_done.html:6
+msgid "Check your email"
+msgstr ""
+
+#: templates/accounts/password_reset_done.html:7
+msgid "If an account with this email address exists, we have sent instructions for setting a new password. The email should arrive within a few minutes."
+msgstr ""
+
+#: templates/accounts/register.html:25 templates/core/landing.html:11
+msgid "Create an account"
+msgstr ""
+
+#: templates/accounts/register.html:29
+msgid "Already have an account?"
+msgstr ""
+
+#: templates/accounts/settings.html:3 templates/accounts/settings_base.html:6 templates/accounts/settings_base.html:10 templates/base.html:96
+msgid "Settings"
+msgstr ""
+
+#: templates/accounts/settings.html:16 templates/base.html:95
+msgid "My record in the tree"
+msgstr ""
+
+#: templates/accounts/settings.html:24
+msgid "The whole site, reminders, Telegram messages and PDF downloads use this language."
+msgstr ""
+
+#: templates/accounts/settings.html:35
+msgid "Appearance"
+msgstr ""
+
+#: templates/accounts/settings.html:45
+msgid "Theme on this device"
+msgstr ""
+
+#: templates/accounts/settings.html:47
+msgid "Light"
+msgstr ""
+
+#: templates/accounts/settings.html:48
+msgid "Dark"
+msgstr ""
+
+#: templates/accounts/settings.html:49
+msgid "Automatic"
+msgstr ""
+
+#: templates/accounts/settings_base.html:11
+msgid "General"
+msgstr ""
+
+#: templates/accounts/settings_base.html:12 templates/core/landing.html:41 templates/genealogy/events.html:40 templates/notify/settings.html:64
+msgid "Reminders"
+msgstr ""
+
+#: templates/accounts/settings_base.html:13 templates/accounts/settings_security.html:3
+msgid "Security"
+msgstr ""
+
+#: templates/accounts/settings_base.html:14 templates/accounts/settings_data.html:3
+msgid "Your data"
+msgstr ""
+
+#: templates/accounts/settings_data.html:6 templates/genealogy/tree.html:35
+msgid "Download"
+msgstr ""
+
+#: templates/accounts/settings_data.html:7
+#, python-format
+msgid "Your archive: %(counter)s person"
+msgid_plural "Your archive: %(counter)s people"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/accounts/settings_data.html:7
+#, python-format
+msgid "%(counter)s event"
+msgid_plural "%(counter)s events"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/accounts/settings_data.html:7
+#, python-format
+msgctxt "count"
+msgid "%(counter)s story"
+msgid_plural "%(counter)s stories"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/accounts/settings_data.html:7
+#, python-format
+msgctxt "count"
+msgid "%(counter)s friend"
+msgid_plural "%(counter)s friends"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/accounts/settings_data.html:11
+msgid "Complete archive (JSON)"
+msgstr ""
+
+#: templates/accounts/settings_data.html:11
+msgid "Everything, with photos. For a backup or moving to another server."
+msgstr ""
+
+#: templates/accounts/settings_data.html:15
+msgid "Family book (PDF)"
+msgstr ""
+
+#: templates/accounts/settings_data.html:15
+msgid "Every person with dates, family and life story, ready to print."
+msgstr ""
+
+#: templates/accounts/settings_data.html:19
+msgid "For other genealogy programs (MyHeritage, Ancestry, Gramps…)."
+msgstr ""
+
+#: templates/accounts/settings_data.html:25
+msgid "Import an archive"
+msgstr ""
+
+#: templates/accounts/settings_data.html:27
+msgid "Load a complete archive (JSON) downloaded from Shajara — for example from another server. Your tree must be empty."
+msgstr ""
+
+#: templates/accounts/settings_data.html:30
+msgid "Import"
+msgstr ""
+
+#: templates/accounts/settings_data.html:39
+msgid "Your account and your whole family archive will be deleted permanently."
+msgstr ""
+
+#: templates/accounts/settings_security.html:6
+msgid "Set a password"
+msgstr ""
+
+#: templates/accounts/settings_security.html:7
+msgid "You sign in with Google. A password lets you sign in without Google too."
+msgstr ""
+
+#: templates/accounts/settings_security.html:19 templates/friends/sharing.html:24
+msgid "Connected"
+msgstr ""
+
+#: templates/accounts/settings_security.html:21 templates/notify/settings.html:24
+msgid "Disconnect"
+msgstr ""
+
+#: templates/accounts/settings_security.html:24
+msgid "Connect your Google account to sign in with one click."
+msgstr ""
+
+#: templates/accounts/settings_security.html:26
+msgid "Connect Google"
+msgstr ""
+
+#: templates/accounts/settings_security.html:29
+msgid "Sign-in with Google is not set up on this server."
+msgstr ""
+
+#: templates/accounts/settings_security.html:34
+msgid "Other devices"
+msgstr ""
+
+#: templates/accounts/settings_security.html:39
+#, python-format
+msgid "Signed in on %(counter)s other device"
+msgid_plural "Signed in on %(counter)s other devices"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/accounts/settings_security.html:41
+msgid "Only this device is signed in"
+msgstr ""
+
+#: templates/accounts/settings_security.html:43
+msgid "If you signed in on someone else's computer, sign out there from here."
+msgstr ""
+
+#: templates/accounts/settings_security.html:47
+msgid "Sign out everywhere else"
+msgstr ""
+
+#: templates/base.html:6 templates/base.html:32 templates/base.html:132
+msgctxt "site name"
+msgid "Family tree"
+msgstr "Shajara"
+
+#: templates/base.html:7 templates/base.html:155
+msgid "Family tree — a family archive for Uzbek families."
+msgstr "Shajara — a family archive for Uzbek families."
+
+#: templates/base.html:26
+msgid "Skip to content"
+msgstr ""
+
+#: templates/base.html:37 templates/friends/list.html:21 templates/friends/sharing.html:15 templates/friends/sharing.html:17 templates/genealogy/people_list.html:16 templates/genealogy/search.html:3 templates/genealogy/search.html:7 templates/genealogy/search.html:9
+msgid "Search"
+msgstr ""
+
+#: templates/base.html:38
+msgid "Search relatives…"
+msgstr ""
+
+#: templates/base.html:46
+msgid "Colour theme"
+msgstr ""
+
+#: templates/base.html:64 templates/notify/list.html:12
+msgid "Mark all as read"
+msgstr ""
+
+#: templates/base.html:76 templates/notify/list.html:28
+msgid "No notifications yet."
+msgstr ""
+
+#: templates/base.html:79
+msgid "All notifications"
+msgstr ""
+
+#: templates/base.html:80 templates/base.html:97 templates/genealogy/events.html:42 templates/notify/list.html:14 templates/notify/settings.html:3
+msgid "Reminder settings"
+msgstr ""
+
+#: templates/base.html:85
+msgid "Account"
+msgstr ""
+
+#: templates/base.html:98 templates/core/landing.html:61 templates/friends/list.html:70 templates/friends/list.html:72 templates/friends/sharing.html:3 templates/friends/sharing.html:6
+msgid "Share the family tree"
+msgstr ""
+
+#: templates/base.html:99 templates/core/control_panel.html:3 templates/core/control_panel.html:6
+msgid "Control panel"
+msgstr ""
+
+#: templates/base.html:102
+msgid "Sign out"
+msgstr ""
+
+#: templates/base.html:114 templates/base.html:130
+msgid "Main menu"
+msgstr ""
+
+#: templates/base.html:115 templates/base.html:131 templates/core/dashboard.html:3
+msgid "Home"
+msgstr ""
+
+#: templates/base.html:116 templates/genealogy/tree.html:3
+msgid "My family tree"
+msgstr ""
+
+#: templates/base.html:117 templates/genealogy/people_list.html:3 templates/genealogy/people_list.html:7
+msgid "My relatives"
+msgstr ""
+
+#: templates/base.html:120 templates/friends/list.html:3 templates/friends/list.html:30
+msgid "My friends"
+msgstr ""
+
+#: templates/base.html:121 templates/core/dashboard.html:81 templates/genealogy/calculator.html:3 templates/genealogy/calculator.html:7
+msgid "Who is who?"
+msgstr ""
+
+#: templates/base.html:133
+msgid "Relatives"
+msgstr ""
+
+#: templates/base.html:148
+msgid "Close"
+msgstr ""
+
+#: templates/core/control_panel.html:7
+msgid "The state of the whole site. Only administrators see this page."
+msgstr ""
+
+#: templates/core/control_panel.html:10
+msgid "Full backup (JSON)"
+msgstr ""
+
+#: templates/core/control_panel.html:11
+msgid "Database administration"
+msgstr ""
+
+#: templates/core/control_panel.html:21
+msgid "New users"
+msgstr ""
+
+#: templates/core/control_panel.html:31
+msgid "Services"
+msgstr ""
+
+#: templates/core/control_panel.html:33
+msgid "Address"
+msgstr ""
+
+#: templates/core/control_panel.html:34
+#, python-format
+msgid "%(size)s MB"
+msgstr ""
+
+#: templates/core/control_panel.html:35
+msgid "Sign in with Google"
+msgstr ""
+
+#: templates/core/control_panel.html:36
+msgid "Reminders (cron)"
+msgstr ""
+
+#: templates/core/control_panel.html:36
+msgid "every hour"
+msgstr ""
+
+#: templates/core/control_panel.html:37
+msgid "Telegram bot"
+msgstr ""
+
+#: templates/core/control_panel.html:38
+msgid "Token not accepted by Telegram"
+msgstr ""
+
+#: templates/core/control_panel.html:40
+msgid "Webhook"
+msgstr ""
+
+#: templates/core/control_panel.html:41
+msgid "Not connected"
+msgstr ""
+
+#: templates/core/control_panel.html:47
+msgid "Connect the bot to the site"
+msgstr ""
+
+#: templates/core/control_panel.html:52
+msgid "Moving to another server"
+msgstr ""
+
+#: templates/core/control_panel.html:53
+msgid "Download the full backup and load it on the new server with the command below. Photos are stored in the database and move with it."
+msgstr ""
+
+#: templates/core/dashboard.html:8
+#, python-format
+msgid "Welcome, %(name)s!"
+msgstr ""
+
+#: templates/core/dashboard.html:9
+msgid "Here is what is happening in your family archive."
+msgstr ""
+
+#: templates/core/dashboard.html:10
+#, python-format
+msgid "This is the year of the %(animal)s"
+msgstr ""
+
+#: templates/core/dashboard.html:13
+msgid "View the family tree"
+msgstr ""
+
+#: templates/core/dashboard.html:14 templates/genealogy/people_list.html:12 templates/genealogy/person_form.html:3 templates/genealogy/person_form.html:7 templates/genealogy/relative_form.html:3 templates/genealogy/relative_form.html:7 templates/genealogy/tree.html:57
+msgid "Add a new relative"
+msgstr ""
+
+#: templates/core/dashboard.html:22
+msgid "Add your date of birth"
+msgstr ""
+
+#: templates/core/dashboard.html:23
+msgid "Then your brothers and sisters are named correctly as aka, uka, opa or singil."
+msgstr "Then your brothers and sisters are named correctly as older or younger."
+
+#: templates/core/dashboard.html:25 templates/friends/list.html:31
+msgid "Add"
+msgstr ""
+
+#: templates/core/dashboard.html:30
+msgctxt "count"
+msgid "relative in the tree"
+msgid_plural "relatives in the tree"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/core/dashboard.html:31
+msgctxt "count"
+msgid "generation"
+msgid_plural "generations"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/core/dashboard.html:32
+msgctxt "count"
+msgid "friend"
+msgid_plural "friends"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/core/dashboard.html:33
+msgctxt "count"
+msgid "family event"
+msgid_plural "family events"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/core/dashboard.html:39
+msgid "Coming up"
+msgstr ""
+
+#: templates/core/dashboard.html:39
+msgid "All dates"
+msgstr ""
+
+#: templates/core/dashboard.html:51
+msgid "Nothing in the next 30 days. Add birthdays and family events so that you never forget them."
+msgstr ""
+
+#: templates/core/dashboard.html:56
+msgid "Recently updated"
+msgstr ""
+
+#: templates/core/dashboard.html:63 templates/genealogy/_people_grid.html:8
+msgid "No relatives have been added yet."
+msgstr ""
+
+#: templates/core/dashboard.html:64
+msgid "Start with your parents: add your father and mother, then your grandparents."
+msgstr ""
+
+#: templates/core/dashboard.html:67
+msgid "Add your father"
+msgstr ""
+
+#: templates/core/dashboard.html:68
+msgid "Add your mother"
+msgstr ""
+
+#: templates/core/dashboard.html:77
+msgid "Quick actions"
+msgstr ""
+
+#: templates/core/dashboard.html:79 templates/genealogy/event_form.html:3 templates/genealogy/event_form.html:6 templates/genealogy/events.html:10
+msgid "Add a family event"
+msgstr ""
+
+#: templates/core/dashboard.html:80 templates/friends/contact_form.html:3 templates/friends/contact_form.html:6 templates/friends/list.html:10 templates/friends/list.html:50 templates/genealogy/person_detail.html:68
+msgid "Add a friend"
+msgstr ""
+
+#: templates/core/dashboard.html:82 templates/genealogy/person_detail.html:80 templates/genealogy/story_form.html:3 templates/genealogy/story_form.html:6 templates/genealogy/story_list.html:8
+msgid "Write a story"
+msgstr ""
+
+#: templates/core/dashboard.html:87
+msgid "Requests to share a family tree"
+msgstr ""
+
+#: templates/core/dashboard.html:93 templates/friends/sharing.html:29 templates/friends/sharing.html:67
+msgid "Accept"
+msgstr ""
+
+#: templates/core/dashboard.html:94 templates/friends/sharing.html:68
+msgid "Decline"
+msgstr ""
+
+#: templates/core/dashboard.html:102
+msgid "Downloads"
+msgstr ""
+
+#: templates/core/dashboard.html:104 templates/genealogy/tree.html:39
+msgid "Family tree book (PDF)"
+msgstr ""
+
+#: templates/core/dashboard.html:105 templates/genealogy/tree.html:37
+msgid "Family tree (PDF)"
+msgstr ""
+
+#: templates/core/dashboard.html:106
+msgid "GEDCOM file (for other genealogy programs)"
+msgstr ""
+
+#: templates/core/landing.html:3
+msgid "Welcome"
+msgstr ""
+
+#: templates/core/landing.html:7
+msgid "For Uzbek families"
+msgstr ""
+
+#: templates/core/landing.html:8
+msgid "Keep your family’s <em>history</em> in one place"
+msgstr ""
+
+#: templates/core/landing.html:9
+msgid "Build your family tree, record the life stories of your relatives and share them with your family. In Uzbek (Latin or Cyrillic), Russian or English."
+msgstr ""
+
+#: templates/core/landing.html:37
+msgid "Relationship names are worked out for you: aka and uka, amaki and togʻa, kelin and kuyov."
+msgstr "Relationship names are worked out for you: older and younger brother, paternal and maternal uncle, son- and daughter-in-law."
+
+#: templates/core/landing.html:42
+msgid "Birthdays, anniversaries, memorial days and family events — on the site and in Telegram."
+msgstr ""
+
+#: templates/core/landing.html:46
+msgid "Life stories"
+msgstr ""
+
+#: templates/core/landing.html:47
+msgid "Write down biographies and family stories so that they are not forgotten."
+msgstr ""
+
+#: templates/core/landing.html:51 templates/genealogy/events.html:48
+msgid "Family chronicle"
+msgstr ""
+
+#: templates/core/landing.html:52 templates/genealogy/events.html:64
+msgid "Record weddings, births, celebrations and memorial gatherings so the family remembers them."
+msgstr ""
+
+#: templates/core/landing.html:56 templates/genealogy/person_detail.html:18
+msgid "Download as PDF"
+msgstr ""
+
+#: templates/core/landing.html:57
+msgid "Download the family tree or a relative's biography as a PDF in the language you use."
+msgstr ""
+
+#: templates/core/landing.html:62 templates/friends/list.html:71
+msgid "Relatives who have their own account on the site can see your family tree once you connect."
+msgstr ""
+
+#: templates/friends/contact_form.html:3 templates/friends/list.html:41 templates/genealogy/event_detail.html:20 templates/genealogy/event_form.html:3 templates/genealogy/person_detail.html:19 templates/genealogy/person_form.html:3 templates/genealogy/story_detail.html:14 templates/genealogy/story_form.html:3
+msgid "Edit"
+msgstr ""
+
+#: templates/friends/contact_form.html:17
+msgid "The day and month are enough for a birthday reminder."
+msgstr ""
+
+#: templates/friends/contact_form.html:24 templates/genealogy/confirm_delete.html:3 templates/genealogy/event_detail.html:21 templates/genealogy/person_detail.html:142 templates/genealogy/story_detail.html:15
+msgid "Delete"
+msgstr ""
+
+#: templates/friends/list.html:8
+msgid "Friends of anyone in your family: your own, your father’s, your grandmother’s. Their birthdays are remembered too."
+msgstr ""
+
+#: templates/friends/list.html:15 templates/genealogy/people_list.html:23
+msgid "Everyone"
+msgstr ""
+
+#: templates/friends/list.html:22 templates/genealogy/people_list.html:19 templates/genealogy/search.html:13
+msgid "Name in Latin or Cyrillic…"
+msgstr ""
+
+#: templates/friends/list.html:30
+#, python-format
+msgid "Friends of %(name)s"
+msgstr ""
+
+#: templates/friends/list.html:48 templates/friends/sharing.html:34 templates/genealogy/_people_grid.html:6 templates/genealogy/_search_results.html:6
+msgid "No results found."
+msgstr ""
+
+#: templates/friends/list.html:48
+msgid "No friends yet."
+msgstr ""
+
+#: templates/friends/list.html:49
+msgid "Add your friends, and your parents’ and grandparents’ friends, so that their names and stories are not forgotten."
+msgstr ""
+
+#: templates/friends/list.html:56
+msgid "Friends’ birthdays"
+msgstr ""
+
+#: templates/friends/list.html:66
+msgid "No birthdays in the next weeks."
+msgstr ""
+
+#: templates/friends/sharing.html:7
+msgid "Connected people can view each other's family trees and stories, but cannot change them."
+msgstr ""
+
+#: templates/friends/sharing.html:13
+msgid "Find people"
+msgstr ""
+
+#: templates/friends/sharing.html:16
+msgid "Name or username…"
+msgstr ""
+
+#: templates/friends/sharing.html:25
+msgid "Request sent"
+msgstr ""
+
+#: templates/friends/sharing.html:29
+msgid "Send a request"
+msgstr ""
+
+#: templates/friends/sharing.html:41
+msgid "Connected people"
+msgstr ""
+
+#: templates/friends/sharing.html:49
+msgid "Remove"
+msgstr ""
+
+#: templates/friends/sharing.html:55
+msgid "You are not connected with anyone yet."
+msgstr ""
+
+#: templates/friends/sharing.html:55
+msgid "Find your relatives by name and send them a request."
+msgstr ""
+
+#: templates/friends/sharing.html:62
+msgid "Incoming requests"
+msgstr ""
+
+#: templates/friends/sharing.html:72
+msgid "No new requests."
+msgstr ""
+
+#: templates/friends/sharing.html:76
+msgid "Sent requests"
+msgstr ""
+
+#: templates/friends/sharing.html:85
+msgid "You have not sent any requests."
+msgstr ""
+
+#: templates/genealogy/_people_grid.html:6 templates/genealogy/_search_results.html:6
+msgid "Try another spelling; Latin and Cyrillic both work."
+msgstr ""
+
+#: templates/genealogy/_person_fields.html:3
+msgid "Name"
+msgstr ""
+
+#: templates/genealogy/_person_fields.html:12
+msgid "Birth and death"
+msgstr ""
+
+#: templates/genealogy/_person_fields.html:13
+msgid "If only the year is known, enter just the year."
+msgstr ""
+
+#: templates/genealogy/_person_fields.html:28
+msgid "Life"
+msgstr ""
+
+#: templates/genealogy/_search_results.html:3
+#, python-format
+msgid "%(counter)s result"
+msgid_plural "%(counter)s results"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/genealogy/calculator.html:8
+msgid "Choose two people to see how they are related and through whom."
+msgstr ""
+
+#: templates/genealogy/calculator.html:12
+msgid "First person"
+msgstr ""
+
+#: templates/genealogy/calculator.html:14 templates/genealogy/calculator.html:24 templates/partials/person_picker.html:6
+msgid "Type a name…"
+msgstr ""
+
+#: templates/genealogy/calculator.html:21
+msgid "Swap"
+msgstr ""
+
+#: templates/genealogy/calculator.html:22
+msgid "Second person"
+msgstr ""
+
+#: templates/genealogy/calculator.html:36
+msgid "relative"
+msgstr ""
+
+#: templates/genealogy/calculator.html:37
+#, python-format
+msgid "And %(a)s is “%(rel)s” to %(b)s."
+msgstr ""
+
+#: templates/genealogy/calculator.html:38
+msgid "How they are connected"
+msgstr ""
+
+#: templates/genealogy/calculator.html:46
+msgid "Each arrow shows who the next person is to the previous one."
+msgstr ""
+
+#: templates/genealogy/calculator.html:48
+msgid "These two people are not connected in the tree yet."
+msgstr ""
+
+#: templates/genealogy/confirm_delete.html:6
+msgid "Are you sure you want to delete this?"
+msgstr ""
+
+#: templates/genealogy/confirm_delete.html:8
+msgid "This cannot be undone."
+msgstr ""
+
+#: templates/genealogy/confirm_delete.html:11
+msgid "Yes, delete"
+msgstr ""
+
+#: templates/genealogy/event_detail.html:10 templates/genealogy/event_form.html:15
+msgid "Date"
+msgstr ""
+
+#: templates/genealogy/event_detail.html:10
+msgid "remembered every year"
+msgstr ""
+
+#: templates/genealogy/event_detail.html:11
+msgid "Place"
+msgstr ""
+
+#: templates/genealogy/event_detail.html:14 templates/genealogy/event_form.html:22
+msgid "Who"
+msgstr ""
+
+#: templates/genealogy/event_detail.html:17 templates/genealogy/event_form.html:27
+msgid "Details"
+msgstr ""
+
+#: templates/genealogy/event_detail.html:22
+msgid "All events"
+msgstr ""
+
+#: templates/genealogy/event_form.html:10
+msgid "Event"
+msgstr ""
+
+#: templates/genealogy/event_form.html:17
+msgid "A future date is allowed: a planned wedding, an expected baby."
+msgstr ""
+
+#: templates/genealogy/event_form.html:24
+msgid "Hold Ctrl (⌘ on a Mac) to choose several people."
+msgstr ""
+
+#: templates/genealogy/events.html:8
+msgid "Birthdays, anniversaries, memorial days and family events: weddings, a baby on the way, celebrations."
+msgstr ""
+
+#: templates/genealogy/events.html:15
+#, python-format
+msgid "Next %(counter)s day"
+msgid_plural "Next %(counter)s days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/genealogy/events.html:27
+msgid "No dates coming up."
+msgstr ""
+
+#: templates/genealogy/events.html:28
+msgid "Birthdays appear here when a relative’s day and month of birth are known."
+msgstr ""
+
+#: templates/genealogy/events.html:34
+msgid "Add quickly"
+msgstr ""
+
+#: templates/genealogy/events.html:41
+msgid "You can be reminded of these dates on the site and in Telegram."
+msgstr ""
+
+#: templates/genealogy/events.html:51
+msgid "Date unknown"
+msgstr ""
+
+#: templates/genealogy/events.html:63 templates/genealogy/person_detail.html:62
+msgid "No events have been added yet."
+msgstr ""
+
+#: templates/genealogy/marriage_form.html:3 templates/genealogy/marriage_form.html:7 templates/genealogy/person_detail.html:112
+msgid "Marriage details"
+msgstr ""
+
+#: templates/genealogy/marriage_form.html:11
+msgid "Wedding date"
+msgstr ""
+
+#: templates/genealogy/marriage_form.html:13
+msgid "With the day and month, you will be reminded of the wedding anniversary."
+msgstr ""
+
+#: templates/genealogy/marriage_form.html:18
+msgid "Delete the marriage record"
+msgstr ""
+
+#: templates/genealogy/people_list.html:8
+#, python-format
+msgid "%(counter)s person in your family tree"
+msgid_plural "%(counter)s people in your family tree"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/genealogy/people_list.html:11
+msgid "Download the family tree book (PDF)"
+msgstr ""
+
+#: templates/genealogy/people_list.html:24
+msgid "Living"
+msgstr ""
+
+#: templates/genealogy/people_list.html:25
+msgid "Deceased"
+msgstr ""
+
+#: templates/genealogy/people_list.html:26
+msgid "Men"
+msgstr ""
+
+#: templates/genealogy/people_list.html:27
+msgid "Women"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:11
+msgctxt "female"
+msgid "deceased"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:11
+msgctxt "male"
+msgid "deceased"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:14
+#, python-format
+msgid "From %(owner)s's family tree"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:17
+msgid "Show in the family tree"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:29
+msgid "Patronymic"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:37
+msgid "Age"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:37
+#, python-format
+msgid "%(years)s (at death)"
+msgid_plural "%(years)s (at death)"
+msgstr[0] "%(years)s year (at death)"
+msgstr[1] "%(years)s years (at death)"
+
+#: templates/genealogy/person_detail.html:37
+#, python-format
+msgid "%(years)s year old"
+msgid_plural "%(years)s years old"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/genealogy/person_detail.html:37
+msgid "approximately"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:38
+msgid "Animal year (muchal)"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:38
+msgid "the birth date is needed to be sure"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:38
+#, python-format
+msgid "Next muchal year: %(year)s"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:46
+msgid "No biography has been written yet."
+msgstr ""
+
+#: templates/genealogy/person_detail.html:50
+msgid "No life story has been written yet."
+msgstr ""
+
+#: templates/genealogy/person_detail.html:55
+msgid "Add an event"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:74
+msgid "No friends have been added yet."
+msgstr ""
+
+#: templates/genealogy/person_detail.html:85 templates/genealogy/story_list.html:23
+msgid "No stories have been added yet."
+msgstr ""
+
+#: templates/genealogy/person_detail.html:97
+msgid "Add father"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:98 templates/genealogy/person_detail.html:104 templates/genealogy/person_detail.html:114 templates/genealogy/person_detail.html:122 templates/genealogy/person_detail.html:130
+msgid "Not specified"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:103
+msgid "Add mother"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:113
+msgid "Add spouse"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:121
+msgid "Add child"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:129
+msgid "Add brother or sister"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:136
+msgid "Actions"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:140
+msgid "This is me"
+msgstr ""
+
+#: templates/genealogy/person_detail.html:145
+#, python-format
+msgid "Last updated: %(date)s"
+msgstr ""
+
+#: templates/genealogy/person_form.html:8
+msgid "Edit personal details"
+msgstr ""
+
+#: templates/genealogy/person_form.html:14
+msgid "Parents"
+msgstr ""
+
+#: templates/genealogy/relative_form.html:8
+#, python-format
+msgid "Relative of %(name)s"
+msgstr ""
+
+#: templates/genealogy/relative_form.html:16
+msgid "Type a name, or leave empty to add a new person"
+msgstr ""
+
+#: templates/genealogy/relative_form.html:20
+#, python-format
+msgid "For a son, the surname is suggested from his paternal grandfather’s name: %(surname)s. You can change it."
+msgstr ""
+
+#: templates/genealogy/story_list.html:7
+msgid "Family memories, traditions and events, written down so they are not forgotten."
+msgstr ""
+
+#: templates/genealogy/story_list.html:23
+msgid "Write down what the older generation remembers."
+msgstr ""
+
+#: templates/genealogy/tree.html:13
+msgid "Person in the centre"
+msgstr ""
+
+#: templates/genealogy/tree.html:15
+msgid "Choose a person by name…"
+msgstr ""
+
+#: templates/genealogy/tree.html:20
+msgid "What to show"
+msgstr ""
+
+#: templates/genealogy/tree.html:21
+msgid "Compact view"
+msgstr ""
+
+#: templates/genealogy/tree.html:22
+msgid "Open everything"
+msgstr ""
+
+#: templates/genealogy/tree.html:25
+msgid "Zoom out"
+msgstr ""
+
+#: templates/genealogy/tree.html:27
+msgid "Zoom in"
+msgstr ""
+
+#: templates/genealogy/tree.html:29
+msgid "Fit to screen"
+msgstr ""
+
+#: templates/genealogy/tree.html:33
+msgid "Open profile"
+msgstr ""
+
+#: templates/genealogy/tree.html:38
+msgid "Image (PNG)"
+msgstr ""
+
+#: templates/genealogy/tree.html:42
+msgid "Add a relative"
+msgstr ""
+
+#: templates/genealogy/tree.html:46
+msgid "Loading the family tree…"
+msgstr ""
+
+#: templates/genealogy/tree.html:49
+msgid "Man"
+msgstr ""
+
+#: templates/genealogy/tree.html:50
+msgid "Woman"
+msgstr ""
+
+#: templates/genealogy/tree.html:51
+msgid "Married couple"
+msgstr ""
+
+#: templates/genealogy/tree.html:52
+msgid "Show hidden relatives"
+msgstr ""
+
+#: templates/notify/list.html:8
+msgid "Reminders about birthdays, anniversaries, memorial days and family events."
+msgstr ""
+
+#: templates/notify/list.html:29
+msgid "Reminders appear here on the day, and in advance if you choose so in the settings."
+msgstr ""
+
+#: templates/notify/settings.html:13
+msgid "Telegram is connected"
+msgstr ""
+
+#: templates/notify/settings.html:13
+msgid "Telegram messages are paused"
+msgstr ""
+
+#: templates/notify/settings.html:14
+#, python-format
+msgid "bot @%(bot)s"
+msgstr ""
+
+#: templates/notify/settings.html:17
+#, python-format
+msgid "Reminders come to Telegram every day at %(hour)s:00. In the bot: /next — upcoming dates, /stop — turn off."
+msgstr ""
+
+#: templates/notify/settings.html:20
+msgid "Send a test message"
+msgstr ""
+
+#: templates/notify/settings.html:22
+msgid "Pause"
+msgstr ""
+
+#: templates/notify/settings.html:22
+msgid "Resume"
+msgstr ""
+
+#: templates/notify/settings.html:30
+msgid "Open the bot in the Telegram app"
+msgstr ""
+
+#: templates/notify/settings.html:32
+#, python-format
+msgid "Open @%(bot)s"
+msgstr ""
+
+#: templates/notify/settings.html:33
+msgid "Telegram Web"
+msgstr ""
+
+#: templates/notify/settings.html:37
+msgid "Press “Start” — or send the bot this code:"
+msgstr ""
+
+#: templates/notify/settings.html:40
+msgid "Copy"
+msgstr ""
+
+#: templates/notify/settings.html:42
+msgid "The code works for one hour."
+msgstr ""
+
+#: templates/notify/settings.html:45
+msgid "Done: this page updates by itself."
+msgstr ""
+
+#: templates/notify/settings.html:46
+msgid "Waiting for Telegram…"
+msgstr ""
+
+#: templates/notify/settings.html:51
+msgid "On your phone: scan with the camera"
+msgstr ""
+
+#: templates/notify/settings.html:55
+msgid "Get a new code"
+msgstr ""
+
+#: templates/notify/settings.html:65
+msgid "Reminders are only for you. Turn on what you need."
+msgstr ""
+
+#: templates/notify/settings.html:68
+msgid "What to remind me of"
+msgstr ""
+
+#: templates/notify/settings.html:72
+msgid "When"
+msgstr ""
+
+#: templates/notify/settings.html:74
+msgid "You are also reminded on the day itself."
+msgstr ""
+
+#: templates/partials/google_button.html:4 templates/socialaccount/login.html:8
+msgid "Continue with Google"
+msgstr ""
+
+#: templates/registration/password_reset_email.txt:1
+#, python-format
+msgid "Hello, %(name)s!"
+msgstr ""
+
+#: templates/registration/password_reset_email.txt:3
+msgid "We received a request to set a new password for your family tree account. To choose a new password, open this link:"
+msgstr ""
+
+#: templates/registration/password_reset_email.txt:7
+#, python-format
+msgid "Your username: %(username)s"
+msgstr ""
+
+#: templates/registration/password_reset_email.txt:9
+msgid "If you did not ask for this, you can ignore this email; your password will not change."
+msgstr ""
+
+#: templates/registration/password_reset_subject.txt:1
+msgid "Setting a new password"
+msgstr ""
+
+#: templates/socialaccount/authentication_error.html:6 templates/socialaccount/signup.html:6
+msgid "Could not sign in with Google"
+msgstr ""
+
+#: templates/socialaccount/authentication_error.html:7 templates/socialaccount/signup.html:7
+msgid "Something went wrong while signing in. Please try again."
+msgstr ""
+
+#: templates/socialaccount/login_cancelled.html:6
+msgid "Sign-in was cancelled"
+msgstr ""
+
+#: templates/socialaccount/login_cancelled.html:7
+msgid "You can try again or sign in with a username and password."
+msgstr ""

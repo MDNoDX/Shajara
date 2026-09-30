@@ -145,10 +145,12 @@ def control_panel(request):
 
     from .models import StoredFile
 
-    webhook = None
+    webhook, bot = None, {}
     if telegram.configured():
+        bot = telegram.bot_info()
         try:
-            webhook = telegram.call("getWebhookInfo", http_timeout=8)
+            webhook = telegram.webhook_info()
+            webhook["ok"] = webhook.get("url") == telegram.webhook_url()
         except telegram.TelegramError as exc:
             webhook = {"error": str(exc)}
     users = get_user_model().objects
@@ -165,7 +167,7 @@ def control_panel(request):
         ],
         "photo_mb": round((StoredFile.objects.aggregate(s=Sum("size"))["s"] or 0) / 1024 / 1024, 1),
         "recent_users": users.order_by("-date_joined")[:10],
-        "telegram": telegram.configured(), "webhook": webhook, "cron": bool(settings.CRON_SECRET),
+        "telegram": telegram.configured(), "webhook": webhook, "bot": bot, "cron": bool(settings.CRON_SECRET),
         "google": bool(settings.GOOGLE_CLIENT_ID), "site_url": settings.SITE_URL,
     })
 
@@ -190,12 +192,13 @@ def full_backup(request):
 @user_passes_test(_superuser)
 def set_telegram_webhook(request):
     from django.contrib import messages
-    from django.urls import reverse
 
     from apps.notify import telegram
 
     try:
-        telegram.set_webhook(settings.SITE_URL + reverse("notify:telegram_webhook"))
+        telegram.bot_info(refresh=True)
+        telegram.set_webhook()
+        telegram.set_commands()
         messages.success(request, _("The Telegram bot is connected to the site."))
     except telegram.TelegramError as exc:
         messages.error(request, str(exc))

@@ -1,0 +1,51 @@
+{% extends "accounts/settings_base.html" %}
+{% load i18n socialaccount %}
+{% block title %}{% translate "Security" %}{% endblock %}
+{% block settings %}
+<section class="card" id="password">
+  <h2>{% if has_password %}{% translate "Change password" %}{% else %}{% translate "Set a password" %}{% endif %}</h2>
+  {% if not has_password %}<p class="muted small">{% translate "You sign in with Google. A password lets you sign in without Google too." %}</p>{% endif %}
+  <form method="post" novalidate>{% csrf_token %}
+    {% for field in form %}{% include "partials/field.html" %}{% endfor %}
+    <div class="form-actions"><button class="btn btn-primary" name="save_password" type="submit">{% translate "Save" %}</button></div>
+  </form>
+</section>
+
+<section class="card" id="google">
+  <h2>Google</h2>
+  {% if google_account %}
+    <div class="setting-row">
+      <span class="setting-icon ok">{% include "partials/icon.html" with name="check" %}</span>
+      <div class="spacer"><b>{% translate "Connected" %}</b>{% if google_email %}<div class="muted small">{{ google_email }}</div>{% endif %}</div>
+      <form method="post" action="{% url 'accounts:google_disconnect' %}">{% csrf_token %}
+        <button class="btn btn-sm" type="submit" data-confirm>{% translate "Disconnect" %}</button></form>
+    </div>
+  {% elif google_login %}
+    <p class="muted small">{% translate "Connect your Google account to sign in with one click." %}</p>
+    <form method="post" action="{% provider_login_url 'google' process='connect' next=request.path %}">{% csrf_token %}
+      <button class="btn google-btn" type="submit">{% include "partials/google_logo.html" %}{% translate "Connect Google" %}</button>
+    </form>
+  {% else %}
+    <p class="muted small">{% translate "Sign-in with Google is not set up on this server." %}</p>
+  {% endif %}
+</section>
+
+<section class="card" id="devices">
+  <h2>{% translate "Other devices" %}</h2>
+  <div class="setting-row">
+    <span class="setting-icon">{% include "partials/icon.html" with name="phone" %}</span>
+    <div class="spacer">
+      {% if other_sessions %}
+        <b>{% blocktranslate count counter=other_sessions %}Signed in on {{ counter }} other device{% plural %}Signed in on {{ counter }} other devices{% endblocktranslate %}</b>
+      {% else %}
+        <b>{% translate "Only this device is signed in" %}</b>
+      {% endif %}
+      <div class="muted small">{% translate "If you signed in on someone else's computer, sign out there from here." %}</div>
+    </div>
+    {% if other_sessions %}
+    <form method="post" action="{% url 'accounts:sign_out_others' %}">{% csrf_token %}
+      <button class="btn btn-sm" type="submit">{% include "partials/icon.html" with name="logout" %}{% translate "Sign out everywhere else" %}</button></form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

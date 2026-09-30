@@ -30,16 +30,16 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
     <div class="tb-group">
-      <a class="btn btn-sm" id="tree-open" href="{{ focus.get_absolute_url }}">{% translate "Open profile" %}</a>
+      <a class="btn btn-sm" id="tree-open" href="{{ focus.get_absolute_url }}" title="{% translate 'Open profile' %}">{% include "partials/icon.html" with name="user" %}<span class="tb-label">{% translate "Open profile" %}</span></a>
       <details class="dropdown">
-        <summary class="btn btn-sm">{% include "partials/icon.html" with name="download" %}{% translate "Download" %}</summary>
+        <summary class="btn btn-sm" title="{% translate 'Download' %}">{% include "partials/icon.html" with name="download" %}<span class="tb-label">{% translate "Download" %}</span></summary>
         <div class="menu">
           <a id="tree-pdf" href="{{ pdf_url }}?person={{ focus.pk }}">{% translate "Family tree (PDF)" %}</a>
           <button type="button" id="tree-png">{% translate "Image (PNG)" %}</button>
           <a href="{% if is_owner %}{% url 'genealogy:family_book' %}{% else %}{% url 'genealogy:family_book_for' owner.username %}{% endif %}">{% translate "Family tree book (PDF)" %}</a>
         </div>
       </details>
-      {% if is_owner %}<a class="btn btn-sm btn-primary" href="{% url 'genealogy:relative_add' focus.pk %}" id="add-relative">{% include "partials/icon.html" with name="plus" %}{% translate "Add a relative" %}</a>{% endif %}
+      {% if is_owner %}<a class="btn btn-sm btn-primary" href="{% url 'genealogy:relative_add' focus.pk %}" id="add-relative" title="{% translate 'Add a relative' %}">{% include "partials/icon.html" with name="plus" %}<span class="tb-label">{% translate "Add a relative" %}</span></a>{% endif %}
     </div>
   </div>
   <div class="tree-view" id="tree-view" tabindex="0" aria-label="{% translate 'Family tree' context 'kinship' %}">

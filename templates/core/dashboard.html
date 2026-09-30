@@ -6,8 +6,8 @@
   <div class="banner-inner">
     <div>
       <h1>{% blocktranslate with name=user.first_name|default:user.username %}Welcome, {{ name }}!{% endblocktranslate %}</h1>
-      <p>{% translate "Here is what is happening in your family archive." %}
-        {% if cycle_animal %}<span class="muchal-badge">· {{ cycle_animal.emoji }} {% blocktranslate with animal=cycle_animal.name %}This is the year of the {{ animal }}{% endblocktranslate %}</span>{% endif %}</p>
+      <p>{% translate "Here is what is happening in your family archive." %}</p>
+      {% if cycle_animal %}<span class="banner-pill">{{ cycle_animal.emoji }} {% blocktranslate with animal=cycle_animal.name %}This is the year of the {{ animal }}{% endblocktranslate %}</span>{% endif %}
     </div>
     <div class="row">
       {% if me %}<a class="btn" href="{% url 'genealogy:tree' %}">{% include "partials/icon.html" with name="tree" %}{% translate "View the family tree" %}</a>{% endif %}

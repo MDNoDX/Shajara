@@ -4,6 +4,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
@@ -85,6 +86,9 @@ class Person(models.Model):
 
     @property
     def full_name(self):
+        """Formal name: "Madaminov Nodirbek Xolmatjon oʻgʻli"; in English "Nodirbek Madaminov"."""
+        if get_language() == "en":
+            return self.short_name
         return " ".join(p for p in (self.last_name, self.first_name, self.patronymic) if p)
 
     @property

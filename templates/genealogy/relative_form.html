@@ -13,7 +13,8 @@
   <fieldset>
     {% include "partials/field.html" with field=form.relation %}
     {% if has_spouses %}<div data-show-if-relation="child">{% include "partials/field.html" with field=form.other_parent %}</div>{% endif %}
-    {% include "partials/field.html" with field=form.existing %}
+    {% translate "Type a name, or leave empty to add a new person" as hint %}
+    {% include "partials/person_picker.html" with field=form.existing placeholder=hint %}
   </fieldset>
   <div data-new-person>
     {% if son_surname %}<p class="help">{% blocktranslate with surname=son_surname %}For a son, the surname is suggested from his paternal grandfather’s name: {{ surname }}. You can change it.{% endblocktranslate %}</p>{% endif %}

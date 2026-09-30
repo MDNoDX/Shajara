@@ -99,8 +99,14 @@ class KinshipTests(TestCase):
         self.assertNotIn(uncle.pk, ids)
         grandpa = next(n for n in compact["nodes"] if n["id"] == self.p["grandpa"].pk)
         self.assertEqual(grandpa["sibs"], {"count": 1, "open": False, "side": "left"})
-        # Parents' brothers and sisters are open by default (the aunt's family).
-        self.assertIn(self.p["cousin"].pk, ids)
+        # Parents' brothers and sisters are shown; their children (cousins)
+        # are folded behind a "+N" button until unfolded.
+        self.assertIn(self.p["aunt"].pk, ids)
+        self.assertNotIn(self.p["cousin"].pk, ids)
+        aunt = next(n for n in compact["nodes"] if n["id"] == self.p["aunt"].pk)
+        self.assertEqual(aunt["kids"], {"count": 1, "open": False})
+        unfolded = build_tree(a, self.p["me"].pk, unfolded={self.p["aunt"].pk})
+        self.assertIn(self.p["cousin"].pk, {n["id"] for n in unfolded["nodes"]})
 
         opened = build_tree(a, self.p["me"].pk, opened={self.p["grandpa"].pk})
         self.assertIn(uncle.pk, {n["id"] for n in opened["nodes"]})
@@ -148,6 +154,14 @@ class DateTests(TestCase):
             self.assertEqual(format_partial_date(2026, 9, 27), "2026 йил 27 сентябрь")
             self.assertEqual(format_partial_date(2026, 9), "2026 йил сентябрь")
             self.assertEqual(format_partial_date(1928), "1928 йил")
+        with translation.override("ru"):
+            self.assertEqual(format_partial_date(2026, 9, 27), "27 сентября 2026 г.")
+            self.assertEqual(format_partial_date(2026, 9), "сентябрь 2026 г.")
+            self.assertEqual(format_partial_date(1928), "1928 г.")
+        with translation.override("en"):
+            self.assertEqual(format_partial_date(2026, 9, 27), "September 27, 2026")
+            self.assertEqual(format_partial_date(2026, 9), "September 2026")
+            self.assertEqual(format_partial_date(1928), "1928")
 
     def test_all_months(self):
         import datetime

@@ -33,9 +33,14 @@
         <dt>{% translate "Address" %}</dt><dd>{{ site_url }}</dd>
         <dt>{% translate "Photos" %}</dt><dd>{% blocktranslate with size=photo_mb %}{{ size }} MB{% endblocktranslate %}</dd>
         <dt>{% translate "Sign in with Google" %}</dt><dd>{% if google %}✓{% else %}—{% endif %}</dd>
-        <dt>{% translate "Daily reminders (cron)" %}</dt><dd>{% if cron %}✓{% else %}—{% endif %}</dd>
-        <dt>{% translate "Telegram" %}</dt>
-        <dd>{% if telegram %}{% if webhook.url %}✓ {{ webhook.url }}{% elif webhook.error %}{{ webhook.error }}{% else %}{% translate "Not connected" %}{% endif %}{% else %}—{% endif %}</dd>
+        <dt>{% translate "Reminders (cron)" %}</dt><dd>{% if cron %}✓ {% translate "every hour" %}{% else %}—{% endif %}</dd>
+        <dt>{% translate "Telegram bot" %}</dt>
+        <dd>{% if bot.username %}<a href="https://t.me/{{ bot.username }}" target="_blank" rel="noopener">@{{ bot.username }}</a>{% elif telegram %}{% translate "Token not accepted by Telegram" %}{% else %}—{% endif %}</dd>
+        {% if telegram %}
+        <dt>{% translate "Webhook" %}</dt>
+        <dd>{% if webhook.error %}<span class="text-danger">{{ webhook.error }}</span>{% elif webhook.ok %}✓{% else %}<span class="text-danger">{% translate "Not connected" %}</span>{% endif %}
+          {% if webhook.last_error_message %}<br><span class="muted small">{{ webhook.last_error_message }}</span>{% endif %}</dd>
+        {% endif %}
       </dl>
       {% if telegram %}
       <form method="post" action="{% url 'set_telegram_webhook' %}" style="margin-top:14px">{% csrf_token %}

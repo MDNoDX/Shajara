@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
+from apps.core import timezones
 from apps.core.languages import LATIN, language_choices
 from apps.core.text import search_key
 
@@ -25,6 +26,7 @@ class User(AbstractUser):
     )
     gender = models.CharField(_("gender"), max_length=10, choices=Gender.choices, blank=True)
     palette = models.CharField(_("colours"), max_length=10, choices=Palette.choices, default=Palette.ATLAS)
+    time_zone = models.CharField(_("time zone"), max_length=40, default=timezones.DEFAULT)
     # The person in the user's own family tree who represents them.
     person = models.OneToOneField(
         "genealogy.Person",

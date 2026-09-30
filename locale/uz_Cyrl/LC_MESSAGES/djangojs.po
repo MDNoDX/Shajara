@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 07:10+0500\n"
+"POT-Creation-Date: 2026-09-30 08:21+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: Uzbek (Cyrillic)\n"
@@ -22,35 +22,39 @@ msgstr "Ростдан ҳам ўчирмоқчимисиз?"
 msgid "The photo is too large. The maximum size is %(size)s MB."
 msgstr "Расм ҳажми жуда катта. Энг кўпи %(size)s МБ бўлиши мумкин."
 
-#: static/js/app.js:65
+#: static/js/app.js:74
 msgid "Saving…"
 msgstr "Сақланмоқда…"
 
-#: static/js/app.js:86
+#: static/js/app.js:95
 msgid "Automatic"
 msgstr "Автоматик"
 
-#: static/js/app.js:86
+#: static/js/app.js:95
 msgid "Light"
 msgstr "Ёруғ"
 
-#: static/js/app.js:86
+#: static/js/app.js:95
 msgid "Dark"
 msgstr "Қоронғи"
 
-#: static/js/app.js:87
+#: static/js/app.js:96
 msgid "Colour theme"
 msgstr "Ранг мавзуси"
 
-#: static/js/app.js:113
+#: static/js/app.js:126
+msgid "Copied"
+msgstr "Нусхаланди"
+
+#: static/js/app.js:163
 msgid "Type a name to filter…"
 msgstr "Исмни ёзиб қидиринг…"
 
-#: static/js/app.js:177
+#: static/js/app.js:227
 msgid "No results found."
 msgstr "Қидирув натижаси топилмади."
 
-#: static/js/app.js:207
+#: static/js/app.js:257
 msgid "All results"
 msgstr "Барча натижалар"
 

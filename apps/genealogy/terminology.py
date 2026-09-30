@@ -63,6 +63,58 @@ KIN = {
     "relative": pgettext_lazy("kinship", "Relative"),
 }
 
+# The same terms as the owner in a longer name ("… of the grandmother"):
+# Russian needs the genitive case here (бабушки); Uzbek and English use
+# the plain word, the chain pattern adds the ending.
+KIN_OF = {
+    "father": pgettext_lazy("kinship, owner", "Father"),
+    "mother": pgettext_lazy("kinship, owner", "Mother"),
+    "son": pgettext_lazy("kinship, owner", "Son"),
+    "daughter": pgettext_lazy("kinship, owner", "Daughter"),
+    "grandfather": pgettext_lazy("kinship, owner", "Grandfather"),
+    "grandmother": pgettext_lazy("kinship, owner", "Grandmother"),
+    "great_grandfather": pgettext_lazy("kinship, owner", "Great-grandfather"),
+    "great_grandmother": pgettext_lazy("kinship, owner", "Great-grandmother"),
+    "forefather": pgettext_lazy("kinship, owner", "Distant male ancestor"),
+    "foremother": pgettext_lazy("kinship, owner", "Distant female ancestor"),
+    "grandchild": pgettext_lazy("kinship, owner", "Grandchild"),
+    "great_grandchild": pgettext_lazy("kinship, owner", "Great-grandchild"),
+    "great_great_grandchild": pgettext_lazy("kinship, owner", "Great-great-grandchild"),
+    "descendant": pgettext_lazy("kinship, owner", "Descendant"),
+    "older_brother": pgettext_lazy("kinship, owner", "Older brother"),
+    "younger_brother": pgettext_lazy("kinship, owner", "Younger brother"),
+    "brother": pgettext_lazy("kinship, owner", "Brother (age unknown)"),
+    "older_sister": pgettext_lazy("kinship, owner", "Older sister"),
+    "younger_sister": pgettext_lazy("kinship, owner", "Younger sister"),
+    "sister": pgettext_lazy("kinship, owner", "Sister (age unknown)"),
+    "paternal_uncle": pgettext_lazy("kinship, owner", "Father's brother"),
+    "paternal_aunt": pgettext_lazy("kinship, owner", "Father's sister"),
+    "maternal_uncle": pgettext_lazy("kinship, owner", "Mother's brother"),
+    "maternal_aunt": pgettext_lazy("kinship, owner", "Mother's sister"),
+    "paternal_uncle_child": pgettext_lazy("kinship, owner", "Child of father's brother"),
+    "paternal_aunt_child": pgettext_lazy("kinship, owner", "Child of father's sister"),
+    "maternal_uncle_child": pgettext_lazy("kinship, owner", "Child of mother's brother"),
+    "maternal_aunt_child": pgettext_lazy("kinship, owner", "Child of mother's sister"),
+    "nephew_niece": pgettext_lazy("kinship, owner", "Nephew or niece"),
+    "husband": pgettext_lazy("kinship, owner", "Husband"),
+    "wife": pgettext_lazy("kinship, owner", "Wife"),
+    "former_husband": pgettext_lazy("kinship, owner", "Former husband"),
+    "former_wife": pgettext_lazy("kinship, owner", "Former wife"),
+    "son_in_law": pgettext_lazy("kinship, owner", "Son-in-law"),
+    "daughter_in_law": pgettext_lazy("kinship, owner", "Daughter-in-law"),
+    "grandson_in_law": pgettext_lazy("kinship, owner", "Granddaughter's husband"),
+    "granddaughter_in_law": pgettext_lazy("kinship, owner", "Grandson's wife"),
+    "father_in_law": pgettext_lazy("kinship, owner", "Father-in-law"),
+    "mother_in_law": pgettext_lazy("kinship, owner", "Mother-in-law"),
+    "brothers_wife": pgettext_lazy("kinship, owner", "Brother's wife"),
+    "sisters_husband": pgettext_lazy("kinship, owner", "Sister's husband"),
+    "stepfather": pgettext_lazy("kinship, owner", "Stepfather"),
+    "stepmother": pgettext_lazy("kinship, owner", "Stepmother"),
+    "stepson": pgettext_lazy("kinship, owner", "Stepson"),
+    "stepdaughter": pgettext_lazy("kinship, owner", "Stepdaughter"),
+    "relative": pgettext_lazy("kinship, owner", "Relative"),
+}
+
 # Possessive forms ("his/her …") used to build longer names such as
 # "Buvining ukasi" (grandmother's younger brother). Uzbek possessives are not
 # regular enough to derive (singil → singlisi), so each is listed.
@@ -115,6 +167,8 @@ def kin(code):
     return str(KIN.get(code, KIN["relative"]))
 
 
-def chain(whose, code):
-    """ "Buvi" + younger_brother → "Buvining ukasi"; "Togʻa" + wife → "Togʻaning xotini"."""
-    return pgettext("kinship chain", "{whose}'s {what}").format(whose=whose, what=POSSESSIVE[code])
+def chain(whose_code, code):
+    """grandmother + younger_brother → "Buvining ukasi" / "Младший брат бабушки" / "Grandmother's younger brother"."""
+    whose = KIN_OF.get(whose_code, KIN_OF["relative"])
+    text = pgettext("kinship chain", "{whose}'s {what}").format(whose=whose, what=POSSESSIVE[code])
+    return text[:1].upper() + text[1:]

@@ -7,14 +7,27 @@
   <h1>{% translate "Who is who?" %}</h1>
   <p>{% translate "Choose two people to see how they are related and through whom." %}</p>
 </div></div>
-<form class="card" method="get">
-  <div class="form-grid">
-    <div class="field"><label for="calc-a">{% translate "First person" %}</label>
-      <select id="calc-a" name="a">{% for p in people %}<option value="{{ p.pk }}"{% if p.pk == a %} selected{% endif %}>{{ p.full_name }}{% if p.lifespan %} ({{ p.lifespan }}){% endif %}</option>{% endfor %}</select></div>
-    <div class="field"><label for="calc-b">{% translate "Second person" %}</label>
-      <select id="calc-b" name="b"><option value="">—</option>{% for p in people %}<option value="{{ p.pk }}"{% if p.pk == b %} selected{% endif %}>{{ p.full_name }}{% if p.lifespan %} ({{ p.lifespan }}){% endif %}</option>{% endfor %}</select></div>
+<form class="card calc-form" method="get" data-autosubmit>
+  <div class="calc-grid">
+    <div class="field"><label for="calc-a-name">{% translate "First person" %}</label>
+      <div class="picker picker-field">{% include "partials/icon.html" with name="search" %}
+      <input id="calc-a-name" type="search" value="{{ person_a.short_name|default:'' }}" placeholder="{% translate 'Type a name…' %}"
+             autocomplete="off" role="combobox" aria-expanded="false" aria-controls="calc-a-results"
+             data-live-search="{% url 'genealogy:search_json' %}" data-mode="pick" data-pick-target="calc-a">
+      <div class="live-results" id="calc-a-results" role="listbox" hidden></div></div>
+      <input type="hidden" id="calc-a" name="a" value="{{ a|default:'' }}">
+    </div>
+    <button class="icon-btn calc-swap" type="button" data-swap="calc-a calc-b"
+            title="{% translate 'Swap' %}" aria-label="{% translate 'Swap' %}">{% include "partials/icon.html" with name="swap" %}</button>
+    <div class="field"><label for="calc-b-name">{% translate "Second person" %}</label>
+      <div class="picker picker-field">{% include "partials/icon.html" with name="search" %}
+      <input id="calc-b-name" type="search" value="{{ person_b.short_name|default:'' }}" placeholder="{% translate 'Type a name…' %}"
+             autocomplete="off" role="combobox" aria-expanded="false" aria-controls="calc-b-results"
+             data-live-search="{% url 'genealogy:search_json' %}" data-mode="pick" data-pick-target="calc-b">
+      <div class="live-results" id="calc-b-results" role="listbox" hidden></div></div>
+      <input type="hidden" id="calc-b" name="b" value="{{ b|default:'' }}">
+    </div>
   </div>
-  <div class="form-actions"><button class="btn btn-primary" type="submit">{% translate "Show the relationship" %}</button></div>
 </form>
 
 {% if result %}

@@ -7,7 +7,7 @@
 <form method="post" novalidate>{% csrf_token %}
   {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
   <fieldset>
-    {% include "partials/field.html" with field=form.person %}
+    {% include "partials/person_picker.html" with field=form.person %}
     <div class="form-grid">
       {% include "partials/field.html" with field=form.name %}
       {% include "partials/field.html" with field=form.how_met %}

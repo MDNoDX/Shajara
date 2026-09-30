@@ -1,40 +1,8 @@
-{% extends "base.html" %}
+{% extends "accounts/settings_base.html" %}
 {% load i18n %}
 {% block title %}{% translate "Settings" %}{% endblock %}
-{% block main_class %}narrow{% endblock %}
-{% block content %}
-<div class="pagehead"><div><h1>{% translate "Settings" %}</h1></div></div>
-
-<section class="card" id="language">
-  <h2>{% translate "Language" %}</h2>
-  <p class="muted">{% translate "Choose the script for the interface. Your choice is saved to your account and used every time you sign in, including in PDF downloads." %}</p>
-  <form method="post" novalidate>{% csrf_token %}
-    <div class="lang-choice" role="radiogroup" aria-label="{% translate 'Language' %}">
-      {% for radio in language_form.language %}
-        <label lang="{% cycle 'uz-Latn' 'uz-Cyrl' %}">{{ radio.tag }} {{ radio.choice_label }}</label>
-      {% endfor %}
-    </div>
-    <div class="form-actions" style="margin-top:14px">
-      <button class="btn btn-primary" name="save_language" type="submit">{% translate "Save" %}</button>
-    </div>
-  </form>
-</section>
-
-<section class="card" id="colours">
-  <h2>{% translate "Colours" %}</h2>
-  <form method="post" novalidate data-palette-form>{% csrf_token %}
-    <div class="palette-choice">
-      {% for radio in palette_form.palette %}
-        <label>{{ radio.tag }}<span class="swatch swatch-{{ radio.data.value }}" aria-hidden="true"></span>{{ radio.choice_label }}</label>
-      {% endfor %}
-    </div>
-    <div class="form-actions" style="margin-top:14px">
-      <button class="btn btn-primary" name="save_palette" type="submit">{% translate "Save" %}</button>
-    </div>
-  </form>
-</section>
-
-<section class="card">
+{% block settings %}
+<section class="card" id="profile">
   <h2>{% translate "Personal details" %}</h2>
   <form method="post" novalidate>{% csrf_token %}
     <div class="form-grid">
@@ -45,33 +13,46 @@
     {% include "partials/field.html" with field=profile_form.gender %}
     <div class="form-actions">
       <button class="btn btn-primary" name="save_profile" type="submit">{% translate "Save" %}</button>
-      <a class="btn btn-ghost" href="{% url 'accounts:profile' %}">{% translate "Cancel" %}</a>
+      {% if user.person %}<a class="btn btn-ghost" href="{{ user.person.get_absolute_url }}">{% translate "My record in the tree" %}</a>{% endif %}
     </div>
   </form>
 </section>
 
+<form method="post" novalidate id="appearance" data-palette-form>{% csrf_token %}
 <section class="card">
-  <h2>{% translate "Reminders" %}</h2>
-  <p class="muted">{% translate "Birthdays, anniversaries, memorial days and family events — on the site and in Telegram." %}</p>
-  <a class="btn" href="{% url 'notify:settings' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Reminder settings" %}</a>
-</section>
-
-<section class="card">
-  <h2>{% translate "Password" %}</h2>
-  <a class="btn" href="{% url 'accounts:password_change' %}">{% translate "Change password" %}</a>
-</section>
-
-<section class="card">
-  <h2>{% translate "Your data" %}</h2>
-  <p class="muted">{% translate "A complete copy of your family archive. It can be kept as a backup or moved to another server." %}</p>
-  <div class="row">
-    <a class="btn" href="{% url 'genealogy:archive_export' %}">{% include "partials/icon.html" with name="download" %}{% translate "Download my data (JSON)" %}</a>
-    <a class="btn" href="{% url 'genealogy:gedcom' %}">{% include "partials/icon.html" with name="download" %}{% translate "GEDCOM file (for other genealogy programs)" %}</a>
+  <h2>{% translate "Language" %}</h2>
+  <p class="muted small">{% translate "The whole site, reminders, Telegram messages and PDF downloads use this language." %}</p>
+  <div class="lang-choice" role="radiogroup" aria-label="{% translate 'Language' %}">
+    {% for radio in prefs_form.preferred_language %}
+      {% for opt in language_options %}{% if opt.code == radio.data.value %}
+      <label lang="{{ opt.html_lang }}">{{ radio.tag }}<span class="lang-short">{{ opt.short }}</span><span>{{ opt.label }}{% if opt.note %}<small>{{ opt.note }}</small>{% endif %}</span></label>
+      {% endif %}{% endfor %}
+    {% endfor %}
   </div>
 </section>
 
 <section class="card">
-  <h2>{% translate "Delete account" %}</h2>
-  <a class="btn btn-danger" href="{% url 'accounts:delete_account' %}">{% translate "Delete account" %}</a>
+  <h2>{% translate "Appearance" %}</h2>
+  <div class="field">
+    <span class="field-label">{% translate "Colours" %}</span>
+    <div class="palette-choice">
+      {% for radio in prefs_form.palette %}
+        <label>{{ radio.tag }}<span class="swatch swatch-{{ radio.data.value }}" aria-hidden="true"></span>{{ radio.choice_label }}</label>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="field">
+    <span class="field-label">{% translate "Theme on this device" %}</span>
+    <div class="segmented" role="group" data-theme-choice>
+      <button type="button" data-theme-value="light">{% include "partials/icon.html" with name="sun" %}{% translate "Light" %}</button>
+      <button type="button" data-theme-value="dark">{% include "partials/icon.html" with name="moon" %}{% translate "Dark" %}</button>
+      <button type="button" data-theme-value="auto">{% include "partials/icon.html" with name="auto" %}{% translate "Automatic" %}</button>
+    </div>
+  </div>
+  {% include "partials/field.html" with field=prefs_form.time_zone %}
+  <div class="form-actions">
+    <button class="btn btn-primary" name="save_prefs" type="submit">{% translate "Save" %}</button>
+  </div>
 </section>
+</form>
 {% endblock %}

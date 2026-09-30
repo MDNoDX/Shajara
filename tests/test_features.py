@@ -122,38 +122,130 @@ class ReminderTests(TestCase):
         self.assertTrue(item["url"].startswith("http"))
 
 
-@override_settings(TELEGRAM_BOT_TOKEN="123:abc", TELEGRAM_BOT_USERNAME="shajara_test_bot")
+class FakeTelegram:
+    """Stands in for the Bot API: records messages, answers getMe / webhook calls."""
+
+    def __init__(self, username="silairahm_bot"):
+        self.username = username
+        self.sent = []
+        self.webhook = ""
+        self.calls = []
+
+    def __call__(self, method, http_timeout=30, **params):
+        self.calls.append(method)
+        if method == "getMe":
+            return {"id": 1, "is_bot": True, "username": self.username, "first_name": "Shajara"}
+        if method == "sendMessage":
+            self.sent.append((params["chat_id"], params["text"]))
+            return {"message_id": len(self.sent)}
+        if method == "getWebhookInfo":
+            return {"url": self.webhook, "pending_update_count": 0}
+        if method == "setWebhook":
+            self.webhook = params["url"]
+        return True
+
+
+def _msg(text, chat=555, update=1, **extra):
+    return {"update_id": update, "message": {"text": text, "chat": {"id": chat, "type": "private", **extra}}}
+
+
+@override_settings(TELEGRAM_BOT_TOKEN="123:abc", TELEGRAM_BOT_USERNAME="wrong_name_bot",
+                   SITE_URL="https://shajara.example")
 class TelegramTests(TestCase):
     def setUp(self):
         self.user, self.p = make_family()
         self.prefs = NotificationSettings.for_user(self.user)
+        self.tg = FakeTelegram()
+        patcher = mock.patch("apps.notify.telegram.call", side_effect=self.tg)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
-    def test_link_and_send(self):
-        url = telegram.link_url(self.prefs)
-        token = url.rsplit("=", 1)[1]
-        self.assertTrue(url.startswith("https://t.me/shajara_test_bot?start="))
-        sent = []
-        with mock.patch("apps.notify.telegram.send_message", side_effect=lambda chat, text: sent.append((chat, text))):
-            telegram.handle_update({"update_id": 1, "message": {"text": f"/start {token}",
-                                                                "chat": {"id": 555, "type": "private", "username": "timur"}}})
-            self.prefs.refresh_from_db()
-            self.assertEqual(self.prefs.telegram_chat_id, 555)
-            self.assertTrue(self.prefs.telegram_enabled)
-            self.assertIn("Hisobingiz ulandi", sent[-1][1])
-            # The token works only once.
-            telegram.handle_update({"update_id": 2, "message": {"text": f"/start {token}",
-                                                                "chat": {"id": 777, "type": "private"}}})
-            self.assertIn("muddati tugagan", sent[-1][1])
+    def test_username_comes_from_the_token(self):
+        link = telegram.link_urls(self.prefs)
+        self.assertEqual(link["bot"], "silairahm_bot")  # not the misconfigured env value
+        self.assertEqual(link["app"], f"tg://resolve?domain=silairahm_bot&start={link['code']}")
+        self.assertEqual(link["web"], f"https://t.me/silairahm_bot?start={link['code']}")
+        self.assertRegex(link["code"], r"^[A-HJ-NP-Z2-9]{8}$")
+        # The same code is reused while it is fresh; getMe is cached.
+        self.assertEqual(telegram.link_urls(self.prefs)["code"], link["code"])
+        self.assertEqual(self.tg.calls.count("getMe"), 1)
 
-            service.generate(self.user, datetime.date(2026, 9, 27))
-            with mock.patch("apps.notify.service.timezone.localtime") as lt:
-                lt.return_value = datetime.datetime(2026, 9, 27, 9, 0)
-                self.assertEqual(service.send_pending_telegram(), 1)
-            self.assertIn("<b>Tugʻilgan kun: Timur Nurmatov</b>", sent[-1][1])
+    @mock.patch("apps.notify.service.user_today", return_value=datetime.date(2026, 9, 20))
+    def test_link_with_start_button_and_send(self, _today):
+        code = telegram.link_code(self.prefs)
+        telegram.handle_update(_msg(f"/start {code}", username="timur"))
+        self.prefs.refresh_from_db()
+        self.assertEqual((self.prefs.telegram_chat_id, self.prefs.telegram_enabled), (555, True))
+        self.assertEqual(self.prefs.telegram_name, "timur")
+        self.assertIn("Hisobingiz ulandi", self.tg.sent[0][1])
+        self.assertIn("Yaqin sanalar", self.tg.sent[1][1])  # upcoming dates right away
+        # A code works only once.
+        telegram.handle_update(_msg(f"/start {code}", chat=777, update=2))
+        self.assertIn("eskirgan", self.tg.sent[-1][1])
 
-            telegram.handle_update({"update_id": 3, "message": {"text": "/stop", "chat": {"id": 555, "type": "private"}}})
-            self.prefs.refresh_from_db()
-            self.assertFalse(self.prefs.telegram_enabled)
+        service.generate(self.user, datetime.date(2026, 9, 27))
+        at_nine = datetime.datetime(2026, 9, 27, 4, 0, tzinfo=datetime.timezone.utc)  # 09:00 in Tashkent
+        at_seven = datetime.datetime(2026, 9, 27, 2, 0, tzinfo=datetime.timezone.utc)
+        self.assertEqual(service.send_pending_telegram(now=at_seven), 0)  # before the chosen hour (08:00)
+        self.assertEqual(service.send_pending_telegram(now=at_nine), 1)
+        self.assertIn("<b>Tugʻilgan kun: Timur Nurmatov</b>", self.tg.sent[-1][1])
+        self.assertIn('href="https://shajara.example/', self.tg.sent[-1][1])
+        self.assertEqual(service.send_pending_telegram(now=at_nine), 0)  # not twice
+
+        telegram.handle_update(_msg("/next", update=3))
+        self.assertIn("Timur Nurmatov", self.tg.sent[-1][1])
+        telegram.handle_update(_msg("/stop", update=4))
+        self.prefs.refresh_from_db()
+        self.assertFalse(self.prefs.telegram_enabled)
+        telegram.handle_update(_msg("/start", update=5))
+        self.prefs.refresh_from_db()
+        self.assertTrue(self.prefs.telegram_enabled)
+
+    def test_code_typed_by_hand(self):
+        code = telegram.link_code(self.prefs)
+        telegram.handle_update(_msg(f" {code[:4].lower()}-{code[4:]} "))
+        self.prefs.refresh_from_db()
+        self.assertEqual(self.prefs.telegram_chat_id, 555)
+
+    def test_unknown_chat_gets_instructions(self):
+        telegram.handle_update(_msg("salom"))
+        self.assertIn("Sozlamalar", self.tg.sent[-1][1])
+        telegram.handle_update(_msg("ABCD2345"))
+        self.assertIn("eskirgan", self.tg.sent[-1][1])
+
+    def test_hour_uses_the_users_time_zone(self):
+        self.user.time_zone = "Europe/Berlin"
+        self.user.save()
+        self.prefs.telegram_chat_id, self.prefs.telegram_enabled = 555, True
+        self.prefs.save()
+        service.generate(self.user, datetime.date(2026, 9, 27))
+        eight_tashkent = datetime.datetime(2026, 9, 27, 3, 30, tzinfo=datetime.timezone.utc)  # 05:30 in Berlin
+        self.assertEqual(service.send_pending_telegram(now=eight_tashkent), 0)
+        self.assertEqual(service.send_pending_telegram(now=eight_tashkent + datetime.timedelta(hours=3)), 1)
+
+    def test_settings_page_status_and_test_message(self):
+        self.client.force_login(self.user)
+        html = self.client.get(reverse("notify:settings")).content.decode()
+        self.assertIn("tg://resolve?domain=silairahm_bot", html)
+        self.assertIn("<svg", html)  # QR code
+        status = reverse("notify:telegram_status")
+        self.assertEqual(self.client.get(status).json(), {"connected": False, "name": ""})
+        telegram.handle_update(_msg(f"/start {telegram.link_code(self.prefs)}", username="timur"))
+        self.assertEqual(self.client.get(status).json(), {"connected": True, "name": "timur"})
+        self.client.post(reverse("notify:telegram_test"))
+        self.assertIn("Sinov xabari", self.tg.sent[-1][1])
+        self.client.post(reverse("notify:telegram_toggle"))
+        self.prefs.refresh_from_db()
+        self.assertFalse(self.prefs.telegram_enabled)
+
+    @override_settings(CRON_SECRET="s3cret")
+    def test_cron_repairs_the_webhook(self):
+        response = self.client.get(reverse("notify:cron_daily"), HTTP_AUTHORIZATION="Bearer s3cret")
+        self.assertTrue(response.json()["webhook_fixed"])
+        self.assertEqual(self.tg.webhook, "https://shajara.example/telegram/webhook/")
+        self.assertIn("setMyCommands", self.tg.calls)
+        response = self.client.get(reverse("notify:cron_daily"), HTTP_AUTHORIZATION="Bearer s3cret")
+        self.assertFalse(response.json()["webhook_fixed"])
 
 
 class EventsFriendsTests(TestCase):

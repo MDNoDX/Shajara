@@ -3,19 +3,18 @@ from django.utils.translation import get_language
 
 from apps.friends.services import incoming_requests
 
-from .languages import CYRILLIC, HTML_LANG, LANGUAGE_LABELS, normalize_language, supported_codes
+from .languages import CYRILLIC_SCRIPT, HTML_LANG, LANGUAGE_LABELS, LANGUAGE_SHORT, language_options, normalize_language
 
 
 def site(request):
-    current = normalize_language(get_language()) or "uz"
+    current = normalize_language(get_language()) or settings.LANGUAGE_CODE
     context = {
         "current_language": current,
+        "current_language_label": LANGUAGE_LABELS[current],
+        "current_language_short": LANGUAGE_SHORT[current],
         "html_lang": HTML_LANG.get(current, "uz"),
-        "is_cyrillic": current == CYRILLIC,
-        "language_options": [
-            {"code": code, "label": LANGUAGE_LABELS[code], "html_lang": HTML_LANG[code], "active": code == current}
-            for code in supported_codes()
-        ],
+        "is_cyrillic": current in CYRILLIC_SCRIPT,
+        "language_options": language_options(current),
         "pending_requests": 0,
         "google_login": bool(settings.GOOGLE_CLIENT_ID),
     }

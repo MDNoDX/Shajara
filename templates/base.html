@@ -78,25 +78,28 @@
             <div class="menu-foot">
               <a href="{% url 'notify:list' %}">{% translate "All notifications" %}</a>
               <a href="{% url 'notify:settings' %}">{% translate "Reminder settings" %}</a>
-            <a href="{% url 'genealogy:stories' %}">{% translate "Stories" %}</a>
-            <a href="{% url 'genealogy:calculator' %}">{% translate "Who is who?" %}</a>
             </div>
           </div>
         </details>
         <details class="usermenu">
-          <summary>
+          <summary aria-label="{% translate 'Account' %}">
             {% include "partials/avatar.html" with person=user.person size="sm" %}
             <span class="uname">{{ user.first_name|default:user.username }}</span>
           </summary>
           <div class="menu">
-            <a href="{% url 'accounts:profile' %}">{% translate "My profile" %}</a>
-            <a href="{% url 'accounts:settings' %}">{% translate "Settings" %}</a>
-            <a href="{% url 'notify:settings' %}">{% translate "Reminder settings" %}</a>
-            {% if user.is_superuser %}<a href="{% url 'control_panel' %}">{% translate "Control panel" %}</a>{% endif %}
-            <a href="{% url 'friends:sharing' %}">{% translate "Share the family tree" %}{% if pending_requests %} <span class="badge">{{ pending_requests }}</span>{% endif %}</a>
+            <div class="menu-user">
+              {% include "partials/avatar.html" with person=user.person %}
+              <span><b>{{ user.display_name }}</b><small>{{ user.email|default:user.username }}</small></span>
+            </div>
+            <hr>
+            {% if user.person %}<a href="{{ user.person.get_absolute_url }}">{% include "partials/icon.html" with name="user" %}{% translate "My record in the tree" %}</a>{% endif %}
+            <a href="{% url 'accounts:settings' %}">{% include "partials/icon.html" with name="settings" %}{% translate "Settings" %}</a>
+            <a href="{% url 'notify:settings' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Reminder settings" %}</a>
+            <a href="{% url 'friends:sharing' %}">{% include "partials/icon.html" with name="share" %}{% translate "Share the family tree" %}{% if pending_requests %} <span class="badge">{{ pending_requests }}</span>{% endif %}</a>
+            {% if user.is_superuser %}<a href="{% url 'control_panel' %}">{% include "partials/icon.html" with name="shield" %}{% translate "Control panel" %}</a>{% endif %}
             <hr>
             <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
-              <button type="submit">{% translate "Sign out" %}</button>
+              <button type="submit">{% include "partials/icon.html" with name="logout" %}{% translate "Sign out" %}</button>
             </form>
           </div>
         </details>
@@ -150,7 +153,7 @@
 <footer class="footer">
   <div class="footer-inner">
     <span>{% translate "Family tree — a family archive for Uzbek families." %}</span>
-    {% include "partials/lang_switch.html" %}
+    {% include "partials/lang_list.html" %}
   </div>
 </footer>
 {% block scripts %}{% endblock %}

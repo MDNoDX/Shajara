@@ -1,0 +1,42 @@
+{% extends "accounts/settings_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Your data" %}{% endblock %}
+{% block settings %}
+<section class="card">
+  <h2>{% translate "Download" %}</h2>
+  <p class="muted small">{% blocktranslate count counter=people_count %}Your archive: {{ counter }} person{% plural %}Your archive: {{ counter }} people{% endblocktranslate %} · {% blocktranslate count counter=events_count %}{{ counter }} event{% plural %}{{ counter }} events{% endblocktranslate %} · {% blocktranslate count counter=stories_count context "count" %}{{ counter }} story{% plural %}{{ counter }} stories{% endblocktranslate %} · {% blocktranslate count counter=friends_count context "count" %}{{ counter }} friend{% plural %}{{ counter }} friends{% endblocktranslate %}</p>
+  <div class="download-list">
+    <a class="download-item" href="{% url 'genealogy:archive_export' %}">
+      <span class="setting-icon">{% include "partials/icon.html" with name="database" %}</span>
+      <span><b>{% translate "Complete archive (JSON)" %}</b><small>{% translate "Everything, with photos. For a backup or moving to another server." %}</small></span>
+      {% include "partials/icon.html" with name="download" %}</a>
+    <a class="download-item" href="{% url 'genealogy:family_book' %}">
+      <span class="setting-icon">{% include "partials/icon.html" with name="book" %}</span>
+      <span><b>{% translate "Family book (PDF)" %}</b><small>{% translate "Every person with dates, family and life story, ready to print." %}</small></span>
+      {% include "partials/icon.html" with name="download" %}</a>
+    <a class="download-item" href="{% url 'genealogy:gedcom' %}">
+      <span class="setting-icon">{% include "partials/icon.html" with name="tree" %}</span>
+      <span><b>GEDCOM</b><small>{% translate "For other genealogy programs (MyHeritage, Ancestry, Gramps…)." %}</small></span>
+      {% include "partials/icon.html" with name="download" %}</a>
+  </div>
+</section>
+
+<section class="card" id="import">
+  <h2>{% translate "Import an archive" %}</h2>
+  {% if can_import %}
+    <p class="muted small">{% translate "Load a complete archive (JSON) downloaded from Shajara — for example from another server. Your tree must be empty." %}</p>
+    <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+      {% include "partials/field.html" with field=form.file %}
+      <div class="form-actions"><button class="btn btn-primary" type="submit">{% include "partials/icon.html" with name="upload" %}{% translate "Import" %}</button></div>
+    </form>
+  {% else %}
+    <p class="muted small">{% translate "An archive can only be imported into an empty family tree." %}</p>
+  {% endif %}
+</section>
+
+<section class="card danger-zone">
+  <h2>{% translate "Delete account" %}</h2>
+  <p class="muted small">{% translate "Your account and your whole family archive will be deleted permanently." %}</p>
+  <a class="btn btn-danger" href="{% url 'accounts:delete_account' %}">{% include "partials/icon.html" with name="trash" %}{% translate "Delete account" %}</a>
+</section>
+{% endblock %}

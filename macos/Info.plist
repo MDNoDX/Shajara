@@ -3,6 +3,8 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key><string>uz</string>
+	<key>CFBundleLocalizations</key><array><string>uz</string><string>ru</string><string>en</string></array>
+	<key>CFBundleAllowMixedLocalizations</key><true/>
 	<key>CFBundleDisplayName</key><string>Shajara</string>
 	<key>CFBundleExecutable</key><string>Shajara</string>
 	<key>CFBundleIconFile</key><string>AppIcon</string>
@@ -10,8 +12,8 @@
 	<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
 	<key>CFBundleName</key><string>Shajara</string>
 	<key>CFBundlePackageType</key><string>APPL</string>
-	<key>CFBundleShortVersionString</key><string>1.0.0</string>
-	<key>CFBundleVersion</key><string>1</string>
+	<key>CFBundleShortVersionString</key><string>1.1.0</string>
+	<key>CFBundleVersion</key><string>2</string>
 	<key>LSApplicationCategoryType</key><string>public.app-category.lifestyle</string>
 	<key>LSMinimumSystemVersion</key><string>13.0</string>
 	<key>NSHighResolutionCapable</key><true/>

@@ -1,4 +1,15 @@
-{% load i18n %}<form class="langsw" method="post" action="{% url 'set_language' %}" aria-label="{% translate 'Language' %}">{% csrf_token %}
-  <input type="hidden" name="next" value="{{ request.get_full_path }}">
-  {% for opt in language_options %}<button type="submit" name="language" value="{{ opt.code }}" lang="{{ opt.html_lang }}" aria-pressed="{% if opt.active %}true{% else %}false{% endif %}">{{ opt.label }}</button>{% endfor %}
-</form>
+{% load i18n %}<details class="dropdown langmenu">
+  <summary class="icon-btn lang-btn" title="{% translate 'Language' %}" aria-label="{% translate 'Language' %}: {{ current_language_label }}">
+    {% include "partials/icon.html" with name="globe" %}<span class="lang-code">{{ current_language_short }}</span>
+  </summary>
+  <form class="menu lang-list langsw" method="post" action="{% url 'set_language' %}">{% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    {% for opt in language_options %}
+      <button type="submit" name="language" value="{{ opt.code }}" lang="{{ opt.html_lang }}" aria-pressed="{% if opt.active %}true{% else %}false{% endif %}">
+        <span class="lang-short">{{ opt.short }}</span>
+        <span class="lang-name">{{ opt.label }}{% if opt.note %}<small>{{ opt.note }}</small>{% endif %}</span>
+        {% if opt.active %}{% include "partials/icon.html" with name="check" %}{% endif %}
+      </button>
+    {% endfor %}
+  </form>
+</details>

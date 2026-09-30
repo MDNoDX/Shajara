@@ -53,6 +53,15 @@
     syncRelation();
   }
 
+  // Buttons disabled by the submit handler come back when the page is
+  // restored from the back/forward cache.
+  window.addEventListener("pageshow", function (e) {
+    if (!e.persisted) return;
+    document.querySelectorAll("button[data-label]").forEach(function (b) {
+      b.disabled = false; b.textContent = b.getAttribute("data-label"); b.removeAttribute("data-label");
+    });
+  });
+
   // Prevent double submission and show progress.
   document.addEventListener("submit", function (e) {
     var form = e.target;
@@ -87,15 +96,56 @@
       themeBtn.title = gettext("Colour theme") + ": " + names[mode];
     }
   }
+  var themeChoice = document.querySelector("[data-theme-choice]");
+  function setTheme(mode) {
+    try { localStorage.setItem("theme", mode); } catch (e) {}
+    applyTheme(mode);
+    if (themeChoice) themeChoice.querySelectorAll("[data-theme-value]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-theme-value") === mode));
+    });
+  }
   var savedTheme = "light";
   try { savedTheme = localStorage.getItem("theme") || "light"; } catch (e) {}
-  applyTheme(savedTheme);
+  setTheme(savedTheme);
   if (themeBtn) {
     themeBtn.addEventListener("click", function () {
-      var next = { light: "dark", dark: "auto", auto: "light" }[themeBtn.getAttribute("data-mode")] || "light";
-      try { localStorage.setItem("theme", next); } catch (e) {}
-      applyTheme(next);
+      setTheme({ light: "dark", dark: "auto", auto: "light" }[themeBtn.getAttribute("data-mode")] || "light");
     });
+  }
+  if (themeChoice) themeChoice.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-theme-value]");
+    if (b) setTheme(b.getAttribute("data-theme-value"));
+  });
+
+  // Copy a code to the clipboard.
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = document.getElementById(btn.getAttribute("data-copy")).textContent.trim();
+      var done = function () {
+        btn.classList.add("copied");
+        btn.title = gettext("Copied");
+        window.setTimeout(function () { btn.classList.remove("copied"); }, 1600);
+      };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+    });
+  });
+
+  // Connecting Telegram: the page notices by itself when the bot linked the account.
+  var tgWait = document.querySelector("[data-telegram-wait]");
+  if (tgWait) {
+    var started = Date.now();
+    var poll = function () {
+      if (Date.now() - started > 15 * 60 * 1000) return;
+      if (document.hidden) { window.setTimeout(poll, 3000); return; }
+      fetch(tgWait.getAttribute("data-telegram-wait"), { credentials: "same-origin", headers: { Accept: "application/json" } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.connected) { window.location.hash = "telegram"; window.location.reload(); }
+          else window.setTimeout(poll, 3000);
+        })
+        .catch(function () { window.setTimeout(poll, 6000); });
+    };
+    window.setTimeout(poll, 3000);
   }
 
   // Toast messages close themselves after a few seconds.
@@ -240,8 +290,46 @@
       else if (e.key === "Escape") { hide(); }
     });
     input.addEventListener("blur", function () { setTimeout(hide, 150); });
-    // In "pick" mode Enter must never submit a surrounding form.
-    if (mode === "pick" && input.form) input.form.addEventListener("submit", function (e) { e.preventDefault(); });
+    // In "pick" mode Enter in the box must never submit the surrounding form
+    // (the form's own buttons still do).
+    if (mode === "pick") input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") e.preventDefault();
+    });
+  });
+
+  // A picked person fills a hidden field; a form marked data-autosubmit is
+  // sent as soon as every hidden field has a value ("Who is who?").
+  document.addEventListener("livesearch:pick", function (e) {
+    var target = e.target.getAttribute("data-pick-target");
+    var field = target && document.getElementById(target);
+    if (!field) return;
+    field.value = e.detail.id;
+    field.dispatchEvent(new Event("change", { bubbles: true }));
+    var form = field.form;
+    if (form && form.hasAttribute("data-autosubmit")) {
+      var ready = Array.prototype.every.call(form.querySelectorAll("input[type=hidden]"), function (h) { return h.value; });
+      if (ready) HTMLFormElement.prototype.submit.call(form);
+    }
+  });
+  // Emptying a picker marked data-pick-clear clears its hidden field too.
+  document.querySelectorAll("input[data-pick-clear]").forEach(function (input) {
+    input.addEventListener("input", function () {
+      var field = document.getElementById(input.getAttribute("data-pick-target"));
+      if (field && field.value && !input.value.trim()) {
+        field.value = "";
+        field.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+  });
+  document.querySelectorAll("[data-swap]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var ids = btn.getAttribute("data-swap").split(" ");
+      var a = document.getElementById(ids[0]), b = document.getElementById(ids[1]);
+      var an = document.getElementById(ids[0] + "-name"), bn = document.getElementById(ids[1] + "-name");
+      var v = a.value; a.value = b.value; b.value = v;
+      v = an.value; an.value = bn.value; bn.value = v;
+      if (a.value && b.value) HTMLFormElement.prototype.submit.call(a.form);
+    });
   });
 
   // Search pages: the results below update while typing.
@@ -270,7 +358,7 @@
   });
 
   // Colour palettes: preview immediately when a palette is chosen.
-  document.querySelectorAll("[data-palette-form] input[type=radio]").forEach(function (radio) {
+  document.querySelectorAll("[data-palette-form] input[type=radio][name$=palette]").forEach(function (radio) {
     radio.addEventListener("change", function () {
       document.documentElement.setAttribute("data-palette", radio.value);
       try { document.cookie = "palette=" + radio.value + ";path=/;max-age=31536000;samesite=lax"; } catch (e) {}

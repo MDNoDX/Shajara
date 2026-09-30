@@ -1,15 +1,19 @@
 from django.conf import settings
-from django.utils import translation
+from django.utils import timezone, translation
 
-from .languages import normalize_language
+from .languages import EXPLICIT_ONLY, normalize_language
+from .timezones import zone
 
 
 class UserLanguageMiddleware:
-    """Signed-in users see the language saved on their account.
+    """Language and time zone for each request.
 
     Runs after LocaleMiddleware (cookie / Accept-Language / default) and
-    AuthenticationMiddleware. The language cookie is kept in step with the
-    account so the choice also survives signing out.
+    AuthenticationMiddleware:
+    * signed-in users get the language and time zone saved on their account,
+      and the language cookie is kept in step so the choice survives signing out;
+    * guests are switched to Russian or English only by choosing it (cookie),
+      not by their browser language: the site opens in Uzbek.
     """
 
     def __init__(self, get_response):
@@ -17,16 +21,23 @@ class UserLanguageMiddleware:
 
     def __call__(self, request):
         user = getattr(request, "user", None)
-        preferred = None
-        if user is not None and user.is_authenticated:
+        signed_in = user is not None and user.is_authenticated
+        if signed_in:
             preferred = normalize_language(user.preferred_language)
             if preferred:
                 translation.activate(preferred)
                 request.LANGUAGE_CODE = preferred
+            timezone.activate(zone(user.time_zone))
+        else:
+            chosen = normalize_language(request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME))
+            if not chosen and translation.get_language() in EXPLICIT_ONLY:
+                translation.activate(settings.LANGUAGE_CODE)
+                request.LANGUAGE_CODE = settings.LANGUAGE_CODE
 
         response = self.get_response(request)
+        timezone.deactivate()
 
-        if user is not None and user.is_authenticated:
+        if signed_in:
             preferred = normalize_language(user.preferred_language)
             if preferred and request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME) != preferred:
                 response.set_cookie(

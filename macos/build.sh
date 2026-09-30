@@ -22,7 +22,7 @@ done
 lipo -create build/obj/Shajara-arm64 build/obj/Shajara-x86_64 -output "$APP/Contents/MacOS/Shajara"
 
 cp Info.plist "$APP/Contents/Info.plist"
-cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+cp Resources/AppIcon.icns Resources/Shajara.wav "$APP/Contents/Resources/"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
 # Ad-hoc signature: enough to run on this Mac. For other Macs / the App Store,

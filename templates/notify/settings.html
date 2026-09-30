@@ -1,22 +1,75 @@
-{% extends "base.html" %}
+{% extends "accounts/settings_base.html" %}
 {% load i18n %}
 {% block title %}{% translate "Reminder settings" %}{% endblock %}
-{% block main_class %}narrow{% endblock %}
-{% block content %}
-<div class="pagehead"><div>
-  <h1>{% translate "Reminder settings" %}</h1>
-  <p>{% translate "Reminders are only for you. Turn on what you need." %}</p>
-</div></div>
+{% block settings %}
+<section class="card" id="telegram">
+  <h2>{% include "partials/icon.html" with name="telegram" %} Telegram</h2>
+  {% if not telegram_available %}
+    <p class="muted">{% translate "Telegram reminders are not available at the moment." %}</p>
+  {% elif prefs.telegram_chat_id %}
+    <div class="setting-row">
+      <span class="setting-icon {% if prefs.telegram_enabled %}ok{% else %}paused{% endif %}">{% if prefs.telegram_enabled %}{% include "partials/icon.html" with name="check" %}{% else %}{% include "partials/icon.html" with name="pause" %}{% endif %}</span>
+      <div class="spacer">
+        <b>{% if prefs.telegram_enabled %}{% translate "Telegram is connected" %}{% else %}{% translate "Telegram messages are paused" %}{% endif %}</b>
+        <div class="muted small">{% if prefs.telegram_name %}@{{ prefs.telegram_name }} · {% endif %}{% if bot %}{% blocktranslate %}bot @{{ bot }}{% endblocktranslate %}{% endif %}</div>
+      </div>
+    </div>
+    <p class="muted small">{% blocktranslate with hour=prefs.send_hour|stringformat:"02d" %}Reminders come to Telegram every day at {{ hour }}:00. In the bot: /next — upcoming dates, /stop — turn off.{% endblocktranslate %}</p>
+    <div class="row">
+      <form method="post" action="{% url 'notify:telegram_test' %}">{% csrf_token %}
+        <button class="btn btn-primary btn-sm" type="submit">{% include "partials/icon.html" with name="send" %}{% translate "Send a test message" %}</button></form>
+      <form method="post" action="{% url 'notify:telegram_toggle' %}">{% csrf_token %}
+        <button class="btn btn-sm" type="submit">{% if prefs.telegram_enabled %}{% include "partials/icon.html" with name="pause" %}{% translate "Pause" %}{% else %}{% include "partials/icon.html" with name="play" %}{% translate "Resume" %}{% endif %}</button></form>
+      <form method="post" action="{% url 'notify:telegram_disconnect' %}">{% csrf_token %}
+        <button class="btn btn-sm btn-ghost" type="submit">{% translate "Disconnect" %}</button></form>
+    </div>
+  {% elif link %}
+    <div class="tg-connect" data-telegram-wait="{% url 'notify:telegram_status' %}">
+      <ol class="tg-steps">
+        <li>
+          <b>{% translate "Open the bot in the Telegram app" %}</b>
+          <div class="row">
+            <a class="btn btn-primary tg-open" href="{{ link.app }}">{% include "partials/icon.html" with name="telegram" %}{% blocktranslate with bot=link.bot %}Open @{{ bot }}{% endblocktranslate %}</a>
+            <a class="btn btn-ghost btn-sm" href="{{ link.web }}" target="_blank" rel="noopener">{% translate "Telegram Web" %}</a>
+          </div>
+        </li>
+        <li>
+          <b>{% translate "Press “Start” — or send the bot this code:" %}</b>
+          <div class="code-box">
+            <code id="tg-code">{{ link.code }}</code>
+            <button class="icon-btn" type="button" data-copy="tg-code" title="{% translate 'Copy' %}" aria-label="{% translate 'Copy' %}">{% include "partials/icon.html" with name="copy" %}</button>
+          </div>
+          <div class="muted small">{% translate "The code works for one hour." %}</div>
+        </li>
+        <li>
+          <b>{% translate "Done: this page updates by itself." %}</b>
+          <div class="tg-wait" role="status"><span class="spinner" aria-hidden="true"></span>{% translate "Waiting for Telegram…" %}</div>
+        </li>
+      </ol>
+      <figure class="tg-qr">
+        {{ link.qr|safe }}
+        <figcaption>{% translate "On your phone: scan with the camera" %}</figcaption>
+      </figure>
+    </div>
+    <form method="post" action="{% url 'notify:telegram_connect' %}" class="tg-renew">{% csrf_token %}
+      <button class="linklike small" type="submit">{% include "partials/icon.html" with name="refresh" %}{% translate "Get a new code" %}</button>
+    </form>
+  {% else %}
+    <p class="muted">{% translate "Telegram reminders are not available at the moment." %}</p>
+  {% endif %}
+</section>
 
 <form method="post" novalidate>{% csrf_token %}
   <section class="card">
+    <h2>{% translate "Reminders" %}</h2>
+    <p class="muted small">{% translate "Reminders are only for you. Turn on what you need." %}</p>
     <div class="switch-row"><label for="{{ form.enabled.id_for_label }}">{{ form.enabled.label|capfirst }}</label>{{ form.enabled }}</div>
     <div data-show-if="{{ form.enabled.id_for_label }}">
-      <h2 style="margin-top:14px">{% translate "What to remind me of" %}</h2>
+      <h3 class="subhead">{% translate "What to remind me of" %}</h3>
       {% for field in form %}{% if field.name in "birthdays friends anniversaries memorials events muchal" %}
         <div class="switch-row"><label for="{{ field.id_for_label }}">{{ field.label|capfirst }}</label>{{ field }}</div>
       {% endif %}{% endfor %}
-      <h2 style="margin-top:18px">{% translate "When" %}</h2>
+      <h3 class="subhead">{% translate "When" %}</h3>
       {% include "partials/field.html" with field=form.days_before %}
       <p class="help">{% translate "You are also reminded on the day itself." %}</p>
       {% include "partials/field.html" with field=form.send_hour %}
@@ -24,29 +77,4 @@
     <div class="form-actions"><button class="btn btn-primary" type="submit">{% translate "Save" %}</button></div>
   </section>
 </form>
-
-<section class="card">
-  <h2>{% translate "Telegram" %}</h2>
-  <div class="tg-box">
-    {% include "partials/icon.html" with name="telegram" %}
-    <div class="spacer">
-      {% if prefs.telegram_enabled and prefs.telegram_chat_id %}
-        <b>{% translate "Telegram is connected" %}</b>{% if prefs.telegram_name %} · @{{ prefs.telegram_name }}{% endif %}
-        <p class="muted small" style="margin:4px 0 0">{% translate "Reminders are also sent to Telegram at the chosen hour." %}</p>
-      {% elif telegram_available %}
-        <b>{% translate "Get reminders in Telegram" %}</b>
-        <p class="muted small" style="margin:4px 0 0">{% translate "Press the button, Telegram opens: press “Start” in the bot. That is all." %}</p>
-      {% else %}
-        <b>{% translate "Telegram reminders are not available at the moment." %}</b>
-      {% endif %}
-    </div>
-    {% if prefs.telegram_enabled and prefs.telegram_chat_id %}
-      <form method="post" action="{% url 'notify:telegram_disconnect' %}">{% csrf_token %}
-        <button class="btn btn-sm btn-danger" type="submit">{% translate "Disconnect" %}</button></form>
-    {% elif telegram_available %}
-      <form method="post" action="{% url 'notify:telegram_connect' %}" target="_blank">{% csrf_token %}
-        <button class="btn btn-primary" type="submit">{% translate "Connect Telegram" %}</button></form>
-    {% endif %}
-  </div>
-</section>
 {% endblock %}

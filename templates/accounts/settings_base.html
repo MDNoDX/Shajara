@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block main_class %}settings-page{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "Settings" %}</h1>
+  <p>{{ user.display_name }} · {{ user.email|default:user.username }}</p>
+</div></div>
+<div class="settings-layout">
+  <nav class="settings-nav" aria-label="{% translate 'Settings' %}">
+    <a href="{% url 'accounts:settings' %}" {% if settings_tab == "general" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="user" %}<span>{% translate "General" %}</span></a>
+    <a href="{% url 'notify:settings' %}" {% if settings_tab == "reminders" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="bell" %}<span>{% translate "Reminders" %}</span></a>
+    <a href="{% url 'accounts:security' %}" {% if settings_tab == "security" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="lock" %}<span>{% translate "Security" %}</span></a>
+    <a href="{% url 'accounts:data' %}" {% if settings_tab == "data" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="database" %}<span>{% translate "Your data" %}</span></a>
+  </nav>
+  <div class="settings-main">
+    {% block settings %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

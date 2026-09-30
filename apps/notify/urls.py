@@ -12,6 +12,9 @@ urlpatterns = [
     path("sozlamalar/eslatmalar/", views.notification_settings, name="settings"),
     path("sozlamalar/eslatmalar/telegram/", views.telegram_connect, name="telegram_connect"),
     path("sozlamalar/eslatmalar/telegram/uzish/", views.telegram_disconnect, name="telegram_disconnect"),
+    path("sozlamalar/eslatmalar/telegram/holat.json", views.telegram_status, name="telegram_status"),
+    path("sozlamalar/eslatmalar/telegram/sinov/", views.telegram_test, name="telegram_test"),
+    path("sozlamalar/eslatmalar/telegram/pauza/", views.telegram_toggle, name="telegram_toggle"),
     path("cron/kunlik/", views.cron_daily, name="cron_daily"),
     path("telegram/webhook/", views.telegram_webhook, name="telegram_webhook"),
 ]

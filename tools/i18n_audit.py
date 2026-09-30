@@ -3,11 +3,13 @@
     python tools/i18n_audit.py          # prints problems, exit code 1 if any
 
 Checks
-  1. Catalogues (locale/*/LC_MESSAGES/*.po): every entry translated, nothing
-     fuzzy, Latin catalogue free of Cyrillic and of non-canonical apostrophes
-     (o' o‘ o’ g' …), Cyrillic catalogue free of Latin letters except in
-     placeholders and a few intentional tokens (PDF, PNG, the "Alisher"
-     search example).
+  1. Catalogues (locale/*/LC_MESSAGES/*.po): every entry translated (English
+     may fall back to the source text), nothing fuzzy, placeholders kept,
+     Russian plurals in three forms; Uzbek Latin free of Cyrillic and of
+     non-canonical apostrophes (o' o‘ o’ g' …); Uzbek Cyrillic and Russian
+     free of Latin letters except a few intentional tokens (PDF, PNG, the
+     "Alisher" search example); Russian free of Uzbek letters (ў қ ғ ҳ);
+     English free of Cyrillic.
   2. Templates: visible text outside {% translate %} / {% blocktranslate %}.
   3. JavaScript: quoted sentences that are not wrapped in gettext().
   4. Python: user-facing calls (messages.*, ValidationError, add_error,
@@ -20,7 +22,11 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LOCALES = {"uz": "latin", "uz_Cyrl": "cyrillic"}
+LOCALES = {"uz": "latin", "uz_Cyrl": "cyrillic", "ru": "russian", "en": "english"}
+PLURAL_FORMS = {"uz": 1, "uz_Cyrl": 1, "ru": 3, "en": 2}
+UZBEK_ONLY_CYRILLIC = re.compile(r"[ЎўҚқҒғҲҳ]")
+# "# Translators: placeholders {a} {b}" lists extra values a sentence may use.
+DECLARED = re.compile(r"placeholders?((?:\s*\{\w+\})+)")
 
 CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 LATIN = re.compile(r"[A-Za-z]")
@@ -30,7 +36,10 @@ BAD_OG = re.compile(r"[oOgG]['‘’`ʼ]")
 BAD_TUTUQ = re.compile(r"(?<=[^\W\d_])['’`](?=[^\W\d_])")
 PLACEHOLDER = re.compile(r"%\(\w+\)[sd]|%[sd]|\{\w+\}")
 # Format names, key names and bot commands stay in Latin in both scripts.
-ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "Alisher", "MB", "GEDCOM", "Ctrl", "Mac", "Start", "stop", "JSON", "Google"}
+ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "Alisher", "MB", "GEDCOM", "Ctrl", "Mac", "Start", "stop", "JSON", "Google",
+                             "Telegram", "Web", "MyHeritage", "Ancestry", "Gramps", "UTC", "Shajara", "next", "help", "start", "URL", "cookie"}
+# Brand and format names that appear as they are in every language.
+BRANDS = {"Google", "Telegram", "GEDCOM", "JSON", "PDF", "PNG"}
 
 
 def _po_entries():
@@ -48,6 +57,11 @@ def _strings(entry):
     return [entry.msgstr]
 
 
+def _allowed_placeholders(entry):
+    m = DECLARED.search(entry.comment or "")
+    return set(PLACEHOLDER.findall(m.group(1))) if m else None
+
+
 def check_catalogues():
     problems = []
     for loc, script, path, entry in _po_entries():
@@ -56,9 +70,13 @@ def check_catalogues():
             continue
         if "fuzzy" in entry.flags:
             problems.append(f"{where} is marked fuzzy")
+        if entry.msgid_plural and script != "english" and len(entry.msgstr_plural) != PLURAL_FORMS[loc]:
+            problems.append(f"{where} needs {PLURAL_FORMS[loc]} plural form(s)")
+        declared = _allowed_placeholders(entry)
         for text in _strings(entry):
             if not text.strip():
-                problems.append(f"{where} is not translated")
+                if script != "english":  # English falls back to the source text
+                    problems.append(f"{where} is not translated")
                 continue
             bare = re.sub(r"<[^>]+>", "", PLACEHOLDER.sub("", text))  # HTML tags are markup
             if script == "latin":
@@ -66,13 +84,23 @@ def check_catalogues():
                     problems.append(f"{where} contains Cyrillic in the Latin catalogue: {text!r}")
                 if BAD_OG.search(bare) or BAD_TUTUQ.search(bare):
                     problems.append(f"{where} uses a non-canonical apostrophe (use ʻ / ʼ): {text!r}")
+            elif script == "english":
+                if CYRILLIC.search(bare) and "Алишер" not in bare:
+                    problems.append(f"{where} contains Cyrillic in the English catalogue: {text!r}")
             else:
                 for word in re.findall(r"[A-Za-z]+", bare):
                     if word not in ALLOWED_LATIN_IN_CYRILLIC:
-                        problems.append(f"{where} contains Latin text {word!r} in the Cyrillic catalogue")
+                        problems.append(f"{where} contains Latin text {word!r} in the {loc} catalogue")
                         break
-            src_ph = sorted(PLACEHOLDER.findall(entry.msgid))
-            if sorted(PLACEHOLDER.findall(text)) != src_ph and not entry.msgid_plural:
+                if script == "russian" and UZBEK_ONLY_CYRILLIC.search(bare):
+                    problems.append(f"{where} contains Uzbek letters in the Russian catalogue: {text!r}")
+            used = set(PLACEHOLDER.findall(text))
+            if declared is not None:
+                if not used <= declared:
+                    problems.append(f"{where} uses undeclared placeholders: {text!r}")
+            elif not entry.msgid_plural and used != set(PLACEHOLDER.findall(entry.msgid)):
+                problems.append(f"{where} placeholders differ: {text!r}")
+            elif entry.msgid_plural and not used <= set(PLACEHOLDER.findall(entry.msgid_plural)):
                 problems.append(f"{where} placeholders differ: {text!r}")
     return problems
 
@@ -122,7 +150,7 @@ def check_templates():
         else:
             parser = _TextCollector()
             parser.feed(source)
-            leftovers = [t for t in parser.found if re.search(r"[A-Za-z]{2,}", t)]
+            leftovers = [t for t in parser.found if re.search(r"[A-Za-z]{2,}", t) and t not in BRANDS]
         for text in leftovers:
             problems.append(f"{path.relative_to(ROOT)}: untranslated text {text!r}")
     return problems

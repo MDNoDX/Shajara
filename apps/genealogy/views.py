@@ -52,12 +52,13 @@ def _ids(value):
 
 
 def _tree_state(request):
-    """Which branches are open: ?all=1&open=…&closed=…&folded=… (comma-separated ids)."""
+    """Which branches are open: ?all=1&open=…&closed=…&folded=…&kids=… (comma-separated ids)."""
     return {
         "open_all": request.GET.get("all") == "1",
         "opened": _ids(request.GET.get("open")),
         "closed": _ids(request.GET.get("closed")),
         "folded": _ids(request.GET.get("folded")),
+        "unfolded": _ids(request.GET.get("kids")),
     }
 
 
@@ -383,7 +384,10 @@ def search_json(request):
     query = request.GET.get("q", "").strip()
     archive = Archive(owner)
     focus = _focus_for(owner, archive)
-    found = _ranked(Person.objects.filter(owner=owner), query, 8) if query else []
+    people = Person.objects.filter(owner=owner)
+    if request.GET.get("gender") in ("male", "female"):
+        people = people.filter(gender=request.GET["gender"])
+    found = _ranked(people, query, 8) if query else []
     return JsonResponse({"results": [{
         "id": p.pk, "name": p.full_name, "years": p.lifespan,
         "label": archive.label(focus, p.pk) if focus and p.pk != focus else "",
@@ -481,7 +485,6 @@ def event_delete(request, pk):
 @login_required
 def calculator(request):
     archive = Archive(request.user)
-    people = sorted(archive.people.values(), key=lambda p: p.full_name)
     a = b = None
     result = None
     try:
@@ -500,7 +503,10 @@ def calculator(request):
             "b_to_a": archive.label(a, b), "a_to_b": archive.label(b, a),
             "chain_start": archive.people[a], "steps": steps, "connected": chain is not None,
         }
-    return render(request, "genealogy/calculator.html", {"people": people, "a": a, "b": b, "result": result})
+    return render(request, "genealogy/calculator.html", {
+        "a": a, "b": b, "result": result,
+        "person_a": archive.people.get(a), "person_b": archive.people.get(b),
+    })
 
 
 @login_required

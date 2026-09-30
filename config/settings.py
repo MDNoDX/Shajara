@@ -61,7 +61,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    # Language from cookie → Accept-Language → LANGUAGE_CODE (Uzbek Latin).
+    # Language from cookie → Accept-Language (Uzbek only) → LANGUAGE_CODE.
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -69,7 +69,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     # Accounts created through Google finish their profile (gender) first.
     "apps.accounts.middleware.ProfileCompletionMiddleware",
-    # For signed-in users the saved account preference wins.
+    # For signed-in users the saved account preference wins (language, time zone).
     "apps.core.middleware.UserLanguageMiddleware",
     "apps.notify.middleware.DailyRemindersMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -167,6 +167,8 @@ LANGUAGE_CODE = "uz"
 LANGUAGES = [
     ("uz", "Oʻzbekcha (lotin)"),
     ("uz-cyrl", "Ўзбекча (кирилл)"),
+    ("ru", "Русский"),
+    ("en", "English"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 FORMAT_MODULE_PATH = ["config.formats"]

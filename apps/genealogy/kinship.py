@@ -154,20 +154,20 @@ class Archive:
             via = self._ancestor_on_path(focus, anc, up - down)
             code = via and self._blood(via, other)
             if via and code in POSSESSIVE and self._named(self._blood(focus, via)):
-                return chain(kin(self._blood(focus, via)), code)
+                return chain(self._blood(focus, via), code)
         # A child of a named relative: cousin's daughter, nephew's son, …
         if down >= 2 and up >= 1:
             parent = self._parent_towards(other, anc, down)
             code = parent and self.relation(focus, parent)
             if parent and self._named(code):
-                return chain(kin(code), "son" if self._male(other) else "daughter")
+                return chain(code, "son" if self._male(other) else "daughter")
         return None
 
     def _describe_spouse(self, focus, other):
         for partner, _m in self.unions.get(other, []):
             code = self._blood(focus, partner)
             if self._named(code):
-                return chain(kin(code), "husband" if self._male(other) else "wife")
+                return chain(code, "husband" if self._male(other) else "wife")
         return None
 
     def _male(self, pk):

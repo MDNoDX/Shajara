@@ -1,9 +1,11 @@
-"""Dates in natural Uzbek.
+"""Dates in natural language.
 
 Genealogy dates are often partial (only a year, or a month and a year), so
 people store year / month / day separately. Output:
-    Latin     27-sentabr 2026-yil · 2026-yil sentabr · 2026-yil
-    Cyrillic  2026 йил 27 сентябрь · 2026 йил сентябрь · 2026 йил
+    Uzbek Latin     27-sentabr 2026-yil · 2026-yil sentabr · 2026-yil
+    Uzbek Cyrillic  2026 йил 27 сентябрь · 2026 йил сентябрь · 2026 йил
+    Russian         27 сентября 2026 г. · сентябрь 2026 г. · 2026 г.
+    English         September 27, 2026 · September 2026 · 2026
 """
 import calendar
 import datetime
@@ -27,8 +29,30 @@ MONTHS = [
 ]
 
 
+# The month inside a full date ("27 сентября"): Russian uses the genitive
+# case here; Uzbek and English use the same word as above.
+MONTHS_IN_DATE = [
+    pgettext_lazy("month name in a date", "January"),
+    pgettext_lazy("month name in a date", "February"),
+    pgettext_lazy("month name in a date", "March"),
+    pgettext_lazy("month name in a date", "April"),
+    pgettext_lazy("month name in a date", "May"),
+    pgettext_lazy("month name in a date", "June"),
+    pgettext_lazy("month name in a date", "July"),
+    pgettext_lazy("month name in a date", "August"),
+    pgettext_lazy("month name in a date", "September"),
+    pgettext_lazy("month name in a date", "October"),
+    pgettext_lazy("month name in a date", "November"),
+    pgettext_lazy("month name in a date", "December"),
+]
+
+
 def month_name(month):
     return str(MONTHS[month - 1])
+
+
+def month_in_date(month):
+    return str(MONTHS_IN_DATE[month - 1])
 
 
 def month_choices():
@@ -41,7 +65,7 @@ def format_partial_date(year, month=None, day=None):
         return ""
     if month and day:
         return pgettext("full date", "{month} {day}, {year}").format(
-            day=day, month=month_name(month), year=year
+            day=day, month=month_in_date(month), year=year
         )
     if month:
         return pgettext("month and year", "{month} {year}").format(month=month_name(month), year=year)

@@ -5,11 +5,12 @@ from django.utils import translation
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
+from apps.core import timezones
 from apps.core.languages import LATIN, language_choices, normalize_language
 from apps.core.text import normalize_apostrophes
 from apps.genealogy.models import Person
 
-from .models import Gender, User
+from .models import Gender, Palette, User
 
 USERNAME_HELP = _("Letters, digits and the characters @ . + - _ only.")
 
@@ -94,19 +95,41 @@ class ProfileForm(forms.ModelForm):
         return normalize_apostrophes(self.cleaned_data["last_name"].strip())
 
 
-class PaletteForm(forms.ModelForm):
+class PreferencesForm(forms.ModelForm):
+    """Language, colours and time zone: how the site looks and when reminders come."""
+
     class Meta:
         model = User
-        fields = ["palette"]
-        widgets = {"palette": forms.RadioSelect}
-
-
-class LanguageForm(forms.Form):
-    language = forms.ChoiceField(label=_("Language"), widget=forms.RadioSelect)
+        fields = ["preferred_language", "palette", "time_zone"]
+        labels = {"preferred_language": _("Language"), "palette": _("Colours"), "time_zone": _("Time zone")}
+        widgets = {"preferred_language": forms.RadioSelect, "palette": forms.RadioSelect}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["language"].choices = language_choices()
+        self.fields["preferred_language"].choices = language_choices()
+        self.fields["palette"].choices = Palette.choices
+        self.fields["time_zone"] = forms.ChoiceField(
+            label=_("Time zone"), choices=timezones.choices(),
+            help_text=_("Reminders are made for your date and sent at your hour."),
+        )
+
+
+class ImportArchiveForm(forms.Form):
+    file = forms.FileField(label=_("Archive file (JSON)"))
+
+    def clean_file(self):
+        import json
+
+        upload = self.cleaned_data["file"]
+        if upload.size > 20 * 1024 * 1024:
+            raise forms.ValidationError(_("The file is too large."))
+        try:
+            data = json.loads(upload.read().decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            raise forms.ValidationError(_("This is not a Shajara archive file.")) from None
+        if not isinstance(data, dict) or data.get("format") != "shajara-archive-1":
+            raise forms.ValidationError(_("This is not a Shajara archive file."))
+        return data
 
 
 class PasswordChangeForm(auth_forms.PasswordChangeForm):

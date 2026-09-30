@@ -10,6 +10,8 @@ One connected chart around a focus person, with no one drawn twice:
 * the brothers and sisters of every ancestor (amaki, amma, togʻa, xola, …)
   with their spouses and descendants. They can be opened and closed; by
   default those of the parents are open and older generations are closed.
+  Their children (cousins) are folded behind a "+N" button in the compact
+  view, so the chart stays readable; "open everything" shows them all.
 
 Branches are packed with per-row contours (a tidy-tree technique): they sit
 as close as possible without overlapping, and a couple stays side by side
@@ -122,13 +124,14 @@ def pack(parts, gap_for):
 
 
 class TreeLayout:
-    def __init__(self, archive: Archive, focus_id, open_all=False, opened=(), closed=(), folded=()):
+    def __init__(self, archive: Archive, focus_id, open_all=False, opened=(), closed=(), folded=(), unfolded=()):
         self.a = archive
         self.focus = focus_id
         self.open_all = open_all
         self.opened = set(opened)
         self.closed = set(closed)
         self.folded = set(folded)
+        self.unfolded = set(unfolded)
         self.placed = set()
 
     # ---- helpers --------------------------------------------------------------
@@ -170,8 +173,12 @@ class TreeLayout:
                 block.add_line([(dx, dy), (dx, bar), (cx, bar), (cx, row_y(child_row))], "child", band=band)
 
     # ---- descendants ----------------------------------------------------------
-    def desc(self, pk, row):
-        """pk with spouse(s) and, unless folded, all descendants. Returns (block, x of pk)."""
+    def desc(self, pk, row, collateral=False):
+        """pk with spouse(s) and, unless folded, all descendants. Returns (block, x of pk).
+
+        collateral: pk is a brother or sister of an ancestor; their children
+        start folded unless everything is open or the user unfolded them.
+        """
         block = Block()
         if pk in self.placed:
             block.add_node({"id": pk, "x": 0.0, "row": row, "dup": True})
@@ -191,7 +198,8 @@ class TreeLayout:
             ordered.append(groups[None])
 
         kid_total = sum(len(g["kids"]) for g in ordered)
-        folded = pk in self.folded
+        folded = pk in self.folded or (
+            collateral and not self.open_all and pk not in self.unfolded)
         block.add_node({"id": pk, "x": 0.0, "row": row, "dup": False,
                         "kids": {"count": kid_total, "open": not folded} if kid_total else None})
 
@@ -263,7 +271,7 @@ class TreeLayout:
                 mb.add_node({"id": pk, "x": 0.0, "row": row, "dup": False, "sibs": info})
                 parts.append((mb, 0.0))
             else:
-                parts.append(self.desc(member, row))
+                parts.append(self.desc(member, row, collateral=not is_focus))
         row_block, xs = pack(parts, lambda i: SIB_GAP)
         pk_x = xs[members.index(pk)]
         centers = [x + CARD_W / 2 for x in xs]
@@ -356,9 +364,10 @@ class TreeLayout:
 
 
 def build_tree(archive: Archive, focus_id, photo_urls=True, viewer_is_owner=True,
-               open_all=False, opened=(), closed=(), folded=()):
+               open_all=False, opened=(), closed=(), folded=(), unfolded=()):
     """Layout plus the text of every card, in the active language."""
-    layout = TreeLayout(archive, focus_id, open_all=open_all, opened=opened, closed=closed, folded=folded).build()
+    layout = TreeLayout(archive, focus_id, open_all=open_all, opened=opened, closed=closed, folded=folded,
+                        unfolded=unfolded).build()
     owner_self = archive.owner.person_id if viewer_is_owner else None
     for node in layout["nodes"]:
         person = archive.people[node["id"]]
