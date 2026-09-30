@@ -124,7 +124,6 @@ struct ContentView: View {
         let lang = browser.language
         ZStack(alignment: .top) {
             WebView(browser: browser)
-                .ignoresSafeArea()
             if browser.isLoading {
                 ProgressView(value: browser.progress)
                     .progressViewStyle(.linear)
