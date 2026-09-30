@@ -10,7 +10,6 @@ import os
 from pathlib import Path
 
 import dj_database_url
-from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -163,9 +162,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalisation
 # ---------------------------------------------------------------------------
 LANGUAGE_CODE = "uz"
+# Plain strings (not gettext_lazy): hosting tools read settings before Django
+# is ready. Users see the self-names from apps/core/languages.py instead.
 LANGUAGES = [
-    ("uz", _("Uzbek (Latin script)")),
-    ("uz-cyrl", _("Uzbek (Cyrillic script)")),
+    ("uz", "Oʻzbekcha (lotin)"),
+    ("uz-cyrl", "Ўзбекча (кирилл)"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 FORMAT_MODULE_PATH = ["config.formats"]
