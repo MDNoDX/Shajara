@@ -8,3 +8,7 @@ staticfiles/
 .DS_Store
 .env.local
 .vercel
+.env*
+.agents/
+.claude/skills/
+skills-lock.json

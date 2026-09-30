@@ -1,10 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python manage.py migrate --noinput && python manage.py createcachetable",
+  "buildCommand": "DATABASE_URL=\"${DATABASE_URL_UNPOOLED:-$DATABASE_URL}\" python manage.py migrate --noinput && DATABASE_URL=\"${DATABASE_URL_UNPOOLED:-$DATABASE_URL}\" python manage.py createcachetable",
   "functions": {
-    "config/wsgi.py": { "maxDuration": 60 }
+    "config/wsgi.py": {
+      "maxDuration": 60
+    }
   },
   "crons": [
-    { "path": "/cron/kunlik/", "schedule": "0 3 * * *" }
+    {
+      "path": "/cron/kunlik/",
+      "schedule": "0 3 * * *"
+    }
+  ],
+  "regions": [
+    "fra1"
   ]
 }

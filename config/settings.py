@@ -110,6 +110,11 @@ DATABASES = {
 # cache works across serverless instances; create it with `createcachetable`.
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "cache"}}
 
+# Neon's pooled connection (PgBouncer, transaction mode) does not support
+# server-side cursors.
+if "pooler" in DATABASES["default"].get("HOST", ""):
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "home"
