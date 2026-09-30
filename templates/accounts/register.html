@@ -1,16 +1,24 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% translate "Sign up" %}{% endblock %}
+{% block main_class %}flush{% endblock %}
 {% block content %}
+<div class="auth-layout">
+  <aside class="auth-side">
+    <h2>{% translate "Every family has a story worth keeping" %}</h2>
+    <p>{% translate "Family tree — a family archive for Uzbek families." %}</p>
+  </aside>
+  <div class="auth-main">
 <div class="auth-wrap" style="max-width:560px">
   <div class="card">
     <h1>{% translate "Sign up" %}</h1>
     <p class="muted">{% translate "Your own record in the family tree is created from these details." %}</p>
     {% if google_login %}
-      {% include "partials/google_button.html" %}
+      {% include "partials/google_button.html" with next=next %}
       <div class="or"><span>{% translate "or" %}</span></div>
     {% endif %}
     <form method="post" novalidate>{% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
       {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
       <div class="form-grid">
         {% include "partials/field.html" with field=form.first_name %}
@@ -27,5 +35,7 @@
     </form>
   </div>
   <p class="muted" style="text-align:center;margin-top:16px">{% translate "Already have an account?" %} <a href="{% url 'accounts:login' %}">{% translate "Sign in" %}</a></p>
+</div>
+  </div>
 </div>
 {% endblock %}

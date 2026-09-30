@@ -15,7 +15,8 @@ bazasida saqlanadi. Shuning uchun boshqa serverga koʻchish = bazani koʻchirish
 | Sayt (Django) | Vercel Python funksiyasi (`config/wsgi.py`), hudud `fra1` |
 | Baza | Neon PostgreSQL (Vercel Marketplace orqali ulangan, `DATABASE_URL`) |
 | Rasmlar | Bazaning `core_storedfile` jadvalida (`apps/core/storage.py`) |
-| Eslatmalar | Vercel Cron → `/cron/kunlik/` **har soatda** (24 ta kunlik yozuv — bepul rejimda shunday qilinadi); har kimga oʻzi tanlagan soatda, oʻz vaqt mintaqasida yuboriladi |
+| Eslatmalar | Vercel Cron → `/cron/kunlik/` **har soatda** (24 ta kunlik yozuv — bepul rejimda shunday qilinadi); har kimga oʻzi tanlagan soatda, oʻz vaqt mintaqasida yuboriladi — Telegramga va push qilib |
+| Haftalik zaxira | Oʻsha cron: administratorning Telegramiga butun baza bitta fayl boʻlib boradi (`/boshqaruv/` da yoqiladi) |
 | Telegram bot | Webhook → `/telegram/webhook/` (uzilib qolsa, cron har soatda oʻzi tiklaydi) |
 | Migratsiyalar | Har bir deploy’da avtomatik (`vercel.json` → `buildCommand`) |
 
@@ -28,6 +29,7 @@ bazasida saqlanadi. Shuning uchun boshqa serverga koʻchish = bazani koʻchirish
 | `CRON_SECRET` | ha | Vercel Cron shu kalit bilan keladi |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google orqali kirish uchun | quyida |
 | `TELEGRAM_BOT_TOKEN` | Telegram eslatmalari uchun | quyida. Bot nomi tokenning oʻzidan olinadi; `TELEGRAM_BOT_USERNAME` shart emas |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | push-bildirishnomalar uchun | quyida. `VAPID_SUBJECT` shart emas (sayt manzili olinadi) |
 | `EMAIL_*`, `DJANGO_EMAIL_BACKEND` | parolni tiklash xatlari uchun | `.env.example` ga qarang |
 | `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS` | faqat oʻz domeningiz boʻlsa | `*.vercel.app` manzillari avtomatik qoʻshiladi |
 
@@ -56,16 +58,44 @@ emailiga mos kelsa, oʻsha akkauntga ulanadi; aks holda yangi akkaunt ochiladi v
    Sahifa ulanganini oʻzi sezadi; «Sinov xabarini yuborish» tugmasi bilan tekshiriladi.
 5. Botdagi buyruqlar: `/next` — yaqin sanalar, `/stop` — oʻchirish, `/start` — qayta yoqish.
 
+### Push-bildirishnomalar (telefon va brauzer)
+
+Kalit juftligi bir marta yaratiladi va Vercel’ga yoziladi (hozirgi saytda allaqachon qoʻshilgan):
+
+```bash
+.venv/bin/python - <<'PY'
+import base64
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+b64 = lambda b: base64.urlsafe_b64encode(b).rstrip(b"=").decode()
+key = ec.generate_private_key(ec.SECP256R1())
+print("VAPID_PRIVATE_KEY=" + b64(key.private_numbers().private_value.to_bytes(32, "big")))
+print("VAPID_PUBLIC_KEY=" + b64(key.public_key().public_bytes(
+    serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint)))
+PY
+```
+
+Foydalanuvchi **Sozlamalar → Eslatmalar → Shu qurilmada → Yoqish** ni bosadi. iPhone/iPad’da avval saytni
+bosh ekranga qoʻshish kerak (Ulashish → Bosh ekranga qoʻshish). Kalitlarni almashtirsangiz, hamma qayta yoqishi kerak boʻladi.
+
+### Haftalik zaxira nusxa
+
+`/boshqaruv/` → **Avtomatik zaxira nusxa** → «har hafta» ni yoqing (avval Telegramni ulang). Har 7 kunda butun baza
+(suratlar bilan, siqilgan `.json.gz`) Telegramingizga keladi; «Hozir yuborish» bilan darhol ham olinadi.
+Telegram botlar 50 MB gacha fayl yubora oladi — baza bundan oshsa, xabar keladi va nusxa paneldan yuklab olinadi.
+Tiklash: `gunzip shajara-….json.gz && python manage.py loaddata shajara-….json`.
+
 ### Oʻz domeningiz
 
 Vercel → Project → **Domains** → domenni qoʻshing va koʻrsatilgan DNS yozuvlarini registratorda kiriting.
-Keyin `DJANGO_ALLOWED_HOSTS=shajara.uz` va `DJANGO_CSRF_TRUSTED_ORIGINS=https://shajara.uz` qoʻshing,
-Google’dagi redirect URI’ni yangilang va Telegram webhookni qayta oʻrnating.
+Keyin `DJANGO_ALLOWED_HOSTS=shajara.uz`, `DJANGO_CSRF_TRUSTED_ORIGINS=https://shajara.uz` va `SITE_URL=https://shajara.uz` qoʻshing,
+Google’dagi redirect URI’ni yangilang va Telegram webhookni qayta oʻrnating. Push-bildirishnomalar domenga bogʻlangan:
+yangi manzilda har kim ularni qayta yoqadi; Mac ilovasida *Sozlamalar → Sayt manzili* ni oʻzgartiring.
 
 ### Bepul rejim cheklovlari
 
-Neon bepul rejimi: 0,5 GB baza — bir necha ming odam va yuzlab rasm uchun yetarli (bitta rasm
-koʻpi bilan 5 MB). Hajmni Boshqaruv panelida kuzating.
+Neon bepul rejimi: 0,5 GB baza — bir necha ming odam va yuzlab rasm uchun yetarli (suratlar yuklashda
+1800 piksel atrofiga kichraytiriladi; hujjat va ovozli yozuvlar 12 MB gacha). Hajmni Boshqaruv panelida kuzating.
 
 ---
 
@@ -81,11 +111,12 @@ koʻpi bilan 5 MB). Hajmni Boshqaruv panelida kuzating.
 
 ## 3. Zaxira nusxa va boshqa serverga koʻchish
 
-Maʼlumotlar yoʻqolmasligi uchun uchta yoʻl bor — bittasini muntazam qiling:
+Maʼlumotlar yoʻqolmasligi uchun bir necha yoʻl bor — bittasini muntazam qiling:
 
 | Usul | Nima saqlanadi | Qanday |
 |---|---|---|
-| **Toʻliq zaxira** (tavsiya) | Butun sayt: foydalanuvchilar, parollar, arxivlar, rasmlar, eslatmalar | `/boshqaruv/` → *Toʻliq zaxira nusxa (JSON)* |
+| **Haftalik avtomatik zaxira** (tavsiya) | Butun sayt, har hafta Telegramga | `/boshqaruv/` → *Avtomatik zaxira nusxa* |
+| **Toʻliq zaxira** (qoʻlda) | Butun sayt: foydalanuvchilar, parollar, arxivlar, rasmlar, eslatmalar | `/boshqaruv/` → *Toʻliq zaxira nusxa (JSON)* |
 | Oila arxivi | Bitta foydalanuvchining shajarasi (rasmlar bilan) | *Sozlamalar → Maʼlumotlaringiz → Maʼlumotlarimni yuklab olish (JSON)* |
 | `pg_dump` | Bazaning aynan nusxasi | `pg_dump "$DATABASE_URL_UNPOOLED" > shajara.sql` |
 
@@ -112,7 +143,7 @@ Istalgan Linux VPS (1 vCPU, 1–2 GB RAM, Ubuntu 22.04/24.04): Hetzner, DigitalO
 | Xizmat | Vazifasi |
 |---|---|
 | `web` | Django + gunicorn |
-| `worker` | Eslatmalar va Telegram bot (*long polling*, webhook shart emas) |
+| `worker` | Eslatmalar (Telegram, push), haftalik zaxira va Telegram bot (*long polling*, webhook shart emas) |
 | `db` | PostgreSQL 17 (maʼlumotlar va rasmlar) |
 | `caddy` | HTTPS (Let’s Encrypt) avtomatik |
 
@@ -151,6 +182,9 @@ Vercel’dan koʻchganda Telegram webhookni oʻchiring (`docker compose exec web
 | Google «redirect_uri_mismatch» | Google Console’dagi redirect URI sayt manziliga mos emas |
 | Telegram javob bermayapti | Token notoʻgʻri yoki webhook oʻrnatilmagan (`/boshqaruv/`) |
 | Eslatmalar kelmayapti | `CRON_SECRET` yoʻq; Vercel → Project → **Cron Jobs** loglarini koʻring. Foydalanuvchi tanlagan soat hali kelmagan boʻlishi ham mumkin |
+| Push yoqilmayapti | `VAPID_*` kalitlari yoʻq (boʻlim koʻrinmaydi); brauzerda bildirishnomalar bloklangan; iPhone’da sayt bosh ekranga qoʻshilmagan |
+| Haftalik zaxira kelmadi | `/boshqaruv/` da yoqilmagan, Telegram ulanmagan yoki fayl 50 MB dan katta |
+| Ikki bosqichli kirishda telefon yoʻqoldi | Tiklash kodlaridan biri bilan kiring; kodlar ham yoʻq boʻlsa, administrator `/admin/` da foydalanuvchining `totp_enabled` belgisini olib tashlaydi |
 | Telegram brauzerda ochilyapti | «@bot ni ochish» tugmasi `tg://` havolasi — Telegram ilovasi oʻrnatilgan boʻlishi kerak; aks holda kodni botga qoʻlda yuboring |
 
 Loglar: Vercel → Project → **Logs** (yoki `vercel logs`), Docker’da `docker compose logs -f web`.
@@ -159,6 +193,10 @@ Loglar: Vercel → Project → **Logs** (yoki `vercel logs`), Docker’da `docke
 
 - `DJANGO_DEBUG=0` (Vercel’da standart), HTTPS, HSTS, xavfsiz cookie yoqilgan.
 - Maxfiy kalitlar faqat Vercel/`.env` da; `.env` gitga qoʻshilmaydi.
-- Suratlar faqat arxiv egasiga va u shajarasini ulashgan odamlarga beriladi (mehmonlarga — yoʻq).
+- Suratlar va albom fayllari faqat arxiv egasiga va u taklif qilgan aʼzolarga beriladi (mehmonlarga — yoʻq).
+- Taklif havolasi bir martalik, 14 kun amal qiladi va istalgan payt bekor qilinadi; aʼzoning huquqi
+  (koʻrish / tahrirlash) *Sozlamalar → Oila aʼzolari* da oʻzgartiriladi yoki olib tashlanadi.
+- Ikki bosqichli kirish: *Sozlamalar → Xavfsizlik*. Administrator hisobida albatta yoqing.
+- Har bir oʻzgarish tarixga yoziladi (kim, qachon) va ortga qaytariladi.
 - Bitta hisobga 10 marta notoʻgʻri parol kiritilsa, kirish 15 daqiqaga toʻxtatiladi.
 - `seed_demo` foydalanuvchilarining paroli repozitoriyda ochiq — ularni production’ga yuklamang.

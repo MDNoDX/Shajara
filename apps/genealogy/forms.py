@@ -76,10 +76,14 @@ def _person_label(person):
 class PersonForm(forms.ModelForm):
     """Personal details. Parents are chosen from the owner's archive."""
 
+    # Shown only when the new person looks like someone already in the tree.
+    confirm_duplicate = forms.BooleanField(required=False, label=_("This is a different person, add anyway"))
+
     def __init__(self, *args, owner, archive=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.owner = owner
         self.archive = archive
+        self.duplicates = []
         self.fields.update(_date_fields("birth"))
         self.fields.update(_date_fields("death"))
         for prefix in ("birth", "death"):
@@ -129,7 +133,24 @@ class PersonForm(forms.ModelForm):
         if data.get("death_year"):
             data["is_deceased"] = True
         self._check_parents(data)
+        self._check_duplicates(data)
         return data
+
+    def _creates_person(self, data):
+        return not self.instance.pk
+
+    def _check_duplicates(self, data):
+        """A new person with the name (and surname or birth year) of someone
+        already in the tree must be confirmed."""
+        if not self._creates_person(data) or data.get("confirm_duplicate") or not data.get("first_name"):
+            return
+        from .duplicates import similar_to
+
+        self.duplicates = similar_to(self.owner, data["first_name"], data.get("last_name") or "",
+                                     data.get("birth_year"))
+        if self.duplicates:
+            self.add_error(None, _("Someone like this is already in the family tree. "
+                                   "Check the list below before adding a second record."))
 
     def _check_parents(self, data):
         pk = self.instance.pk
@@ -144,11 +165,19 @@ class PersonForm(forms.ModelForm):
 
     def clean_photo(self):
         photo = self.cleaned_data.get("photo")
-        if photo and hasattr(photo, "size") and photo.size > settings.PHOTO_MAX_BYTES:
-            raise forms.ValidationError(
-                _("The photo is too large. The maximum size is %(size)d MB."),
-                params={"size": settings.PHOTO_MAX_BYTES // (1024 * 1024)},
-            )
+        if photo and hasattr(photo, "size") and hasattr(photo, "content_type"):  # a new upload
+            if photo.size > settings.PHOTO_MAX_BYTES:
+                raise forms.ValidationError(
+                    _("The photo is too large. The maximum size is %(size)d MB."),
+                    params={"size": settings.PHOTO_MAX_BYTES // (1024 * 1024)},
+                )
+            from apps.core.images import PORTRAIT_SIDE, shrink
+
+            small = shrink(photo, PORTRAIT_SIDE)
+            if small:
+                content, ext = small
+                content.name = f"photo.{ext}"
+                return content
         return photo
 
     def save(self, commit=True):
@@ -191,6 +220,9 @@ class RelativeForm(PersonForm):
 
     def _check_parents(self, data):
         pass
+
+    def _creates_person(self, data):
+        return not data.get("existing")
 
     def clean(self):
         data = super().clean()

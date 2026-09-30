@@ -7,9 +7,10 @@
   <h1>{% translate "Add a new relative" %}</h1>
   <p>{% blocktranslate with name=anchor.full_name %}Relative of {{ name }}{% endblocktranslate %}</p>
 </div></div>
-<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="5"
+<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="12"
       {% if son_surname %}data-son-surname="{{ son_surname }}" data-father-surname="{{ father_surname }}"{% endif %}>{% csrf_token %}
   {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+  {% include "genealogy/_duplicates_notice.html" %}
   <fieldset>
     {% include "partials/field.html" with field=form.relation %}
     {% if has_spouses %}<div data-show-if-relation="child">{% include "partials/field.html" with field=form.other_parent %}</div>{% endif %}

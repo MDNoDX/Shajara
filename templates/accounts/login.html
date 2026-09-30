@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% translate "Sign in" %}{% endblock %}
+{% block main_class %}flush{% endblock %}
 {% block content %}
+<div class="auth-layout">
+  <aside class="auth-side">
+    <h2>{% translate "Every family has a story worth keeping" %}</h2>
+    <p>{% translate "Family tree — a family archive for Uzbek families." %}</p>
+  </aside>
+  <div class="auth-main">
 <div class="auth-wrap">
   <div class="card">
     <h1>{% translate "Sign in" %}</h1>
@@ -21,6 +28,8 @@
       </div>
     </form>
   </div>
-  <p class="muted" style="text-align:center;margin-top:16px">{% translate "No account yet?" %} <a href="{% url 'accounts:register' %}">{% translate "Sign up" %}</a></p>
+  <p class="muted" style="text-align:center;margin-top:16px">{% translate "No account yet?" %} <a href="{% url 'accounts:register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% translate "Sign up" %}</a></p>
+</div>
+  </div>
 </div>
 {% endblock %}

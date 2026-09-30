@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 08:21+0500\n"
+"POT-Creation-Date: 2026-09-30 13:32+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: Uzbek (Cyrillic)\n"
@@ -14,87 +14,107 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: static/js/app.js:11
+#: static/js/app.js:20
 msgid "Are you sure you want to delete this?"
 msgstr "Ростдан ҳам ўчирмоқчимисиз?"
 
-#: static/js/app.js:24
-msgid "The photo is too large. The maximum size is %(size)s MB."
-msgstr "Расм ҳажми жуда катта. Энг кўпи %(size)s МБ бўлиши мумкин."
-
-#: static/js/app.js:74
-msgid "Saving…"
-msgstr "Сақланмоқда…"
-
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Automatic"
 msgstr "Автоматик"
 
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Light"
 msgstr "Ёруғ"
 
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Dark"
 msgstr "Қоронғи"
 
-#: static/js/app.js:96
+#: static/js/app.js:41
 msgid "Colour theme"
 msgstr "Ранг мавзуси"
 
-#: static/js/app.js:126
-msgid "Copied"
-msgstr "Нусхаланди"
+#: static/js/app.js:124
+msgid "Saving…"
+msgstr "Сақланмоқда…"
 
-#: static/js/app.js:163
+#: static/js/app.js:133
 msgid "Type a name to filter…"
 msgstr "Исмни ёзиб қидиринг…"
 
-#: static/js/app.js:227
+#: static/js/app.js:167
+msgid "Copied"
+msgstr "Нусхаланди"
+
+#: static/js/app.js:214
+msgid "The photo is too large. The maximum size is %(size)s MB."
+msgstr "Расм ҳажми жуда катта. Энг кўпи %(size)s МБ бўлиши мумкин."
+
+#: static/js/app.js:256
+msgid "Close"
+msgstr "Ёпиш"
+
+#: static/js/app.js:327 static/js/app.js:468
 msgid "No results found."
 msgstr "Қидирув натижаси топилмади."
 
-#: static/js/app.js:257
-msgid "All results"
-msgstr "Барча натижалар"
+#: static/js/app.js:538
+msgid "On for this device"
+msgstr "Бу қурилмада ёқилган"
 
-#: static/js/tree.js:135
+#: static/js/app.js:539
+msgid "Blocked in the browser settings"
+msgstr "Браузер созламаларида блокланган"
+
+#: static/js/app.js:539
+msgid "Off for this device"
+msgstr "Бу қурилмада ўчирилган"
+
+#: static/js/tree.js:146 static/js/tree.js:250
 msgid "Family tree"
 msgstr "Шажара"
 
-#: static/js/tree.js:170
+#: static/js/tree.js:188
 msgid "Hide brothers and sisters"
 msgstr "Ака-ука ва опа-сингилларини яшириш"
 
-#: static/js/tree.js:170
+#: static/js/tree.js:188
 msgid "Show brothers and sisters"
 msgstr "Ака-ука ва опа-сингилларини кўрсатиш"
 
-#: static/js/tree.js:175
+#: static/js/tree.js:193
 msgid "Hide children"
 msgstr "Фарзандларини яшириш"
 
-#: static/js/tree.js:175
+#: static/js/tree.js:193
 msgid "Show children"
 msgstr "Фарзандларини кўрсатиш"
 
-#: static/js/tree.js:379
-msgid "Loading the family tree…"
-msgstr "Шажара юкланмоқда…"
+#: static/js/tree.js:297
+msgid "Add father"
+msgstr "Отасини қўшиш"
 
-#: static/js/tree.js:386
-msgid "The family tree is empty."
-msgstr "Шажара ҳали бўш."
+#: static/js/tree.js:297
+msgid "Add mother"
+msgstr "Онасини қўшиш"
 
-#: static/js/tree.js:393
-msgid "Could not load the family tree. Please try again."
-msgstr "Шажарани юклаб бўлмади. Қайтадан уриниб кўринг."
+#: static/js/tree.js:594
+msgid "You"
+msgstr "Сиз"
 
-#: static/js/tree.js:464
+#: static/js/tree.js:675 static/js/tree.js:813
 msgid "An error occurred."
 msgstr "Хатолик юз берди."
 
-#: static/js/tree.js:467
+#: static/js/tree.js:702
+msgid "Could not load the family tree. Please try again."
+msgstr "Шажарани юклаб бўлмади. Қайтадан уриниб кўринг."
+
+#: static/js/tree.js:711 static/js/tree.js:726
+msgid "The family tree is empty."
+msgstr "Шажара ҳали бўш."
+
+#: static/js/tree.js:816
 msgctxt "file name"
 msgid "family-tree"
 msgstr "шажара"

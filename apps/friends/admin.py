@@ -1,12 +1,6 @@
 from django.contrib import admin
 
-from .models import Contact, FriendRequest
-
-
-@admin.register(FriendRequest)
-class FriendRequestAdmin(admin.ModelAdmin):
-    list_display = ("from_user", "to_user", "status", "created_at")
-    list_filter = ("status",)
+from .models import Contact
 
 
 @admin.register(Contact)

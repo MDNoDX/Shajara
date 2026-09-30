@@ -1,4 +1,4 @@
-"""Background worker: daily reminders, Telegram delivery and bot commands.
+"""Background worker: daily reminders, Telegram and push delivery, weekly backup, bot commands.
 
     python manage.py run_worker          # runs forever (use as a service)
     python manage.py run_worker --once   # one pass, e.g. from cron
@@ -28,8 +28,11 @@ class Command(BaseCommand):
             if opts["once"] or time.monotonic() - last > REMINDER_EVERY:
                 created = service.run_daily()
                 sent = service.send_pending_telegram()
+                pushed = service.send_pending_push()
+                backups = service.weekly_backup()
                 last = time.monotonic()
-                self.stdout.write(f"reminders created: {created}, sent to Telegram: {sent}")
+                self.stdout.write(f"reminders created: {created}, sent to Telegram: {sent}, "
+                                  f"pushed: {pushed}, backups: {backups}")
             if opts["once"]:
                 return
             if telegram.configured():

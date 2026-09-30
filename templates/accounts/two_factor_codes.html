@@ -1,0 +1,15 @@
+{% extends "accounts/settings_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Recovery codes" %}{% endblock %}
+{% block settings %}
+<section class="card">
+  <h2>{% include "partials/icon.html" with name="shield" %}{% translate "Two-step sign-in is on" %}</h2>
+  <p>{% translate "Save these recovery codes somewhere safe. If you lose your phone, each code lets you sign in once. They are shown only now." %}</p>
+  <div class="codes" id="recovery-codes" data-copy-text="{{ codes|join:' ' }}">{% for code in codes %}<code>{{ code }}</code>{% endfor %}</div>
+  <div class="form-actions">
+    <button class="btn" type="button" data-copy="recovery-codes">{% include "partials/icon.html" with name="copy" %}{% translate "Copy" %}</button>
+    <button class="btn" type="button" onclick="window.print()">{% translate "Print" %}</button>
+    <a class="btn btn-primary" href="{% url 'accounts:security' %}">{% translate "Done" %}</a>
+  </div>
+</section>
+{% endblock %}

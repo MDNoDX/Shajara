@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Marriage, Person, Story
+from .models import Change, Marriage, Media, Person, Story
 
 
 @admin.register(Person)
@@ -13,3 +13,17 @@ class PersonAdmin(admin.ModelAdmin):
 
 admin.site.register(Marriage)
 admin.site.register(Story)
+
+
+@admin.register(Media)
+class MediaAdmin(admin.ModelAdmin):
+    list_display = ("person", "kind", "caption", "year", "uploaded_by")
+    list_filter = ("kind",)
+    raw_id_fields = ("owner", "person", "uploaded_by")
+
+
+@admin.register(Change)
+class ChangeAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "owner", "actor", "action", "subject", "undone_at")
+    list_filter = ("action",)
+    raw_id_fields = ("owner", "actor", "person")

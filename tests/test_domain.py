@@ -6,7 +6,8 @@ from django.utils import translation
 from apps.accounts.models import User
 from apps.core.dates import format_date, format_partial_date
 from apps.core.text import normalize_apostrophes, search_key
-from apps.friends.models import FriendRequest
+from apps.accounts.models import Invite, Membership
+from apps.accounts.sharing import accept_invite, switch_archive
 from apps.genealogy.kinship import Archive
 from apps.genealogy.models import Person
 
@@ -72,14 +73,28 @@ class KinshipTests(TestCase):
         from apps.genealogy.tree import build_tree
 
         with translation.override("uz"):
-            mine = build_tree(self.a, self.p["me"].pk)
-            other = build_tree(self.a, self.p["grandpa"].pk)
-            friend = build_tree(self.a, self.p["me"].pk, viewer_is_owner=False)
+            me = self.p["me"].pk
+            mine = build_tree(self.a, me, viewer_person=me)
+            other = build_tree(self.a, self.p["grandpa"].pk, viewer_person=me)
+            friend = build_tree(self.a, me, viewer_person=None)
         label = lambda layout, key: next(n["label"] for n in layout["nodes"] if n["id"] == self.p[key].pk)
         self.assertEqual(label(mine, "me"), "Siz")
         self.assertEqual(label(other, "grandpa"), "")
         self.assertEqual(label(other, "father"), "Oʻgʻil")
         self.assertEqual(label(friend, "me"), "")
+        # Sides of the family, the direct line and the generations.
+        node = lambda key: next(n for n in mine["nodes"] if n["id"] == self.p[key].pk)
+        self.assertEqual((node("father")["branch"], node("mother")["branch"]), ("paternal", "maternal"))
+        self.assertEqual((node("me")["branch"], node("aunt")["branch"]), ("own", "paternal"))
+        self.assertTrue(node("grandpa")["direct"] and not node("aunt")["direct"])
+        self.assertTrue(any(line.get("direct") for line in mine["lines"]))
+        self.assertEqual([r["gen"] for r in mine["rows"]], [-2, -1, 0, 1, 2])
+        with translation.override("uz"):
+            maternal = build_tree(self.a, me, viewer_person=me, side="maternal")
+        shown = {n["id"] for n in maternal["nodes"]}
+        self.assertIn(self.p["father"].pk, shown)        # still next to the mother …
+        self.assertNotIn(self.p["grandpa"].pk, shown)    # … but without his own family
+        self.assertNotIn(self.p["aunt"].pk, shown)
 
     def test_tree_is_one_connected_chart(self):
         from collections import Counter, defaultdict
@@ -280,19 +295,57 @@ class AccessTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertContains(response, "Кириш тақиқланган.", status_code=403)
 
-    def test_friends_can_view_but_not_edit(self):
-        FriendRequest.objects.create(from_user=self.other, to_user=self.owner, status=FriendRequest.Status.ACCEPTED)
+    def test_viewers_can_view_but_not_edit(self):
+        Membership.objects.create(owner=self.owner, member=self.other, role="viewer")
         self.assertEqual(self.client.get(reverse("genealogy:person", args=[self.p["me"].pk])).status_code, 200)
         self.assertEqual(self.client.get(reverse("genealogy:tree_for", args=[self.owner.username])).status_code, 200)
         response = self.client.get(reverse("genealogy:person_edit", args=[self.p["me"].pk]))
         self.assertContains(response, "Ушбу маълумотни ўзгартириш ҳуқуқингиз йўқ.", status_code=403)
 
-    def test_friend_request_flow(self):
-        self.client.post(reverse("friends:send", args=[self.owner.pk]))
-        req = FriendRequest.objects.get(from_user=self.other, to_user=self.owner)
+    def test_invite_makes_a_shared_tree(self):
+        invite = Invite.objects.create(owner=self.owner, created_by=self.owner, role="editor", person=self.p["cousin"])
+        own_person = self.other.person
+        # Opening the link and joining.
+        self.assertEqual(self.client.get(reverse("accounts:invite", args=[invite.token])).status_code, 200)
+        self.client.post(reverse("accounts:invite", args=[invite.token]))
+        self.other.refresh_from_db()
+        self.assertEqual(self.other.active_archive, self.owner)
+        self.assertEqual(self.other.person, self.p["cousin"])       # who they are in the shared tree
+        self.assertEqual(self.other.own_person, own_person)          # their own tree is kept
+        invite.refresh_from_db()
+        self.assertFalse(invite.is_open)                             # a link works once
+        # The shared tree is named from the member's own place in it.
+        data = self.client.get(reverse("genealogy:tree_data_for", args=[self.owner.username])).json()
+        labels = {n["id"]: n["label"] for n in data["nodes"]}
+        self.assertEqual(data["focus"], self.p["cousin"].pk)
+        self.assertEqual(labels[self.p["cousin"].pk], "Сиз")
+        # An editor adds a relative to the owner's archive; the change is in the history.
+        response = self.client.post(reverse("genealogy:quick_add", args=[self.p["cousin"].pk]), {
+            "relation": "child", "first_name": "Зарина", "gender": "female", "birth_year": "2010"})
+        self.assertTrue(response.json()["ok"])
+        child = Person.objects.get(first_name="Зарина")
+        self.assertEqual((child.owner, child.mother), (self.owner, self.p["cousin"]))
+        change = self.owner.changes.first()
+        self.assertEqual((change.actor, change.person, change.action), (self.other, child, "created"))
+        # Back to their own tree, and leaving.
+        switch_archive(self.other, self.other)
+        self.other.refresh_from_db()
+        self.assertEqual((self.other.active_archive, self.other.person), (None, own_person))
+        self.client.post(reverse("accounts:archive_leave", args=[self.owner.pk]))
+        self.assertFalse(Membership.objects.filter(owner=self.owner, member=self.other).exists())
+
+    def test_owner_manages_invites_and_members(self):
         self.client.force_login(self.owner)
-        home = self.client.get(reverse("home")).content.decode()
-        self.assertIn('class="badge"', home)
-        self.client.post(reverse("friends:answer", args=[req.pk]), {"answer": "accept"})
-        req.refresh_from_db()
-        self.assertEqual(req.status, FriendRequest.Status.ACCEPTED)
+        self.client.post(reverse("accounts:family"), {"role": "viewer", "person": ""})
+        invite = Invite.objects.get(owner=self.owner)
+        page = self.client.get(reverse("accounts:family") + f"?yangi={invite.pk}").content.decode()
+        self.assertIn(f"/taklif/{invite.token}/", page)
+        accept_invite(invite, self.other)
+        membership = Membership.objects.get(owner=self.owner, member=self.other)
+        self.client.post(reverse("accounts:member_update", args=[membership.pk]), {"role": "editor"})
+        membership.refresh_from_db()
+        self.assertEqual(membership.role, "editor")
+        self.client.post(reverse("accounts:member_update", args=[membership.pk]), {"remove": "1"})
+        self.other.refresh_from_db()
+        self.assertIsNone(self.other.active_archive)                 # pushed back to their own tree
+        self.assertFalse(Membership.objects.filter(pk=membership.pk).exists())

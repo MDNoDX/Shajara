@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 08:21+0500\n"
+"POT-Creation-Date: 2026-09-30 13:32+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: Russian\n"
@@ -18,87 +18,107 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: static/js/app.js:11
+#: static/js/app.js:20
 msgid "Are you sure you want to delete this?"
 msgstr "Вы действительно хотите удалить?"
 
-#: static/js/app.js:24
-msgid "The photo is too large. The maximum size is %(size)s MB."
-msgstr "Фото слишком большое. Максимальный размер — %(size)s МБ."
-
-#: static/js/app.js:74
-msgid "Saving…"
-msgstr "Сохранение…"
-
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Automatic"
 msgstr "Как в системе"
 
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Light"
 msgstr "Светлая"
 
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Dark"
 msgstr "Тёмная"
 
-#: static/js/app.js:96
+#: static/js/app.js:41
 msgid "Colour theme"
 msgstr "Тема"
 
-#: static/js/app.js:126
-msgid "Copied"
-msgstr "Скопировано"
+#: static/js/app.js:124
+msgid "Saving…"
+msgstr "Сохранение…"
 
-#: static/js/app.js:163
+#: static/js/app.js:133
 msgid "Type a name to filter…"
 msgstr "Введите имя для фильтра…"
 
-#: static/js/app.js:227
+#: static/js/app.js:167
+msgid "Copied"
+msgstr "Скопировано"
+
+#: static/js/app.js:214
+msgid "The photo is too large. The maximum size is %(size)s MB."
+msgstr "Фото слишком большое. Максимальный размер — %(size)s МБ."
+
+#: static/js/app.js:256
+msgid "Close"
+msgstr "Закрыть"
+
+#: static/js/app.js:327 static/js/app.js:468
 msgid "No results found."
 msgstr "Ничего не найдено."
 
-#: static/js/app.js:257
-msgid "All results"
-msgstr "Все результаты"
+#: static/js/app.js:538
+msgid "On for this device"
+msgstr "На этом устройстве включено"
 
-#: static/js/tree.js:135
+#: static/js/app.js:539
+msgid "Blocked in the browser settings"
+msgstr "Заблокировано в настройках браузера"
+
+#: static/js/app.js:539
+msgid "Off for this device"
+msgstr "На этом устройстве выключено"
+
+#: static/js/tree.js:146 static/js/tree.js:250
 msgid "Family tree"
 msgstr "Шаджара"
 
-#: static/js/tree.js:170
+#: static/js/tree.js:188
 msgid "Hide brothers and sisters"
 msgstr "Скрыть братьев и сестёр"
 
-#: static/js/tree.js:170
+#: static/js/tree.js:188
 msgid "Show brothers and sisters"
 msgstr "Показать братьев и сестёр"
 
-#: static/js/tree.js:175
+#: static/js/tree.js:193
 msgid "Hide children"
 msgstr "Скрыть детей"
 
-#: static/js/tree.js:175
+#: static/js/tree.js:193
 msgid "Show children"
 msgstr "Показать детей"
 
-#: static/js/tree.js:379
-msgid "Loading the family tree…"
-msgstr "Загрузка древа…"
+#: static/js/tree.js:297
+msgid "Add father"
+msgstr "Добавить отца"
 
-#: static/js/tree.js:386
-msgid "The family tree is empty."
-msgstr "Древо пока пустое."
+#: static/js/tree.js:297
+msgid "Add mother"
+msgstr "Добавить мать"
 
-#: static/js/tree.js:393
-msgid "Could not load the family tree. Please try again."
-msgstr "Не удалось загрузить древо. Попробуйте ещё раз."
+#: static/js/tree.js:594
+msgid "You"
+msgstr "Вы"
 
-#: static/js/tree.js:464
+#: static/js/tree.js:675 static/js/tree.js:813
 msgid "An error occurred."
 msgstr "Произошла ошибка."
 
-#: static/js/tree.js:467
+#: static/js/tree.js:702
+msgid "Could not load the family tree. Please try again."
+msgstr "Не удалось загрузить древо. Попробуйте ещё раз."
+
+#: static/js/tree.js:711 static/js/tree.js:726
+msgid "The family tree is empty."
+msgstr "Древо пока пустое."
+
+#: static/js/tree.js:816
 msgctxt "file name"
 msgid "family-tree"
 msgstr "шаджара"

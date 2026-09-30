@@ -1,0 +1,86 @@
+{% extends "accounts/settings_base.html" %}
+{% load i18n uz %}
+{% block title %}{% translate "Family members" %}{% endblock %}
+{% block settings %}
+<section class="card" id="invites">
+  <h2>{% include "partials/icon.html" with name="share" %}{% translate "Invite a relative" %}</h2>
+  <p class="muted small">{% translate "Send a link. When your relative opens it and signs in, they see the same family tree — named from their own place in it — and can help fill it in. Every change is recorded and can be undone." %}</p>
+  {% if new_invite %}
+  <div class="notice info" style="display:block">
+    <b>{% translate "The link is ready. Send it to your relative:" %}</b>
+    <div class="link-box" style="margin:10px 0">
+      <code id="invite-link">{{ new_link }}</code>
+      <button class="icon-btn" type="button" data-copy="invite-link" title="{% translate 'Copy' %}" aria-label="{% translate 'Copy' %}">{% include "partials/icon.html" with name="copy" %}</button>
+    </div>
+    <div class="row">
+      <a class="btn btn-sm tg-open" href="https://t.me/share/url?url={{ new_link|urlencode:'' }}&amp;text={% translate 'Join our family tree on Shajara' as share_text %}{{ share_text|urlencode:'' }}" target="_blank" rel="noopener">{% include "partials/icon.html" with name="telegram" %}{% translate "Send in Telegram" %}</a>
+      <span class="muted small">{% blocktranslate with date=new_invite.expires_at|uzdate %}Works once, until {{ date }}.{% endblocktranslate %}</span>
+    </div>
+  </div>
+  {% endif %}
+  <form method="post" novalidate>{% csrf_token %}
+    {% include "partials/field.html" with field=form.role %}
+    {% translate "Type a name, or leave empty" as hint %}
+    {% include "partials/person_picker.html" with field=form.person placeholder=hint %}
+    <div class="form-actions"><button class="btn btn-primary" type="submit">{% include "partials/icon.html" with name="link" %}{% translate "Create a link" %}</button></div>
+  </form>
+  {% if invites %}
+  <h3 class="subhead">{% translate "Links waiting to be used" %}</h3>
+  {% for invite in invites %}
+  <div class="member">
+    <span class="setting-icon">{% include "partials/icon.html" with name="link" %}</span>
+    <span class="spacer"><b>{% if invite.person %}{{ invite.person.short_name }}{% else %}{% translate "Any relative" %}{% endif %}</b>
+      <span class="muted small"> · {{ invite.get_role_display }} · {% blocktranslate with date=invite.expires_at|uzdate %}until {{ date }}{% endblocktranslate %}</span></span>
+    <form method="post" action="{% url 'accounts:invite_revoke' invite.pk %}">{% csrf_token %}
+      <button class="btn btn-sm btn-ghost" type="submit">{% translate "Cancel" %}</button></form>
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>
+
+<section class="card" id="members">
+  <h2>{% translate "Who has access to my family tree" %}</h2>
+  {% for m in members %}
+  <div class="member">
+    {% include "partials/avatar.html" with person=m.person size="sm" branch="own" %}
+    <span class="spacer"><b>{{ m.member.display_name }}</b>
+      <span class="muted small">{% if m.member.email %} · {{ m.member.email }}{% endif %}{% if m.person %} · {{ m.person.short_name }}{% endif %}</span></span>
+    <form method="post" action="{% url 'accounts:member_update' m.pk %}" class="row">{% csrf_token %}
+      <label class="visually-hidden" for="role-{{ m.pk }}">{% translate "Access" %}</label>
+      <select id="role-{{ m.pk }}" name="role" onchange="this.form.submit()">
+        <option value="editor"{% if m.role == "editor" %} selected{% endif %}>{% translate "Can edit" context "role" %}</option>
+        <option value="viewer"{% if m.role == "viewer" %} selected{% endif %}>{% translate "Can view" context "role" %}</option>
+      </select>
+      <button class="btn btn-sm btn-ghost" type="submit" name="remove" value="1" data-confirm="{% translate 'Remove this person’s access?' %}">{% translate "Remove" %}</button>
+    </form>
+  </div>
+  {% empty %}
+  <p class="muted">{% translate "Only you, so far. Invite your parents, brothers and sisters: a family tree is best built together." %}</p>
+  {% endfor %}
+</section>
+
+<section class="card" id="archives">
+  <h2>{% translate "Family trees I take part in" %}</h2>
+  <div class="member">
+    <span class="setting-icon{% if archive.pk == user.pk %} ok{% endif %}">{% include "partials/icon.html" with name="tree" %}</span>
+    <span class="spacer"><b>{% translate "My own family tree" %}</b>
+      <span class="muted small"> · {% blocktranslate count counter=own_people %}{{ counter }} person{% plural %}{{ counter }} people{% endblocktranslate %}</span></span>
+    {% if archive.pk != user.pk %}
+    <form method="post" action="{% url 'accounts:archive_switch' user.pk %}">{% csrf_token %}
+      <button class="btn btn-sm" type="submit">{% translate "Open" %}</button></form>
+    {% else %}<span class="tag">{% translate "In use" %}</span>{% endif %}
+  </div>
+  {% for m in archives %}
+  <div class="member">
+    <span class="setting-icon{% if archive.pk == m.owner.pk %} ok{% endif %}">{% include "partials/icon.html" with name="people" %}</span>
+    <span class="spacer"><b>{{ m.owner.display_name }}</b> <span class="muted small"> · {{ m.get_role_display }}</span></span>
+    {% if archive.pk != m.owner.pk %}
+    <form method="post" action="{% url 'accounts:archive_switch' m.owner.pk %}">{% csrf_token %}
+      <button class="btn btn-sm" type="submit">{% translate "Open" %}</button></form>
+    {% else %}<span class="tag">{% translate "In use" %}</span>{% endif %}
+    <form method="post" action="{% url 'accounts:archive_leave' m.owner.pk %}">{% csrf_token %}
+      <button class="btn btn-sm btn-ghost" type="submit" data-confirm="{% translate 'Leave this family tree?' %}">{% translate "Leave" %}</button></form>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

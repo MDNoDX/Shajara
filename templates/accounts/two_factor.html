@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Two-step sign-in" %}{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="card">
+  <h1>{% translate "Enter the code" %}</h1>
+  <p class="muted">{% translate "Open the authenticator app on your phone and type the six digits shown for Shajara. A recovery code works too." %}</p>
+  <form method="post" novalidate>{% csrf_token %}
+    {% include "partials/field.html" with field=form.code %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">{% translate "Sign in" %}</button>
+      <a class="btn btn-ghost" href="{% url 'accounts:login' %}">{% translate "Back to sign in" %}</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

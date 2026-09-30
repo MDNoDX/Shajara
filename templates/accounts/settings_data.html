@@ -34,6 +34,18 @@
   {% endif %}
 </section>
 
+<section class="card" id="gedcom">
+  <h2>{% translate "Import from another program (GEDCOM)" %}</h2>
+  <p class="muted small">{% translate "Add the people from a GEDCOM file exported by MyHeritage, Ancestry, Gramps and others to the family tree you are working in. Possible duplicates are shown afterwards." %}</p>
+  {% if can_edit %}
+  <form method="post" action="{% url 'genealogy:gedcom_import' %}" enctype="multipart/form-data" novalidate>{% csrf_token %}
+    <div class="field"><label for="ged-file">{% translate "GEDCOM file" %}</label>
+      <input id="ged-file" type="file" name="file" accept=".ged,.gedcom,text/plain" required></div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">{% include "partials/icon.html" with name="upload" %}{% translate "Import" %}</button></div>
+  </form>
+  {% endif %}
+</section>
+
 <section class="card danger-zone">
   <h2>{% translate "Delete account" %}</h2>
   <p class="muted small">{% translate "Your account and your whole family archive will be deleted permanently." %}</p>

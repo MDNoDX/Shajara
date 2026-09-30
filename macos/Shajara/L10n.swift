@@ -43,6 +43,7 @@ enum L {
         "myTree": ["Shajaram", "Шажарам", "Моё древо", "My family tree"],
         "relatives": ["Qarindoshlarim", "Қариндошларим", "Мои родственники", "My relatives"],
         "events": ["Voqealar", "Воқеалар", "События", "Events"],
+        "timeline": ["Vaqt chizigʻi", "Вақт чизиғи", "Хронология", "Timeline"],
         "friends": ["Doʻstlarim", "Дўстларим", "Мои друзья", "My friends"],
         "search": ["Qidiruv", "Қидирув", "Поиск", "Search"],
         "addRelative": ["Qarindosh qoʻshish", "Қариндош қўшиш", "Добавить родственника", "Add a relative"],

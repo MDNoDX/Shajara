@@ -2,26 +2,57 @@
 {% load i18n uz %}
 {% block title %}{{ person.full_name }}{% endblock %}
 {% block content %}
-<div class="card profile-head">
-  {% include "partials/avatar.html" with person=person size="lg" %}
-  <div class="spacer">
+<div class="card profile">
+  {% include "partials/avatar.html" with person=person size="lg" branch=branch %}
+  <div>
     <h1>{{ person.full_name }}</h1>
-    <p class="muted" style="margin:0">
+    <p class="sub" style="margin:0">
       {% if person.lifespan %}{{ person.lifespan }}{% endif %}
-      {% if person.is_deceased %}<span class="deceased-mark"> · {% if person.gender == "female" %}{% translate "deceased" context "female" %}{% else %}{% translate "deceased" context "male" %}{% endif %}</span>{% endif %}
+      {% if person.is_deceased %} · {% if person.gender == "female" %}{% translate "deceased" context "female" %}{% else %}{% translate "deceased" context "male" %}{% endif %}{% endif %}
     </p>
-    {% if is_me %}<span class="rel">{% translate "You" context "kinship" %}</span>{% elif relation_to_me %}<span class="rel">{{ relation_to_me }}</span>{% endif %}
-    {% if not is_owner %}<p class="small muted">{% blocktranslate with owner=person.owner.display_name %}From {{ owner }}'s family tree{% endblocktranslate %}</p>{% endif %}
+    <div class="chips-row">
+      {% if is_me %}<span class="rel" style="margin:0">{% translate "You" context "kinship" %}</span>{% elif relation_to_me %}<span class="rel" style="margin:0">{{ relation_to_me }}</span>{% endif %}
+      {% if person.birth_place %}<span class="tag">{% include "partials/icon.html" with name="map" %}{{ person.birth_place }}</span>{% endif %}
+      {% if person.occupation %}<span class="tag">{{ person.occupation }}</span>{% endif %}
+      {% if muchal %}<span class="tag">{{ muchal.emoji }} {{ muchal.name }}</span>{% endif %}
+    </div>
   </div>
-  <div class="row no-print">
-    <a class="btn" href="{% url 'genealogy:tree_for' person.owner.username %}?person={{ person.pk }}">{% translate "Show in the family tree" %}</a>
-    <a class="btn" href="{% url 'genealogy:person_pdf' person.pk %}">{% translate "Download as PDF" %}</a>
-    {% if is_owner %}<a class="btn btn-primary" href="{% url 'genealogy:person_edit' person.pk %}">{% translate "Edit" %}</a>{% endif %}
+  <div class="actions no-print">
+    <a class="btn" href="{% url 'genealogy:tree_for' person.owner.username %}?person={{ person.pk }}">{% include "partials/icon.html" with name="tree" %}{% translate "Show in the family tree" %}</a>
+    <a class="btn" href="{% url 'genealogy:person_pdf' person.pk %}">{% include "partials/icon.html" with name="download" %}{% translate "Download as PDF" %}</a>
+    {% if is_owner %}<a class="btn btn-primary" href="{% url 'genealogy:person_edit' person.pk %}">{% include "partials/icon.html" with name="pencil" %}{% translate "Edit" %}</a>{% endif %}
+    {% if can_be_me %}
+    <form method="post" action="{% url 'genealogy:set_self' person.pk %}">{% csrf_token %}
+      <button class="btn btn-ghost" type="submit">{% translate "This is me" %}</button>
+    </form>
+    {% endif %}
   </div>
 </div>
 
+{% if prompts %}
+<div class="prompt-list no-print" style="margin-top:16px">
+  {% for kind, text in prompts %}
+    <a class="prompt" href="{% url 'genealogy:person_edit' person.pk %}">{% include "partials/icon.html" with name="sparkle" %}<span>{{ text }}</span><span class="go">{% include "partials/icon.html" with name="chevron" %}</span></a>
+  {% endfor %}
+</div>
+{% endif %}
+
 <div class="cols" style="margin-top:16px">
   <div>
+    {% if life_path %}
+    <section class="card">
+      <h2>{% translate "Life path" %}</h2>
+      <ol class="path">
+        {% for item in life_path %}
+        <li class="k-{{ item.kind }}">
+          <div class="when">{{ item.when }}{% if item.age %} · <span class="age">{% blocktranslate count years=item.age %}aged {{ years }}{% plural %}aged {{ years }}{% endblocktranslate %}</span>{% endif %}</div>
+          <div class="what">{% if item.url %}<a href="{{ item.url }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif %}</div>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+    {% endif %}
+
     <section class="card">
       <h2>{% translate "Personal details" %}</h2>
       <dl class="facts">
@@ -42,17 +73,74 @@
     </section>
 
     <section class="card">
-      <h2>{% translate "Biography" %}</h2>
-      {% if person.biography %}<p class="prose">{{ person.biography }}</p>{% else %}<p class="muted">{% translate "No biography has been written yet." %}</p>{% endif %}
-    </section>
-    <section class="card">
       <h2>{% translate "Life story" %}</h2>
-      {% if person.life_story %}<p class="prose">{{ person.life_story }}</p>{% else %}<p class="muted">{% translate "No life story has been written yet." %}</p>{% endif %}
+      {% if person.biography %}<p class="prose">{{ person.biography }}</p>{% endif %}
+      {% if person.life_story %}<p class="prose">{{ person.life_story }}</p>{% endif %}
+      {% if not person.biography and not person.life_story %}
+        <p class="muted">{% translate "Nothing has been written yet." %}</p>
+        {% if is_owner %}
+        <p class="muted small">{% blocktranslate with name=person.first_name %}What was {{ name }}’s childhood like? Where did they study and work? What do the family remember them for?{% endblocktranslate %}</p>
+        <a class="btn btn-sm" href="{% url 'genealogy:person_edit' person.pk %}">{% include "partials/icon.html" with name="pencil" %}{% translate "Write the story" %}</a>
+        {% endif %}
+      {% endif %}
+    </section>
+
+    <section class="card" id="album">
+      <h2>{% translate "Album" %}{% if media_count %} <span class="muted small" style="font-weight:500">{{ media_count }}</span>{% endif %}</h2>
+      {% if photos %}
+      <div class="album">
+        {% for m in photos %}
+        <button type="button" class="shot" data-lightbox="{{ m.file.url }}" data-caption="{{ m.caption }}{% if m.year %}{% if m.caption %} · {% endif %}{{ m.year }}{% endif %}" data-tools="tools-{{ m.pk }}">
+          <img src="{{ m.file.url }}" alt="{{ m.caption }}" loading="lazy">
+          {% if m.caption or m.year %}<small>{{ m.caption }}{% if m.year %} {{ m.year }}{% endif %}</small>{% endif %}
+        </button>
+        {% if is_owner %}
+        <template id="tools-{{ m.pk }}">
+          <form method="post" action="{% url 'genealogy:media_portrait' m.pk %}"><input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <button class="btn btn-sm" type="submit">{% translate "Make the main photo" %}</button></form>
+          <form method="post" action="{% url 'genealogy:media_delete' m.pk %}"><input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <button class="btn btn-sm" type="submit" data-confirm>{% translate "Delete" %}</button></form>
+        </template>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if files %}
+      <div class="files">
+        {% for m in files %}
+        <div class="file-row">
+          {% if m.kind == "audio" %}{% include "partials/icon.html" with name="mic" %}{% else %}{% include "partials/icon.html" with name="file" %}{% endif %}
+          <span class="spacer"><b>{{ m.caption|default:m.get_kind_display }}</b>{% if m.year %} <span class="muted small">· {{ m.year }}</span>{% endif %}</span>
+          {% if m.kind == "audio" %}<audio controls preload="none" src="{{ m.file.url }}"></audio>
+          {% else %}<a class="btn btn-sm" href="{{ m.file.url }}" target="_blank" rel="noopener">{% translate "Open" %}</a>{% endif %}
+          {% if is_owner %}
+          <form method="post" action="{% url 'genealogy:media_delete' m.pk %}">{% csrf_token %}
+            <button class="icon-btn" type="submit" data-confirm title="{% translate 'Delete' %}" aria-label="{% translate 'Delete' %}">{% include "partials/icon.html" with name="trash" %}</button></form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if not photos and not files %}<p class="muted">{% translate "Old photographs, documents and voice recordings belong here." %}</p>{% endif %}
+      {% if is_owner %}
+      <form method="post" action="{% url 'genealogy:media_upload' person.pk %}" enctype="multipart/form-data" class="no-print" style="margin-top:12px" data-no-busy>{% csrf_token %}
+        <div class="form-grid">
+          <div class="field"><label for="album-caption">{% translate "Caption" %}</label><input id="album-caption" type="text" name="caption" maxlength="200" placeholder="{% translate 'For example: wedding day' %}"></div>
+          <div class="field"><label for="album-year">{% translate "Year" context "date part" %}</label><input id="album-year" type="number" name="year" min="1000" max="2200" inputmode="numeric"></div>
+        </div>
+        <label class="dropzone">
+          {% include "partials/icon.html" with name="upload" %}
+          <b>{% translate "Add photos, a PDF document or a recording" %}</b>
+          <span class="small">{% translate "Choose files or drop them here" %}</span>
+          <input type="file" name="files" multiple accept="image/*,application/pdf,audio/*" data-autosubmit>
+        </label>
+      </form>
+      {% endif %}
     </section>
 
     <section class="card">
       <h2>{% translate "Events" %}
-        {% if is_owner %}<a class="btn btn-sm" href="{% url 'genealogy:event_create' %}?person={{ person.pk }}">{% translate "Add an event" %}</a>{% endif %}
+        {% if is_owner %}<a class="btn btn-sm" href="{% url 'genealogy:event_create' %}?person={{ person.pk }}">{% include "partials/icon.html" with name="plus" %}{% translate "Add an event" %}</a>{% endif %}
       </h2>
       {% for event in events %}
         <div class="story"><a href="{{ event.get_absolute_url }}"><b>{{ event.display_title }}</b></a>
@@ -64,8 +152,19 @@
     </section>
 
     <section class="card">
+      <h2>{% translate "Stories" %}
+        {% if is_owner %}<a class="btn btn-sm" href="{% url 'genealogy:story_create' %}?person={{ person.pk }}">{% include "partials/icon.html" with name="pencil" %}{% translate "Write a story" %}</a>{% endif %}
+      </h2>
+      {% for story in stories %}
+        <div class="story"><a href="{{ story.get_absolute_url }}"><b>{{ story.title }}</b></a>{% if story.year %} <span class="muted">· {{ story.year }}</span>{% endif %}</div>
+      {% empty %}
+        <p class="muted">{% translate "No stories have been added yet." %}</p>
+      {% endfor %}
+    </section>
+
+    <section class="card">
       <h2>{% translate "Friends" %}
-        {% if is_owner %}<a class="btn btn-sm" href="{% url 'friends:create' %}?kimning={{ person.pk }}">{% translate "Add a friend" %}</a>{% endif %}
+        {% if is_owner %}<a class="btn btn-sm" href="{% url 'friends:create' %}?kimning={{ person.pk }}">{% include "partials/icon.html" with name="plus" %}{% translate "Add a friend" %}</a>{% endif %}
       </h2>
       {% for friend in friends %}
         <div class="story"><b>{{ friend.name }}</b>{% if friend.how_met %} <span class="kind-badge">{{ friend.get_how_met_display }}</span>{% endif %}
@@ -74,77 +173,57 @@
         <p class="muted">{% translate "No friends have been added yet." %}</p>
       {% endfor %}
     </section>
-
-    <section class="card">
-      <h2>{% translate "Stories" %}
-        {% if is_owner %}<a class="btn btn-sm" href="{% url 'genealogy:story_create' %}?person={{ person.pk }}">{% translate "Write a story" %}</a>{% endif %}
-      </h2>
-      {% for story in stories %}
-        <div class="story"><a href="{{ story.get_absolute_url }}"><b>{{ story.title }}</b></a>{% if story.year %} <span class="muted">· {{ story.year }}</span>{% endif %}</div>
-      {% empty %}
-        <p class="muted">{% translate "No stories have been added yet." %}</p>
-      {% endfor %}
-    </section>
   </div>
 
   <aside>
     <section class="card">
       <h2>{% translate "Family" %}</h2>
-      <div class="stack">
-        <div>
-          <h3>{{ section.father }}</h3>
-          {% if father %}{% include "partials/person_card.html" with person=father label="" %}
-          {% elif is_owner %}<a class="btn btn-sm" href="{% url 'genealogy:relative_add' person.pk %}?relation=father">{% translate "Add father" %}</a>
-          {% else %}<p class="muted small">{% translate "Not specified" %}</p>{% endif %}
+      <div class="famtree">
+        <div class="tier">
+          {% if father %}{% include "partials/mini_person.html" with person=father label=section.father branch="paternal" %}
+          {% elif is_owner %}<a class="mini add" href="{% url 'genealogy:relative_add' person.pk %}?relation=father">+ {% translate "Add father" %}</a>{% endif %}
+          {% if mother %}{% include "partials/mini_person.html" with person=mother label=section.mother branch="maternal" %}
+          {% elif is_owner %}<a class="mini add" href="{% url 'genealogy:relative_add' person.pk %}?relation=mother">+ {% translate "Add mother" %}</a>{% endif %}
         </div>
-        <div>
-          <h3>{{ section.mother }}</h3>
-          {% if mother %}{% include "partials/person_card.html" with person=mother label="" %}
-          {% elif is_owner %}<a class="btn btn-sm" href="{% url 'genealogy:relative_add' person.pk %}?relation=mother">{% translate "Add mother" %}</a>
-          {% else %}<p class="muted small">{% translate "Not specified" %}</p>{% endif %}
+        {% if father or mother or is_owner %}<div class="stem"></div>{% endif %}
+        <div class="tier">
+          {% include "partials/mini_person.html" with person=person is_self=True label="" branch=branch %}
+          {% for sp, label in spouses %}{% include "partials/mini_person.html" with person=sp branch="" %}{% endfor %}
+          {% if is_owner %}<a class="mini add" href="{% url 'genealogy:relative_add' person.pk %}?relation=spouse">+ {% translate "Add spouse" %}</a>{% endif %}
         </div>
-        <div>
-          <h3>{{ section.spouses }}</h3>
-          <div class="kin-list">
-            {% for sp, label in spouses %}{% include "partials/person_card.html" with person=sp %}{% endfor %}
-          </div>
-          {% if is_owner %}
-            {% for m in marriages %}<a class="small" href="{% url 'genealogy:marriage_edit' m.pk %}?from={{ person.pk }}">{% translate "Marriage details" %}{% if m.date_display %} · {{ m.date_display }}{% endif %}</a><br>{% endfor %}
-            <a class="btn btn-sm" href="{% url 'genealogy:relative_add' person.pk %}?relation=spouse" style="margin-top:6px">{% translate "Add spouse" %}</a>
-          {% elif not spouses %}<p class="muted small">{% translate "Not specified" %}</p>{% endif %}
-        </div>
-        <div>
-          <h3>{{ section.children }}</h3>
-          <div class="kin-list">
-            {% for ch, label in children %}{% include "partials/person_card.html" with person=ch %}{% endfor %}
-          </div>
-          {% if is_owner %}<a class="btn btn-sm" href="{% url 'genealogy:relative_add' person.pk %}?relation=child" style="margin-top:6px">{% translate "Add child" %}</a>
-          {% elif not children %}<p class="muted small">{% translate "Not specified" %}</p>{% endif %}
-        </div>
-        <div>
-          <h3>{{ section.siblings }}</h3>
-          <div class="kin-list">
-            {% for sb, label in siblings %}{% include "partials/person_card.html" with person=sb %}{% endfor %}
-          </div>
-          {% if is_owner and father or is_owner and mother %}<a class="btn btn-sm" href="{% url 'genealogy:relative_add' person.pk %}?relation=sibling" style="margin-top:6px">{% translate "Add brother or sister" %}</a>
-          {% elif not siblings %}<p class="muted small">{% translate "Not specified" %}</p>{% endif %}
+        {% if children or is_owner %}<div class="stem"></div>{% endif %}
+        <div class="tier">
+          {% for ch, label in children %}{% include "partials/mini_person.html" with person=ch branch="own" %}{% endfor %}
+          {% if is_owner %}<a class="mini add" href="{% url 'genealogy:relative_add' person.pk %}?relation=child">+ {% translate "Add child" %}</a>{% endif %}
         </div>
       </div>
+      {% if is_owner %}{% for m in marriages %}
+        <p class="small" style="margin:12px 0 0;text-align:center"><a href="{% url 'genealogy:marriage_edit' m.pk %}?from={{ person.pk }}">{% translate "Marriage details" %}{% if m.date_display %} · {{ m.date_display }}{% endif %}</a></p>
+      {% endfor %}{% endif %}
     </section>
+
+    <section class="card">
+      <h2>{{ section.siblings }}</h2>
+      <div class="kin-list">
+        {% for sb, label in siblings %}{% include "partials/person_card.html" with person=sb branch=branch %}{% endfor %}
+      </div>
+      {% if is_owner and father or is_owner and mother %}<a class="btn btn-sm" href="{% url 'genealogy:relative_add' person.pk %}?relation=sibling" style="margin-top:8px">{% include "partials/icon.html" with name="plus" %}{% translate "Add brother or sister" %}</a>
+      {% elif not siblings %}<p class="muted small">{% translate "Not specified" %}</p>{% endif %}
+    </section>
+
     {% if is_owner %}
     <section class="card no-print">
-      <h2>{% translate "Actions" %}</h2>
-      <div class="stack">
-        {% if not is_me %}
-        <form method="post" action="{% url 'genealogy:set_self' person.pk %}">{% csrf_token %}
-          <button class="btn btn-sm" type="submit">{% translate "This is me" %}</button>
-        </form>
-        <a class="btn btn-sm btn-danger" href="{% url 'genealogy:person_delete' person.pk %}">{% translate "Delete" %}</a>
-        {% endif %}
-      </div>
-      <p class="small muted" style="margin-top:10px">{% blocktranslate with date=person.updated_at|uzdate %}Last updated: {{ date }}{% endblocktranslate %}</p>
+      <h2>{% translate "History" %}</h2>
+      {% if changes %}
+      <ul class="activity">
+        {% for c in changes %}<li><span>{{ c.get_action_display }}{% if c.actor %} <span class="muted">· {{ c.actor.display_name }}</span>{% endif %}</span><time>{{ c.created_at|uzdate }}</time></li>{% endfor %}
+      </ul>
+      {% endif %}
+      <p class="small muted" style="margin:10px 0">{% blocktranslate with date=person.updated_at|uzdate %}Last updated: {{ date }}{% endblocktranslate %}</p>
+      {% if not is_me %}<a class="btn btn-sm btn-danger" href="{% url 'genealogy:person_delete' person.pk %}">{% include "partials/icon.html" with name="trash" %}{% translate "Delete" %}</a>{% endif %}
     </section>
     {% endif %}
+    {% if person.owner != archive %}<p class="small muted">{% blocktranslate with owner=person.owner.display_name %}From {{ owner }}'s family tree{% endblocktranslate %}</p>{% endif %}
   </aside>
 </div>
 {% endblock %}

@@ -11,14 +11,14 @@ from .models import Contact
 class ContactForm(DatePartsMixin, forms.ModelForm):
     date_prefix, date_target, date_require_year = "birth", "birth_", False
 
-    def __init__(self, *args, owner, **kwargs):
+    def __init__(self, *args, owner, default_person=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.owner_user = owner
         self.fields["person"].queryset = Person.objects.filter(owner=owner).order_by("first_name", "last_name")
         self.fields["person"].label_from_instance = _person_label
         self.fields["person"].empty_label = None
-        if owner.person_id and not self.instance.pk and not self.initial.get("person"):
-            self.initial["person"] = owner.person_id
+        if default_person and not self.instance.pk and not self.initial.get("person"):
+            self.initial["person"] = default_person
         self.fields["how_met"].choices = [("", "—")] + list(Contact.HowMet.choices)
         self.fields["phone"].widget.attrs.update({"inputmode": "tel", "autocomplete": "off"})
         self.add_date_fields()

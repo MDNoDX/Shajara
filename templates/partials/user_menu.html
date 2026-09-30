@@ -1,0 +1,24 @@
+{% load i18n %}<div class="menu{% if up %} up{% endif %}">
+  <div class="menu-user">
+    {% include "partials/avatar.html" with person=user.person branch="own" %}
+    <span><b>{{ user.display_name }}</b><small>{{ user.email|default:user.username }}</small></span>
+  </div>
+  <hr>
+  {% if user.person %}<a href="{{ user.person.get_absolute_url }}">{% include "partials/icon.html" with name="user" %}{% translate "My record in the tree" %}</a>{% endif %}
+  <a href="{% url 'accounts:family' %}">{% include "partials/icon.html" with name="share" %}{% translate "Family members" %}</a>
+  <a href="{% url 'notify:settings' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Reminder settings" %}</a>
+  {% if user.is_superuser %}<a href="{% url 'control_panel' %}">{% include "partials/icon.html" with name="shield" %}{% translate "Control panel" %}</a>{% endif %}
+  <hr>
+  <div class="menu-label">{% translate "Colour theme" %}</div>
+  <div class="segmented" role="group" data-theme-choice>
+    <button type="button" data-theme-value="light">{% include "partials/icon.html" with name="sun" %}{% translate "Light" %}</button>
+    <button type="button" data-theme-value="dark">{% include "partials/icon.html" with name="moon" %}{% translate "Dark" %}</button>
+    <button type="button" data-theme-value="auto">{% include "partials/icon.html" with name="auto" %}</button>
+  </div>
+  <div class="menu-label">{% translate "Language" %}</div>
+  {% include "partials/lang_list.html" %}
+  <hr>
+  <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+    <button type="submit">{% include "partials/icon.html" with name="logout" %}{% translate "Sign out" %}</button>
+  </form>
+</div>

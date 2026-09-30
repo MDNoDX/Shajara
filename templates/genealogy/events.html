@@ -7,7 +7,10 @@
     <h1>{% translate "Events" %}</h1>
     <p>{% translate "Birthdays, anniversaries, memorial days and family events: weddings, a baby on the way, celebrations." %}</p>
   </div>
-  <a class="btn btn-primary" href="{% url 'genealogy:event_create' %}">{% include "partials/icon.html" with name="plus" %}{% translate "Add a family event" %}</a>
+  <div class="row">
+    <a class="btn" href="{% url 'genealogy:timeline' %}">{% include "partials/icon.html" with name="timeline" %}{% translate "Timeline" %}</a>
+    {% if can_edit %}<a class="btn btn-primary" href="{% url 'genealogy:event_create' %}">{% include "partials/icon.html" with name="plus" %}{% translate "Add a family event" %}</a>{% endif %}
+  </div>
 </div>
 
 <div class="cols">
@@ -17,7 +20,7 @@
       <ul class="occ-list">
         {% for o, t, left in items %}
         <li><a class="occ{% if left == 0 %} today{% endif %}" href="{{ o.url }}">
-          <span class="occ-icon" aria-hidden="true">{{ t.icon }}</span>
+          {% include "partials/occ_icon.html" with kind=o.kind %}
           <span class="occ-main"><b>{{ t.title }}</b><br><span class="muted small">{{ t.body }}</span></span>
           <span class="occ-when"><b>{{ o.date|date:"j" }}</b>{{ o.date|uzmonth }}</span>
         </a></li>

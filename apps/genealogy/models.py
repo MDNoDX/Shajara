@@ -19,6 +19,11 @@ def photo_path(instance, filename):
     return f"photos/{instance.owner_id}/{uuid.uuid4().hex}.{ext}"
 
 
+def media_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "bin"
+    return f"album/{instance.owner_id}/{uuid.uuid4().hex}.{ext[:8]}"
+
+
 class Person(models.Model):
     """One person in a user's family archive.
 
@@ -246,3 +251,59 @@ class Event(models.Model):
             except ValueError:
                 return None
         return None
+
+
+class Media(models.Model):
+    """A photo, document or voice recording in a person's album."""
+
+    class Kind(models.TextChoices):
+        PHOTO = "photo", pgettext_lazy("media", "Photo")
+        DOCUMENT = "document", pgettext_lazy("media", "Document")
+        AUDIO = "audio", pgettext_lazy("media", "Voice recording")
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="media")
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="media")
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.PHOTO)
+    file = models.FileField(upload_to=media_path)
+    caption = models.CharField(_("caption"), max_length=200, blank=True)
+    year = models.PositiveSmallIntegerField(_("year"), null=True, blank=True)
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["year", "id"]
+
+    def __str__(self):
+        return self.caption or self.file.name
+
+
+class Change(models.Model):
+    """One entry in the history of an archive: who changed what, and what it
+    looked like before (so that a mistake can be undone)."""
+
+    class Action(models.TextChoices):
+        CREATED = "created", pgettext_lazy("history", "added")
+        UPDATED = "updated", pgettext_lazy("history", "changed")
+        DELETED = "deleted", pgettext_lazy("history", "deleted")
+        LINKED = "linked", pgettext_lazy("history", "linked")
+        MERGED = "merged", pgettext_lazy("history", "merged")
+        RESTORED = "restored", pgettext_lazy("history", "restored")
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="changes")
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    person = models.ForeignKey(Person, null=True, blank=True, on_delete=models.SET_NULL, related_name="changes")
+    subject = models.CharField(max_length=250)
+    what = models.CharField(max_length=20, default="person")  # person, event, story, marriage
+    action = models.CharField(max_length=10, choices=Action.choices)
+    details = models.JSONField(default=dict, blank=True)
+    snapshot = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    undone_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    @property
+    def can_undo(self):
+        return self.undone_at is None and self.what == "person" and self.snapshot is not None \
+            and self.action in (self.Action.UPDATED, self.Action.DELETED)

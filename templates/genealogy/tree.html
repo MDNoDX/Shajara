@@ -1,61 +1,135 @@
 {% extends "base.html" %}
 {% load i18n static %}
-{% block title %}{% if is_owner %}{% translate "My family tree" %}{% else %}{% translate "Family tree" context "kinship" %} · {{ owner.display_name }}{% endif %}{% endblock %}
+{% block title %}{% translate "Family tree" context "kinship" %}{% if not is_active_archive %} · {{ owner.display_name }}{% endif %}{% endblock %}
 {% block main_class %}wide{% endblock %}
 {% block content %}
 {% if focus %}
 <div class="tree-shell" id="tree"
-     data-url="{{ data_url }}" data-pdf-url="{{ pdf_url }}" data-focus="{{ focus.pk }}"
-     data-add-url-template="{% if is_owner %}{% url 'genealogy:relative_add' 0 %}{% endif %}">
+     data-url="{{ data_url }}" data-fan-url="{{ fan_url }}" data-pdf-url="{{ pdf_url }}" data-focus="{{ focus.pk }}"
+     data-can-edit="{% if is_owner %}1{% endif %}">
   <div class="tree-toolbar">
     <div class="tb-group tb-grow picker">
       {% include "partials/icon.html" with name="search" %}
       <label class="visually-hidden" for="tree-person">{% translate "Person in the centre" %}</label>
-      <input id="tree-person" type="search" value="{{ focus.full_name }}" autocomplete="off"
+      <input id="tree-person" type="search" value="{{ focus.short_name }}" autocomplete="off"
              placeholder="{% translate 'Choose a person by name…' %}" role="combobox" aria-expanded="false"
              aria-controls="tree-person-results" data-mode="pick"
              data-live-search="{% url 'genealogy:search_json' %}?owner={{ owner.username|urlencode }}">
       <div class="live-results" id="tree-person-results" role="listbox" hidden></div>
     </div>
-    <div class="segmented" role="group" aria-label="{% translate 'What to show' %}">
-      <button type="button" data-expand="compact" aria-pressed="true">{% translate "Compact view" %}</button>
-      <button type="button" data-expand="all" aria-pressed="false">{% translate "Open everything" %}</button>
+    <div class="segmented" role="group" aria-label="{% translate 'View' %}">
+      <button type="button" data-view="tree" aria-pressed="true">{% include "partials/icon.html" with name="tree" %}<span class="tb-label">{% translate "Tree" %}</span></button>
+      <button type="button" data-view="fan" aria-pressed="false">{% include "partials/icon.html" with name="fan" %}<span class="tb-label">{% translate "Fan of ancestors" %}</span></button>
+    </div>
+    <div class="tb-group" data-tree-only>
+      <label class="visually-hidden" for="tree-side">{% translate "Which side of the family" %}</label>
+      <select id="tree-side">
+        <option value="">{% translate "Both sides" %}</option>
+        <option value="paternal">{{ branches.paternal }}</option>
+        <option value="maternal">{{ branches.maternal }}</option>
+      </select>
+      <div class="segmented" role="group" aria-label="{% translate 'What to show' %}">
+        <button type="button" data-expand="compact" aria-pressed="true" title="{% translate 'Compact view' %}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4l4 4 4-4M8 20l4-4 4 4M4 12h16"/></svg><span class="tb-label">{% translate "Compact view" %}</span></button>
+        <button type="button" data-expand="all" aria-pressed="false" title="{% translate 'Open everything' %}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l4-4 4 4M8 16l4 4 4-4M4 12h16"/></svg><span class="tb-label">{% translate "Open everything" %}</span></button>
+      </div>
     </div>
     <div class="tb-group">
-      <button class="icon-btn" type="button" data-zoom="out" aria-label="{% translate 'Zoom out' %}" title="{% translate 'Zoom out' %}">
+      <button class="icon-btn tb-zoom" type="button" data-zoom="out" aria-label="{% translate 'Zoom out' %}" title="{% translate 'Zoom out' %}">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
-      <button class="icon-btn" type="button" data-zoom="in" aria-label="{% translate 'Zoom in' %}" title="{% translate 'Zoom in' %}">
+      <button class="icon-btn tb-zoom" type="button" data-zoom="in" aria-label="{% translate 'Zoom in' %}" title="{% translate 'Zoom in' %}">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
       <button class="icon-btn" type="button" data-zoom="fit" aria-label="{% translate 'Fit to screen' %}" title="{% translate 'Fit to screen' %}">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-    </div>
-    <div class="tb-group">
-      <a class="btn btn-sm" id="tree-open" href="{{ focus.get_absolute_url }}" title="{% translate 'Open profile' %}">{% include "partials/icon.html" with name="user" %}<span class="tb-label">{% translate "Open profile" %}</span></a>
       <details class="dropdown">
         <summary class="btn btn-sm" title="{% translate 'Download' %}">{% include "partials/icon.html" with name="download" %}<span class="tb-label">{% translate "Download" %}</span></summary>
         <div class="menu">
-          <a id="tree-pdf" href="{{ pdf_url }}?person={{ focus.pk }}">{% translate "Family tree (PDF)" %}</a>
-          <button type="button" id="tree-png">{% translate "Image (PNG)" %}</button>
-          <a href="{% if is_owner %}{% url 'genealogy:family_book' %}{% else %}{% url 'genealogy:family_book_for' owner.username %}{% endif %}">{% translate "Family tree book (PDF)" %}</a>
+          <a id="tree-pdf" href="{{ pdf_url }}?person={{ focus.pk }}">{% include "partials/icon.html" with name="file" %}{% translate "Family tree (PDF)" %}</a>
+          <a id="tree-poster-a2" href="{{ pdf_url }}?person={{ focus.pk }}&amp;size=A2">{% include "partials/icon.html" with name="image" %}{% translate "Wall poster, 42 cm high (PDF)" %}</a>
+          <a id="tree-poster-a1" href="{{ pdf_url }}?person={{ focus.pk }}&amp;size=A1">{% include "partials/icon.html" with name="image" %}{% translate "Wall poster, 59 cm high (PDF)" %}</a>
+          <button type="button" id="tree-png">{% include "partials/icon.html" with name="image" %}{% translate "Image (PNG)" %}</button>
+          <hr>
+          <a href="{% if is_active_archive %}{% url 'genealogy:family_book' %}{% else %}{% url 'genealogy:family_book_for' owner.username %}{% endif %}">{% include "partials/icon.html" with name="book" %}{% translate "Family book (PDF)" %}</a>
         </div>
       </details>
-      {% if is_owner %}<a class="btn btn-sm btn-primary" href="{% url 'genealogy:relative_add' focus.pk %}" id="add-relative" title="{% translate 'Add a relative' %}">{% include "partials/icon.html" with name="plus" %}<span class="tb-label">{% translate "Add a relative" %}</span></a>{% endif %}
     </div>
   </div>
-  <div class="tree-view" id="tree-view" tabindex="0" aria-label="{% translate 'Family tree' context 'kinship' %}">
-    <div class="tree-status" id="tree-status" role="status">{% translate "Loading the family tree…" %}</div>
+  <div class="tree-stage">
+    <div class="rail" id="tree-rail" aria-hidden="true"></div>
+    <div class="tree-view" id="tree-view" tabindex="0" aria-label="{% translate 'Family tree' context 'kinship' %}">
+      <canvas class="minimap" id="tree-minimap" width="380" height="236" hidden aria-hidden="true"></canvas>
+      <div class="tree-tip" id="tree-tip" hidden></div>
+      <div class="tree-status" id="tree-status" role="status">
+        <div class="tree-skeleton" aria-hidden="true">
+          <div><i class="skeleton"></i><i class="skeleton"></i></div>
+          <div><i class="skeleton"></i><i class="skeleton"></i><i class="skeleton"></i></div>
+          <div><i class="skeleton"></i><i class="skeleton"></i></div>
+        </div>
+        <span>{% translate "Loading the family tree…" %}</span>
+      </div>
+    </div>
+    <aside class="sheet" id="tree-sheet" aria-live="polite"><div class="sheet-inner" id="tree-sheet-inner"></div></aside>
   </div>
   <div class="tree-legend">
-    <span><i class="lg-stripe male"></i>{% translate "Man" %}</span>
-    <span><i class="lg-stripe female"></i>{% translate "Woman" %}</span>
+    <span><i class="dot own"></i>{{ branches.own }}</span>
+    <span><i class="dot paternal"></i>{{ branches.paternal }}</span>
+    <span><i class="dot maternal"></i>{{ branches.maternal }}</span>
+    <span><i class="lg-direct"></i>{% translate "Direct ancestors" %}</span>
     <span><i class="lg-couple"></i>{% translate "Married couple" %}</span>
     <span><i class="lg-toggle">+3</i>{% translate "Show hidden relatives" %}</span>
   </div>
 </div>
+
+<template id="sheet-tpl">
+  <div class="sheet-head">
+    <span class="avatar" data-f="avatar"></span>
+    <div class="spacer">
+      <h2 data-f="name"></h2>
+      <span class="rel" data-f="label" style="margin:0"></span>
+      <div class="muted small" data-f="years"></div>
+    </div>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="{% translate 'Close' %}">{% include "partials/icon.html" with name="x" %}</button>
+  </div>
+  <div class="sheet-facts">
+    <span data-row="born">{% include "partials/icon.html" with name="cake" %}<span data-f="born"></span></span>
+    <span data-row="place">{% include "partials/icon.html" with name="map" %}<span data-f="place"></span></span>
+    <span data-row="died">{% include "partials/icon.html" with name="candle" %}<span data-f="died"></span></span>
+    <span data-row="work">{% include "partials/icon.html" with name="star" %}<span data-f="work"></span></span>
+  </div>
+  <div class="row">
+    <button class="btn btn-primary btn-sm" type="button" data-act="centre">{% include "partials/icon.html" with name="target" %}{% translate "Put in the centre" %}</button>
+    <a class="btn btn-sm" data-f="url">{% translate "Open profile" %}</a>
+    <a class="btn btn-sm" data-f="edit">{% include "partials/icon.html" with name="pencil" %}{% translate "Edit" %}</a>
+  </div>
+  <div data-f="add-block">
+    <div class="subhead">{% translate "Add a relative" %}</div>
+    <div class="chips">
+      {% for value, label in add_relation.items %}<button class="chip" type="button" data-rel="{{ value }}">{{ label }}</button>{% endfor %}
+    </div>
+    <form class="quick-form" hidden novalidate>
+      <div class="dups" hidden><b>{% translate "Already in the family tree?" %}</b><div data-f="dups"></div>
+        <span class="muted">{% translate "Press “Save” again to add a separate person." %}</span></div>
+      <div class="two">
+        <div class="field"><label for="qa-first">{% translate "First name" %}</label><input id="qa-first" name="first_name" type="text" maxlength="100" autocomplete="off"></div>
+        <div class="field"><label for="qa-last">{% translate "Last name" %}</label><input id="qa-last" name="last_name" type="text" maxlength="100" autocomplete="off"></div>
+      </div>
+      <div class="two">
+        <div class="field" data-f="gender-field"><label for="qa-gender">{% translate "Gender" %}</label>
+          <select id="qa-gender" name="gender"><option value="male">{% translate "Male" context "gender" %}</option><option value="female">{% translate "Female" context "gender" %}</option></select></div>
+        <div class="field"><label for="qa-year">{% translate "Year of birth" %}</label><input id="qa-year" name="birth_year" type="number" min="1000" max="2200" inputmode="numeric"></div>
+      </div>
+      <div class="error" data-f="error" hidden></div>
+      <div class="form-actions">
+        <button class="btn btn-primary btn-sm" type="submit">{% translate "Save" %}</button>
+        <a class="btn btn-ghost btn-sm" data-f="more">{% translate "More details…" %}</a>
+      </div>
+    </form>
+  </div>
+</template>
 {% else %}
-<div class="empty"><h3>{% translate "The family tree is empty." %}</h3>
+<div class="empty" style="margin-top:10vh"><div class="ornament">{% include "partials/logo.svg" %}</div>
+  <h3>{% translate "The family tree is empty." %}</h3>
   {% if is_owner %}<a class="btn btn-primary" href="{% url 'genealogy:person_create' %}">{% translate "Add a new relative" %}</a>{% endif %}
 </div>
 {% endif %}
 {% endblock %}
-{% block scripts %}<script src="{% static 'js/tree.js' %}" defer></script>{% endblock %}
+{% block scripts %}{% if focus %}<script src="{% static 'js/tree.js' %}" defer></script>{% endif %}{% endblock %}

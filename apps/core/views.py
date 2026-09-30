@@ -1,5 +1,4 @@
 import datetime
-from collections import deque
 
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
@@ -9,55 +8,95 @@ from django.shortcuts import redirect, render
 from django.utils import timezone, translation
 from django.utils.http import content_disposition_header, url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from apps.core.muchal import current_cycle_year, muchal
-from apps.friends.services import incoming_requests
 from apps.genealogy.kinship import Archive
 from apps.notify.messages import render_parts
 from apps.notify.occasions import occasions
 
+from .dates import format_date
 from .languages import normalize_language
 
 
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "core/landing.html")
-    user = request.user
-    archive = Archive(user)
-    focus = user.person_id if user.person_id in archive.people else None
-    recent = sorted(archive.people.values(), key=lambda p: p.updated_at, reverse=True)[:6]
+    from urllib.parse import quote
+
+    from apps.genealogy.access import viewer_person
+    from apps.genealogy.models import Change
+
+    user, owner = request.user, request.archive
+    archive = Archive(owner)
+    focus = viewer_person(request, archive)
     today = timezone.localdate()
-    soon = [(o, render_parts(o.kind, o.params, (o.date - today).days), (o.date - today).days)
-            for o in occasions(user, today, today + datetime.timedelta(days=30))][:8]
-    generations = len({g for g in _generations(archive, focus).values()}) if focus else 0
+    upcoming = [(o, render_parts(o.kind, o.params, (o.date - today).days), (o.date - today).days)
+                for o in occasions(owner, today, today + datetime.timedelta(days=30))]
+    todays = []
+    for o, text, days in upcoming:
+        if days:
+            continue
+        person = archive.people.get(o.person) if o.person else None
+        greeting = ""
+        if o.kind in ("birthday", "friend_birthday"):
+            greeting = _("Happy birthday, {name}! Wishing you health, happiness and every success.").format(
+                name=(person.first_name if person else o.params.get("name", "")))
+        elif o.kind == "anniversary":
+            greeting = _("Congratulations on your wedding anniversary! Wishing you many happy years together.")
+        todays.append({"occasion": o, "text": text, "person": person, "greeting": greeting,
+                       "share": "tg://msg?text=" + quote(greeting) if greeting else ""})
+    generations = len(set(archive.generations(focus).values())) if focus else 0
     return render(request, "core/dashboard.html", {
         "people_count": len(archive.people),
-        "friends_count": user.contacts.count(),
-        "events_count": user.events.count(),
-        "stories_count": user.stories.count(),
+        "friends_count": owner.contacts.count(),
+        "events_count": owner.events.count(),
+        "stories_count": owner.stories.count(),
         "generations": generations,
-        "recent": [(p, archive.label(focus, p.pk) if focus else "") for p in recent],
-        "incoming": incoming_requests(user)[:5],
         "me": archive.people.get(focus),
-        "soon": soon,
+        "today_items": todays,
+        "today_label": format_date(today),
+        "soon": [row for row in upcoming if row[2]][:6],
+        "completeness": _completeness(archive, focus),
+        "changes": Change.objects.filter(owner=owner).select_related("actor", "person")[:6],
         "cycle_animal": muchal(current_cycle_year(), 6, 1),
     })
 
 
-def _generations(archive, focus):
-    """Generation number of everyone connected to `focus` (parents −1)."""
-    gen = {focus: 0}
-    queue = deque([focus])
-    while queue:
-        cur = queue.popleft()
-        steps = [(p, -1) for p in archive.parents(cur)] + [(c, 1) for c in archive.children.get(cur, [])]
-        steps += [(s, 0) for s in archive.spouses(cur)]
-        for nxt, d in steps:
-            if nxt not in gen:
-                gen[nxt] = gen[cur] + d
-                queue.append(nxt)
-    return gen
+def _completeness(archive, focus):
+    """How complete the archive is, and what to fill in next."""
+    people = list(archive.people.values())
+    if not people:
+        return None
+    living = [p for p in people if not p.is_deceased]
+    connected = archive.generations(focus) if focus else {}
+    no_year = sum(1 for p in people if not p.birth_year)
+    no_day = sum(1 for p in living if p.birth_year and not (p.birth_month and p.birth_day))
+    no_photo = sum(1 for p in people if not p.photo)
+    unlinked = sum(1 for p in people if p.pk not in connected) if focus else 0
+    no_story = sum(1 for p in people if p.is_deceased and not p.biography and not p.life_story)
+    n = len(people)
+    score = round(100 * (0.35 * (n - no_year) / n + 0.2 * (1 - no_day / max(1, len(living)))
+                         + 0.25 * (n - no_photo) / n + 0.2 * (n - unlinked) / n))
+    tasks = [
+        ("calendar", no_year, "nodate", ngettext(
+            "%(count)d person has no year of birth", "%(count)d people have no year of birth", no_year)),
+        ("bell", no_day, "noday", ngettext(
+            "%(count)d birthday cannot be reminded: the day and month are missing",
+            "%(count)d birthdays cannot be reminded: the day and month are missing", no_day)),
+        ("user", no_photo, "nophoto", ngettext(
+            "%(count)d person has no photo", "%(count)d people have no photo", no_photo)),
+        ("link", unlinked, "unlinked", ngettext(
+            "%(count)d person is not linked to the family yet",
+            "%(count)d people are not linked to the family yet", unlinked)),
+        ("book", no_story, "nostory", ngettext(
+            "%(count)d relative who has passed away has no life story",
+            "%(count)d relatives who have passed away have no life story", no_story)),
+    ]
+    return {"score": max(0, min(100, score)),
+            "tasks": [{"icon": icon, "filter": flt, "text": text % {"count": count}}
+                      for icon, count, flt, text in tasks if count][:4]}
 
 
 @require_POST
@@ -82,20 +121,21 @@ def set_language(request):
 
 
 def media(request, name):
-    """Serve a photo from the database storage — only to the owner of the
-    archive it belongs to and to people they share the family tree with."""
+    """Serve a photo or album file from the database storage — only to the
+    owner of the archive it belongs to and to the members of that archive."""
     from django.http import Http404, HttpResponse
     from django.utils.http import http_date
 
     from apps.genealogy.access import can_view
-    from apps.genealogy.models import Person
+    from apps.genealogy.models import Media, Person
 
     from .models import StoredFile
 
     if not request.user.is_authenticated:
         raise Http404
-    person = Person.objects.filter(photo=name).select_related("owner").first()
-    if person is None or not (person.owner_id == request.user.pk or can_view(request.user, person.owner)):
+    holder = (Person.objects.filter(photo=name).select_related("owner").first()
+              or Media.objects.filter(file=name).select_related("owner").first())
+    if holder is None or not can_view(request.user, holder.owner):
         raise Http404
     obj = StoredFile.objects.filter(name=name).first()
     if obj is None:
@@ -105,6 +145,18 @@ def media(request, name):
     response["Last-Modified"] = http_date(obj.created_at.timestamp())
     response["X-Content-Type-Options"] = "nosniff"
     return response
+
+
+def service_worker(request):
+    """The service worker must be served from the site root to control every page."""
+    response = render(request, "sw.js", content_type="application/javascript; charset=utf-8")
+    response["Service-Worker-Allowed"] = "/"
+    response["Cache-Control"] = "no-cache"
+    return response
+
+
+def offline(request):
+    return render(request, "offline.html")
 
 
 def health(request):
@@ -140,6 +192,12 @@ def server_error(request):
 # ---------------------------------------------------------------------------
 def _superuser(user):
     return user.is_active and user.is_superuser
+
+
+def _count_memberships():
+    from apps.accounts.models import Membership
+
+    return Membership.objects.count()
 
 
 @user_passes_test(_superuser)
@@ -178,23 +236,47 @@ def control_panel(request):
         "recent_users": users.order_by("-date_joined")[:10],
         "telegram": telegram.configured(), "webhook": webhook, "bot": bot, "cron": bool(settings.CRON_SECRET),
         "google": bool(settings.GOOGLE_CLIENT_ID), "site_url": settings.SITE_URL,
+        "push": bool(settings.VAPID_PRIVATE_KEY),
+        "my_prefs": NotificationSettings.for_user(request.user),
+        "members_count": _count_memberships(),
     })
 
 
 @user_passes_test(_superuser)
 def full_backup(request):
     """The whole database as JSON (for `manage.py loaddata` on any server)."""
-    import io
+    from . import backup
 
-    from django.core.management import call_command
-
-    buf = io.StringIO()
-    call_command("dumpdata", "--natural-foreign", "--natural-primary", "--exclude=contenttypes",
-                 "--exclude=auth.permission", "--exclude=admin.logentry", "--exclude=sessions", stdout=buf)
-    response = HttpResponse(buf.getvalue(), content_type="application/json; charset=utf-8")
-    response["Content-Disposition"] = content_disposition_header(
-        True, f"shajara-full-backup-{timezone.localdate().isoformat()}.json")
+    response = HttpResponse(backup.dump_json(), content_type="application/json; charset=utf-8")
+    response["Content-Disposition"] = content_disposition_header(True, backup.filename())
     return response
+
+
+@require_POST
+@user_passes_test(_superuser)
+def backup_telegram(request):
+    """Turn the weekly backup to my Telegram on or off, or send one now."""
+    from django.contrib import messages
+
+    from apps.notify import service, telegram
+    from apps.notify.models import NotificationSettings
+
+    prefs = NotificationSettings.for_user(request.user)
+    if not prefs.telegram_chat_id:
+        messages.error(request, _("Connect Telegram first: Settings → Reminders."))
+    elif "now" in request.POST:
+        try:
+            if service.send_backup(prefs):
+                messages.success(request, _("The backup has been sent to your Telegram."))
+            else:
+                messages.error(request, _("The backup is too large for Telegram. Download it here instead."))
+        except telegram.TelegramError as exc:
+            messages.error(request, str(exc))
+    else:
+        prefs.backup_telegram = not prefs.backup_telegram
+        prefs.save(update_fields=["backup_telegram"])
+        messages.success(request, _("The information has been saved."))
+    return redirect("control_panel")
 
 
 @require_POST

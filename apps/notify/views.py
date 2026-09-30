@@ -71,6 +71,8 @@ def notification_settings(request):
     return render(request, "notify/settings.html", {
         "form": form, "prefs": prefs, "telegram_available": telegram.configured(), "link": link,
         "connected": connected, "bot": telegram.bot_username() if telegram.configured() else "",
+        "vapid_key": settings.VAPID_PUBLIC_KEY if settings.VAPID_PRIVATE_KEY else "",
+        "push_devices": request.user.push_subscriptions.count(),
         "settings_tab": "reminders",
     })
 
@@ -135,6 +137,52 @@ def telegram_disconnect(request):
 
 
 # ---------------------------------------------------------------------------
+# Push notifications in this browser / on this phone
+# ---------------------------------------------------------------------------
+@require_POST
+@login_required
+def push_subscribe(request):
+    from .models import PushSubscription
+
+    try:
+        data = json.loads(request.body.decode())
+        endpoint, keys = data["endpoint"], data["keys"]
+        p256dh, auth = keys["p256dh"], keys["auth"]
+    except (ValueError, KeyError, TypeError, UnicodeDecodeError):
+        return JsonResponse({"ok": False}, status=400)
+    if not str(endpoint).startswith("https://") or len(endpoint) > 2000:
+        return JsonResponse({"ok": False}, status=400)
+    PushSubscription.objects.update_or_create(endpoint=endpoint, defaults={
+        "user": request.user, "p256dh": p256dh[:200], "auth": auth[:100],
+        "device": request.headers.get("User-Agent", "")[:200]})
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+@login_required
+def push_unsubscribe(request):
+    from .models import PushSubscription
+
+    try:
+        endpoint = json.loads(request.body.decode()).get("endpoint", "")
+    except (ValueError, UnicodeDecodeError, AttributeError):
+        endpoint = ""
+    PushSubscription.objects.filter(user=request.user, endpoint=endpoint).delete()
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+@login_required
+def push_test(request):
+    from . import push
+
+    delivered = push.send_to_user(request.user, {
+        "title": _("Shajara"), "body": _("Notifications work on this device."), "url": reverse("notify:settings"),
+        "tag": "test"}) if push.configured() else 0
+    return JsonResponse({"ok": bool(delivered)})
+
+
+# ---------------------------------------------------------------------------
 # Serverless entry points: Vercel Cron and the Telegram webhook
 # ---------------------------------------------------------------------------
 @csrf_exempt
@@ -146,8 +194,12 @@ def cron_daily(request):
     # Runs every hour (Vercel Hobby: 24 daily cron entries, one per hour).
     webhook_fixed = telegram.ensure_webhook()
     created = service.run_daily()
-    sent = service.send_pending_telegram(ignore_hour=request.GET.get("all") == "1")
-    return JsonResponse({"created": created, "telegram_sent": sent, "webhook_fixed": webhook_fixed})
+    everyone = request.GET.get("all") == "1"
+    sent = service.send_pending_telegram(ignore_hour=everyone)
+    pushed = service.send_pending_push(ignore_hour=everyone)
+    backups = service.weekly_backup()
+    return JsonResponse({"created": created, "telegram_sent": sent, "push_sent": pushed, "backups": backups,
+                         "webhook_fixed": webhook_fixed})
 
 
 @csrf_exempt

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "No connection" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="empty" style="margin-top:12vh">
+  <div class="ornament">{% include "partials/logo.svg" %}</div>
+  <h3>{% translate "No connection" %}</h3>
+  <p>{% translate "The family tree opens again as soon as the internet is back." %}</p>
+  <button class="btn btn-primary" type="button" onclick="location.reload()">{% translate "Try again" %}</button>
+</div>
+{% endblock %}

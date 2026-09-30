@@ -19,7 +19,8 @@ UZBEK_ONLY_CYRILLIC = re.compile(r"[ЎўҚқҒғҲҳ]")
 SELF_NAMES = ("Oʻzbekcha", "Ўзбекча", "Русский", "English", "lotin yozuvi", "кирилл ёзуви", "ЎЗ")
 ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "MB", "Alisher", "GEDCOM", "Ctrl", "Mac", "Start", "stop", "JSON", "Google",
                              "Telegram", "Web", "UZ", "RU", "EN", "UTC", "MyHeritage", "Ancestry", "Gramps", "URL",
-                             "cookie", "next"}
+                             "cookie", "next", "Authenticator", "Microsoft", "Push", "iPhone", "iPad", "Esc", "K",
+                             "Shajara", "help", "start"}
 LANGUAGES = {"uz": "uz-Latn", "uz-cyrl": "uz-Cyrl", "ru": "ru", "en": "en"}
 
 
@@ -72,7 +73,15 @@ class PagePurityTests(TestCase):
             reverse("genealogy:calculator") + f"?a={p['me'].pk}&b={p['cousin'].pk}",
             reverse("friends:list"),
             reverse("friends:create"),
-            reverse("friends:sharing"),
+            reverse("accounts:family"),
+            reverse("accounts:two_factor_setup"),
+            reverse("genealogy:timeline"),
+            reverse("genealogy:history"),
+            reverse("genealogy:duplicates"),
+            reverse("genealogy:people") + "?tartib=abc",
+            reverse("genealogy:tree") + "?view=fan",
+            reverse("control_panel"),
+            reverse("offline"),
             reverse("notify:list"),
             reverse("notify:settings"),
             reverse("genealogy:marriage_edit", args=[p["me"].marriages_as_husband.first().pk]),
@@ -84,6 +93,8 @@ class PagePurityTests(TestCase):
             language = "uz-cyrl" if language else "uz"
         text = visible_text(html)
         text = re.sub(r"\S+@\S+\.\w+|@\w+", "", text)  # emails and @usernames
+        text = re.sub(r"https?://\S+|python manage\.py \S+ \S+", "", text)  # addresses and commands (control panel)
+        text = re.sub(r"\b[A-Z2-7]{4}(?: [A-Z2-7]{4}){3,}\b", "", text)  # the two-step sign-in key
         for token in allowed + SELF_NAMES:
             text = text.replace(token, "")
         if language != "en":
@@ -102,6 +113,8 @@ class PagePurityTests(TestCase):
 
     def check_language(self, language):
         user, p = make_family(language=language)
+        user.is_superuser = True  # the control panel is part of the interface too
+        user.save()
         self.client.force_login(user)
         for url in self.pages(p, user):
             response = self.client.get(url)
@@ -219,7 +232,7 @@ class LanguageChoiceTests(TestCase):
         user, _p = make_family()
         self.client.force_login(user)
         response = self.client.post(reverse("accounts:settings"), {
-            "prefs-preferred_language": "uz-cyrl", "prefs-palette": "atlas", "prefs-time_zone": "Asia/Tashkent",
+            "prefs-preferred_language": "uz-cyrl", "prefs-time_zone": "Asia/Tashkent",
             "save_prefs": "1"}, follow=True)
         user.refresh_from_db()
         self.assertEqual(user.preferred_language, "uz-cyrl")

@@ -1,6 +1,5 @@
 import AppKit
 import SwiftUI
-import UniformTypeIdentifiers
 import WebKit
 
 /// The WKWebView plus the native pieces a web page cannot do on its own:
@@ -111,13 +110,13 @@ struct WebView: NSViewRepresentable {
             completionHandler(alert.runModal() == .alertFirstButtonReturn)
         }
 
-        // <input type="file">: a photo, or an archive (JSON) to import.
+        // <input type="file">: photos, documents and recordings for the album,
+        // or an archive (JSON, GEDCOM) to import. The page checks what it accepts.
         func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters,
                      initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
             let panel = NSOpenPanel()
             panel.allowsMultipleSelection = parameters.allowsMultipleSelection
             panel.canChooseDirectories = false
-            panel.allowedContentTypes = [.image, .json]
             panel.begin { completionHandler($0 == .OK ? panel.urls : nil) }
         }
 

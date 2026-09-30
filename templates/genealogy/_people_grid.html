@@ -1,9 +1,14 @@
-{% load i18n %}{% if rows %}
-  <div class="people">
-    {% for person, label in rows %}{% include "partials/person_card.html" %}{% endfor %}
-  </div>
+{% load i18n %}{% if shown %}
+  {% for title, rows in groups %}
+    {% if title %}<h2 class="divider">{{ title }} <span class="count">{{ rows|length }}</span></h2>{% endif %}
+    <div class="people">
+      {% for person, label, branch in rows %}{% include "partials/person_card.html" %}{% endfor %}
+    </div>
+  {% endfor %}
 {% elif query %}
   <div class="empty"><h3>{% translate "No results found." %}</h3><p>{% translate "Try another spelling; Latin and Cyrillic both work." %}</p></div>
+{% elif missing %}
+  <div class="empty"><div class="ornament">{% include "partials/logo.svg" %}</div><h3>{% translate "Nothing is missing here. Well done!" %}</h3></div>
 {% else %}
   <div class="empty"><h3>{% translate "No relatives have been added yet." %}</h3></div>
 {% endif %}

@@ -105,6 +105,64 @@ class Archive:
                     queue.append(nxt)
         return None
 
+    def generations(self, focus):
+        """{person_id: generation} of everyone connected to `focus`
+        (focus 0, parents −1, children +1; spouses share a generation)."""
+        if focus not in self.people:
+            return {}
+        gen = {focus: 0}
+        queue = deque([focus])
+        while queue:
+            cur = queue.popleft()
+            steps = [(p, -1) for p in self.parents(cur)] + [(c, 1) for c in self.children.get(cur, [])]
+            steps += [(sp, 0) for sp in self.spouses(cur)]
+            for nxt, d in steps:
+                if nxt not in gen:
+                    gen[nxt] = gen[cur] + d
+                    queue.append(nxt)
+        return gen
+
+    def branches(self, focus):
+        """{person_id: "own" | "paternal" | "maternal" | "other"} as seen from `focus`.
+
+        own: focus, brothers and sisters, and all their descendants;
+        paternal / maternal: the father's / mother's side with its descendants;
+        a husband or wife belongs to the side of their partner; everyone else
+        (a spouse's own relatives, unlinked people) is "other".
+        """
+        if focus not in self.people:
+            return {}
+        me = self.people[focus]
+        out = {focus: "own"}
+        parents = self.parents(focus)
+        own = self.descendants(focus)
+        for parent in parents:
+            own |= self.descendants(parent)
+        for pk in own:
+            out[pk] = "own"
+        for parent_id, side in ((me.father_id, "paternal"), (me.mother_id, "maternal")):
+            if parent_id not in self.people:
+                continue
+            line = set(self.ancestors(parent_id))
+            family = set(line)
+            for anc in line:
+                family |= self.descendants(anc)
+            for pk in family:
+                out.setdefault(pk, side)
+            out[parent_id] = side
+        for pk in list(out):
+            for partner in self.spouses(pk):
+                out.setdefault(partner, out[pk])
+        for pk in self.people:
+            out.setdefault(pk, "other")
+        return out
+
+    def direct_line(self, focus):
+        """Direct ancestors and descendants of `focus` (with focus)."""
+        if focus not in self.people:
+            return set()
+        return set(self.ancestors(focus)) | self.descendants(focus) | {focus}
+
     # ---- relationship names ---------------------------------------------
     def relation(self, focus, other):
         """Kinship code of `other` as seen from `focus`, or None if unrelated."""

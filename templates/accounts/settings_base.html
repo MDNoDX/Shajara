@@ -9,6 +9,7 @@
 <div class="settings-layout">
   <nav class="settings-nav" aria-label="{% translate 'Settings' %}">
     <a href="{% url 'accounts:settings' %}" {% if settings_tab == "general" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="user" %}<span>{% translate "General" %}</span></a>
+    <a href="{% url 'accounts:family' %}" {% if settings_tab == "family" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="share" %}<span>{% translate "Family members" %}</span></a>
     <a href="{% url 'notify:settings' %}" {% if settings_tab == "reminders" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="bell" %}<span>{% translate "Reminders" %}</span></a>
     <a href="{% url 'accounts:security' %}" {% if settings_tab == "security" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="lock" %}<span>{% translate "Security" %}</span></a>
     <a href="{% url 'accounts:data' %}" {% if settings_tab == "data" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="database" %}<span>{% translate "Your data" %}</span></a>

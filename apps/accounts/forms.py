@@ -10,7 +10,7 @@ from apps.core.languages import LATIN, language_choices, normalize_language
 from apps.core.text import normalize_apostrophes
 from apps.genealogy.models import Person
 
-from .models import Gender, Palette, User
+from .models import Gender, Invite, Role, User
 
 USERNAME_HELP = _("Letters, digits and the characters @ . + - _ only.")
 
@@ -127,18 +127,17 @@ class ProfileForm(forms.ModelForm):
 
 
 class PreferencesForm(forms.ModelForm):
-    """Language, colours and time zone: how the site looks and when reminders come."""
+    """Language and time zone: how the site speaks and when reminders come."""
 
     class Meta:
         model = User
-        fields = ["preferred_language", "palette", "time_zone"]
-        labels = {"preferred_language": _("Language"), "palette": _("Colours"), "time_zone": _("Time zone")}
-        widgets = {"preferred_language": forms.RadioSelect, "palette": forms.RadioSelect}
+        fields = ["preferred_language", "time_zone"]
+        labels = {"preferred_language": _("Language"), "time_zone": _("Time zone")}
+        widgets = {"preferred_language": forms.RadioSelect}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["preferred_language"].choices = language_choices()
-        self.fields["palette"].choices = Palette.choices
         self.fields["time_zone"] = forms.ChoiceField(
             label=_("Time zone"), choices=timezones.choices(),
             help_text=_("Reminders are made for your date and sent at your hour."),
@@ -216,3 +215,27 @@ class CompleteProfileForm(forms.Form):
         )
         user.save()
         return user
+
+
+class InviteForm(forms.ModelForm):
+    """A link for one relative: what they may do and who they are in the tree."""
+
+    class Meta:
+        model = Invite
+        fields = ["role", "person"]
+        widgets = {"role": forms.RadioSelect}
+        labels = {"role": _("What may they do?"), "person": _("Who is this relative in the tree?")}
+        help_texts = {"person": _("Optional. The tree will then name everyone as seen from them.")}
+
+    def __init__(self, *args, owner, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["role"].choices = [(Role.EDITOR, Role.EDITOR.label), (Role.VIEWER, Role.VIEWER.label)]
+        self.fields["role"].initial = Role.EDITOR
+        self.fields["person"].queryset = Person.objects.filter(owner=owner)
+        self.fields["person"].required = False
+
+
+class CodeForm(forms.Form):
+    code = forms.CharField(label=_("Code from the app"), max_length=12,
+                           widget=forms.TextInput(attrs={"inputmode": "numeric", "autocomplete": "one-time-code",
+                                                         "autofocus": True}))

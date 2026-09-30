@@ -11,6 +11,8 @@ from django.utils.translation import gettext as _
 
 from apps.core.languages import normalize_language
 
+from apps.genealogy.models import Person
+
 from .forms import (
     CompleteProfileForm,
     ImportArchiveForm,
@@ -32,8 +34,20 @@ def register(request):
         user = form.save()
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         messages.success(request, _("Welcome! Your account has been created."))
-        return redirect("home")
-    return render(request, "accounts/register.html", {"form": form})
+        return redirect(_after_sign_in(request))
+    return render(request, "accounts/register.html", {"form": form, "next": request.GET.get("next", "")})
+
+
+def _after_sign_in(request, default="home"):
+    """Where to go after signing in or up: a safe ?next, else an invite that
+    was opened before, else the home page."""
+    target = request.POST.get("next") or request.GET.get("next") or ""
+    if target and url_has_allowed_host_and_scheme(target, {request.get_host()}, request.is_secure()):
+        return target
+    token = request.session.get("invite")
+    if token:
+        return reverse("accounts:invite", args=[token])
+    return default
 
 
 class LoginView(auth_views.LoginView):
@@ -41,13 +55,52 @@ class LoginView(auth_views.LoginView):
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
+    def get_default_redirect_url(self):
+        token = self.request.session.get("invite")
+        return reverse("accounts:invite", args=[token]) if token else super().get_default_redirect_url()
+
     def form_valid(self, form):
+        user = form.get_user()
+        if user.totp_enabled:
+            # Second step: the password was right, now the code from the app.
+            self.request.session["2fa_user"] = user.pk
+            self.request.session["2fa_next"] = self.get_success_url()
+            return redirect("accounts:two_factor")
         response = super().form_valid(form)
         # Switch to the account's language straight away.
-        lang = normalize_language(form.get_user().preferred_language)
+        lang = normalize_language(user.preferred_language)
         if lang:
             translation.activate(lang)
         return response
+
+
+def two_factor(request):
+    """Second step of signing in: a code from the authenticator app, or a recovery code."""
+    from django.contrib.auth import get_user_model
+    from django.core.cache import cache
+
+    from . import totp
+    from .forms import CodeForm
+
+    user = get_user_model().objects.filter(pk=request.session.get("2fa_user"), is_active=True).first()
+    if user is None:
+        return redirect("accounts:login")
+    form = CodeForm(request.POST or None)
+    key = f"2fa-fail:{user.pk}"
+    if request.method == "POST" and form.is_valid():
+        code = form.cleaned_data["code"]
+        if cache.get(key, 0) >= 8:
+            form.add_error("code", _("Too many attempts. Please try again in 15 minutes."))
+        elif totp.verify(user.totp_secret, code) or totp.use_recovery_code(user, code):
+            cache.delete(key)
+            target = request.session.pop("2fa_next", "") or "home"
+            request.session.pop("2fa_user", None)
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            return redirect(target)
+        else:
+            cache.set(key, cache.get(key, 0) + 1, 15 * 60)
+            form.add_error("code", _("The code is not correct."))
+    return render(request, "accounts/two_factor.html", {"form": form})
 
 
 @login_required
@@ -116,7 +169,68 @@ def security_view(request):
         "form": form, "has_password": has_password, "google_account": google,
         "google_email": (google.extra_data or {}).get("email", "") if google else "",
         "other_sessions": _other_sessions(request).count(), "settings_tab": "security",
+        "recovery_left": len(user.recovery_codes or []),
     })
+
+
+@login_required
+def two_factor_setup(request):
+    """Turn two-step sign-in on: scan the QR code, confirm with a code."""
+    from apps.notify.telegram import qr_svg
+
+    from . import totp
+    from .forms import CodeForm
+
+    user = request.user
+    if user.totp_enabled:
+        return redirect(reverse("accounts:security") + "#two-step")
+    secret = request.session.get("totp_new") or totp.new_secret()
+    request.session["totp_new"] = secret
+    form = CodeForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        if totp.verify(secret, form.cleaned_data["code"]):
+            codes, hashes = totp.new_recovery_codes()
+            user.totp_secret, user.totp_enabled, user.recovery_codes = secret, True, hashes
+            user.save(update_fields=["totp_secret", "totp_enabled", "recovery_codes"])
+            request.session.pop("totp_new", None)
+            return render(request, "accounts/two_factor_codes.html", {"codes": codes, "settings_tab": "security"})
+        form.add_error("code", _("The code is not correct."))
+    return render(request, "accounts/two_factor_setup.html", {
+        "form": form, "secret": " ".join(secret[i:i + 4] for i in range(0, len(secret), 4)),
+        "qr": qr_svg(totp.uri(secret, user.email or user.username)), "settings_tab": "security",
+    })
+
+
+@require_POST
+@login_required
+def two_factor_off(request):
+    from . import totp
+
+    user = request.user
+    code = request.POST.get("code", "")
+    if user.totp_enabled and (totp.verify(user.totp_secret, code) or totp.use_recovery_code(user, code)):
+        user.totp_secret, user.totp_enabled, user.recovery_codes = "", False, []
+        user.save(update_fields=["totp_secret", "totp_enabled", "recovery_codes"])
+        messages.info(request, _("Two-step sign-in has been turned off."))
+    else:
+        messages.error(request, _("The code is not correct."))
+    return redirect(reverse("accounts:security") + "#two-step")
+
+
+@require_POST
+@login_required
+def two_factor_codes(request):
+    """New recovery codes (the old ones stop working)."""
+    from . import totp
+
+    user = request.user
+    if not user.totp_enabled or not totp.verify(user.totp_secret, request.POST.get("code", "")):
+        messages.error(request, _("The code is not correct."))
+        return redirect(reverse("accounts:security") + "#two-step")
+    codes, hashes = totp.new_recovery_codes()
+    user.recovery_codes = hashes
+    user.save(update_fields=["recovery_codes"])
+    return render(request, "accounts/two_factor_codes.html", {"codes": codes, "settings_tab": "security"})
 
 
 def _other_sessions(request):
@@ -160,7 +274,7 @@ def data_view(request):
 
     user = request.user
     people = Person.objects.filter(owner=user)
-    can_import = people.count() <= 1
+    can_import = people.count() <= 1 and not user.active_archive_id
     form = ImportArchiveForm(request.POST or None, request.FILES or None)
     if request.method == "POST":
         if not can_import:
@@ -170,7 +284,8 @@ def data_view(request):
             with transaction.atomic():
                 own = user.person
                 user.person = None
-                user.save(update_fields=["person"])
+                user.own_person = None
+                user.save(update_fields=["person", "own_person"])
                 if own:
                     own.delete()
                 counts = import_archive(user, form.cleaned_data["file"])
@@ -188,6 +303,140 @@ def data_view(request):
 def password_change(request):
     """Old address: the password form now lives in Settings → Security."""
     return redirect(reverse("accounts:security") + "#password")
+
+
+# ---------------------------------------------------------------------------
+# Family members: invites, access, switching between family trees
+# ---------------------------------------------------------------------------
+@login_required
+def family_view(request):
+    """Settings → Family: who may see or edit my archive, and the trees I take part in."""
+    from .forms import InviteForm
+    from .models import Invite
+    from .sharing import archives_of, open_invites
+
+    user = request.user
+    form = InviteForm(request.POST or None, owner=user)
+    new_invite = None
+    if request.method == "POST" and form.is_valid():
+        invite = form.save(commit=False)
+        invite.owner = invite.created_by = user
+        invite.save()
+        return redirect(f"{reverse('accounts:family')}?yangi={invite.pk}#invites")
+    if request.GET.get("yangi", "").isdigit():
+        new_invite = Invite.objects.filter(owner=user, pk=int(request.GET["yangi"])).first()
+    return render(request, "accounts/settings_family.html", {
+        "form": form, "new_invite": new_invite if new_invite and new_invite.is_open else None,
+        "new_link": request.build_absolute_uri(reverse("accounts:invite", args=[new_invite.token])) if new_invite else "",
+        "invites": open_invites(user),
+        "members": user.members.select_related("member", "person"),
+        "archives": archives_of(user),
+        "own_people": Person.objects.filter(owner=user).count(),
+        "settings_tab": "family",
+    })
+
+
+@require_POST
+@login_required
+def invite_revoke(request, pk):
+    from .models import Invite
+
+    Invite.objects.filter(owner=request.user, pk=pk, accepted_at=None).delete()
+    messages.info(request, _("The invitation link no longer works."))
+    return redirect(reverse("accounts:family") + "#invites")
+
+
+@require_POST
+@login_required
+def member_update(request, pk):
+    """Change a member's access, or remove them."""
+    from .models import Membership, Role
+    from .sharing import remove_member
+
+    membership = Membership.objects.filter(owner=request.user, pk=pk).select_related("member").first()
+    if membership is None:
+        return redirect("accounts:family")
+    if "remove" in request.POST:
+        remove_member(request.user, membership.member)
+        messages.info(request, _("Access has been removed."))
+    elif request.POST.get("role") in Role.values:
+        membership.role = request.POST["role"]
+        membership.save(update_fields=["role"])
+        messages.success(request, _("The information has been saved."))
+    return redirect(reverse("accounts:family") + "#members")
+
+
+@require_POST
+@login_required
+def archive_switch(request, user_id):
+    """Work in another family tree (or back in my own)."""
+    from django.contrib.auth import get_user_model
+
+    from .sharing import switch_archive
+
+    owner = get_user_model().objects.filter(pk=user_id, is_active=True).first()
+    if owner is None or not switch_archive(request.user, owner):
+        messages.error(request, _("Access denied."))
+        return redirect("accounts:family")
+    return redirect("home")
+
+
+@require_POST
+@login_required
+def archive_leave(request, user_id):
+    from django.contrib.auth import get_user_model
+
+    from .sharing import leave
+
+    owner = get_user_model().objects.filter(pk=user_id).first()
+    if owner is not None:
+        leave(request.user, owner)
+        messages.info(request, _("You have left this family tree."))
+    return redirect("accounts:family")
+
+
+def invite_view(request, token):
+    """The page an invitation link opens: sign in or up, then join."""
+    from .models import Invite
+    from .sharing import accept_invite, role_in
+
+    invite = Invite.objects.filter(token=token).select_related("owner", "person").first()
+    if invite is None or not invite.is_open:
+        if invite and request.user.is_authenticated and role_in(request.user, invite.owner):
+            return redirect("home")  # already joined with this link
+        return render(request, "accounts/invite.html", {"invite": None}, status=410)
+    if not request.user.is_authenticated:
+        request.session["invite"] = token
+        return render(request, "accounts/invite.html", {"invite": invite, "next": request.path})
+    if invite.owner_id == request.user.pk:
+        messages.info(request, _("This is your own invitation link: send it to a relative."))
+        return redirect("accounts:family")
+    if request.method == "POST":
+        membership = accept_invite(invite, request.user)
+        request.session.pop("invite", None)
+        if membership is None:
+            return render(request, "accounts/invite.html", {"invite": None}, status=410)
+        messages.success(request, _("You have joined the family tree."))
+        return redirect("home" if request.user.person_id else "accounts:who_am_i")
+    return render(request, "accounts/invite.html", {
+        "invite": invite, "own_people": Person.objects.filter(owner=request.user).count(),
+    })
+
+
+@login_required
+def who_am_i(request):
+    """After joining a shared tree: find your own record in it (optional)."""
+    from .models import Membership
+
+    owner = request.archive
+    if request.method == "POST":
+        person = Person.objects.filter(owner=owner, pk=request.POST.get("person") or 0).first()
+        if person is not None and not hasattr(person, "account"):
+            request.user.person = person
+            request.user.save(update_fields=["person"])
+            Membership.objects.filter(owner=owner, member=request.user).update(person=person)
+        return redirect("home")
+    return render(request, "accounts/who_am_i.html", {"owner": owner})
 
 
 password_reset = auth_views.PasswordResetView.as_view(
@@ -218,10 +467,7 @@ def complete_profile(request):
     if request.method == "POST" and form.is_valid():
         form.save(request.user)
         messages.success(request, _("Welcome! Your account has been created."))
-        target = request.GET.get("next") or ""
-        if not url_has_allowed_host_and_scheme(target, {request.get_host()}, request.is_secure()):
-            target = ""
-        return redirect(target or "home")
+        return redirect(_after_sign_in(request))
     return render(request, "accounts/complete_profile.html", {"form": form})
 
 

@@ -7,8 +7,9 @@
   <h1>{% if is_new %}{% translate "Add a new relative" %}{% else %}{{ person.full_name }}{% endif %}</h1>
   {% if not is_new %}<p>{% translate "Edit personal details" %}</p>{% endif %}
 </div></div>
-<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="5">{% csrf_token %}
+<form method="post" enctype="multipart/form-data" novalidate data-photo-limit="12">{% csrf_token %}
   {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+  {% include "genealogy/_duplicates_notice.html" %}
   {% include "genealogy/_person_fields.html" %}
   <fieldset>
     <legend>{% translate "Parents" %}</legend>

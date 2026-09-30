@@ -11,6 +11,26 @@
   </form>
 </section>
 
+<section class="card" id="two-step">
+  <h2>{% translate "Two-step sign-in" %}</h2>
+  {% if user.totp_enabled %}
+    <div class="setting-row">
+      <span class="setting-icon ok">{% include "partials/icon.html" with name="shield" %}</span>
+      <div class="spacer"><b>{% translate "On" %}</b>
+        <div class="muted small">{% blocktranslate count counter=recovery_left %}{{ counter }} recovery code left{% plural %}{{ counter }} recovery codes left{% endblocktranslate %}</div></div>
+    </div>
+    <form method="post" action="{% url 'accounts:two_factor_off' %}" class="row" style="margin-top:14px">{% csrf_token %}
+      <label class="visually-hidden" for="off-code">{% translate "Code from the app" %}</label>
+      <input id="off-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="{% translate 'Code from the app' %}" style="max-width:200px">
+      <button class="btn btn-sm" type="submit" formaction="{% url 'accounts:two_factor_codes' %}">{% translate "New recovery codes" %}</button>
+      <button class="btn btn-sm btn-danger" type="submit">{% translate "Turn off" %}</button>
+    </form>
+  {% else %}
+    <p class="muted small">{% translate "After the password the site asks for a code from an authenticator app on your phone. Even someone who knows your password cannot sign in." %}</p>
+    <a class="btn" href="{% url 'accounts:two_factor_setup' %}">{% include "partials/icon.html" with name="shield" %}{% translate "Turn on" %}</a>
+  {% endif %}
+</section>
+
 <section class="card" id="google">
   <h2>Google</h2>
   {% if google_account %}

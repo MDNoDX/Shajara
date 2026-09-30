@@ -34,6 +34,8 @@
         <dt>{% translate "Photos" %}</dt><dd>{% blocktranslate with size=photo_mb %}{{ size }} MB{% endblocktranslate %}</dd>
         <dt>{% translate "Sign in with Google" %}</dt><dd>{% if google %}✓{% else %}—{% endif %}</dd>
         <dt>{% translate "Reminders (cron)" %}</dt><dd>{% if cron %}✓ {% translate "every hour" %}{% else %}—{% endif %}</dd>
+        <dt>{% translate "Push notifications" %}</dt><dd>{% if push %}✓{% else %}—{% endif %}</dd>
+        <dt>{% translate "Shared family trees" %}</dt><dd>{{ members_count }}</dd>
         <dt>{% translate "Telegram bot" %}</dt>
         <dd>{% if bot.username %}<a href="https://t.me/{{ bot.username }}" target="_blank" rel="noopener">@{{ bot.username }}</a>{% elif telegram %}{% translate "Token not accepted by Telegram" %}{% else %}—{% endif %}</dd>
         {% if telegram %}
@@ -46,6 +48,19 @@
       <form method="post" action="{% url 'set_telegram_webhook' %}" style="margin-top:14px">{% csrf_token %}
         <button class="btn" type="submit">{% include "partials/icon.html" with name="telegram" %}{% translate "Connect the bot to the site" %}</button>
       </form>
+      {% endif %}
+    </section>
+    <section class="card" id="backup">
+      <h2>{% translate "Automatic backup" %}</h2>
+      <p class="muted small">{% translate "Once a week the whole database (with photos) is sent as one file to your Telegram. Keep the latest files: any of them restores the site." %}</p>
+      {% if my_prefs.telegram_chat_id %}
+      <form method="post" action="{% url 'backup_telegram' %}" class="row">{% csrf_token %}
+        <button class="btn btn-sm {% if my_prefs.backup_telegram %}btn-ghost{% else %}btn-primary{% endif %}" type="submit">{% if my_prefs.backup_telegram %}{% translate "Turn off" %}{% else %}{% translate "Turn on" %}{% endif %}</button>
+        <button class="btn btn-sm" type="submit" name="now" value="1">{% include "partials/icon.html" with name="send" %}{% translate "Send now" %}</button>
+        {% if my_prefs.backup_telegram %}<span class="tag">✓ {% translate "every week" %}</span>{% endif %}
+      </form>
+      {% else %}
+      <a class="btn btn-sm" href="{% url 'notify:settings' %}#telegram">{% include "partials/icon.html" with name="telegram" %}{% translate "Connect Telegram first" %}</a>
       {% endif %}
     </section>
     <section class="card">

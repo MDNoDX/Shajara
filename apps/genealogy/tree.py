@@ -22,6 +22,7 @@ Coordinates are abstract units; the browser and the PDF scale them.
 from django.utils.translation import ngettext
 
 from .kinship import Archive
+from .terminology import generation_label
 
 CARD_W, CARD_H = 220, 92
 SIB_GAP, COUPLE_GAP, GROUP_GAP, ROW_GAP = 26, 34, 46, 78
@@ -54,8 +55,9 @@ class Block:
             self.extend(node["row"] + 0.5, node["x"], node["x"] + CARD_W)
         return node
 
-    def add_line(self, points, kind, band=None):
-        self.lines.append({"points": [list(p) for p in points], "kind": kind})
+    def add_line(self, points, kind, band=None, **who):
+        """`who`: the people a line joins (to=child, a/b=couple), for highlighting."""
+        self.lines.append({"points": [list(p) for p in points], "kind": kind, **who})
         if band is not None:
             xs = [p[0] for p in points]
             self.extend(band, min(xs), max(xs))
@@ -124,9 +126,11 @@ def pack(parts, gap_for):
 
 
 class TreeLayout:
-    def __init__(self, archive: Archive, focus_id, open_all=False, opened=(), closed=(), folded=(), unfolded=()):
+    def __init__(self, archive: Archive, focus_id, open_all=False, opened=(), closed=(), folded=(), unfolded=(),
+                 side=None):
         self.a = archive
         self.focus = focus_id
+        self.side = side  # "paternal" / "maternal": only that half of the ancestry
         self.open_all = open_all
         self.opened = set(opened)
         self.closed = set(closed)
@@ -159,18 +163,19 @@ class TreeLayout:
             return "partners"
         return "divorced" if marriage.is_divorced else "couple"
 
-    def _connect(self, block, drop, centers, child_row, level=0):
+    def _connect(self, block, drop, centers, child_row, level=0, ids=()):
         """Lines from a couple's drop point down to their children."""
         # One elbow per child (down, across, down) so the browser can round
         # the corners; the shared trunk is simply drawn over itself.
         bar = row_y(child_row) - ROW_GAP / 2 + 8 * level
         dx, dy = drop
         band = child_row - 0.5
-        for cx in centers:
+        for i, cx in enumerate(centers):
+            who = {"to": ids[i]} if i < len(ids) else {}
             if abs(cx - dx) < 0.5:
-                block.add_line([(dx, dy), (dx, row_y(child_row))], "child", band=band)
+                block.add_line([(dx, dy), (dx, row_y(child_row))], "child", band=band, **who)
             else:
-                block.add_line([(dx, dy), (dx, bar), (cx, bar), (cx, row_y(child_row))], "child", band=band)
+                block.add_line([(dx, dy), (dx, bar), (cx, bar), (cx, row_y(child_row))], "child", band=band, **who)
 
     # ---- descendants ----------------------------------------------------------
     def desc(self, pk, row, collateral=False):
@@ -212,13 +217,13 @@ class TreeLayout:
             block.add_node({"id": g["partner"], "x": g["x"], "row": row, "dup": dup})
             kind = self._kind(g["marriage"])
             if i == 1:  # the first spouse stands next to pk
-                block.add_line([(CARD_W, mid), (g["x"], mid)], kind)
+                block.add_line([(CARD_W, mid), (g["x"], mid)], kind, a=pk, b=g["partner"])
                 g["drop"] = ((CARD_W + g["x"]) / 2, mid)
             else:       # later spouses: a line over the cards
                 top = row_y(row) - 10 - 7 * i
                 block.add_line([(CARD_W / 2, row_y(row)), (CARD_W / 2, top),
                                 (g["x"] + CARD_W / 2, top), (g["x"] + CARD_W / 2, row_y(row))],
-                               kind, band=row - 0.5)
+                               kind, band=row - 0.5, a=pk, b=g["partner"])
                 g["drop"] = (g["x"] + CARD_W / 2, row_y(row) + CARD_H)
         for g in ordered:
             g.setdefault("drop", (CARD_W / 2, row_y(row) + CARD_H))
@@ -226,12 +231,13 @@ class TreeLayout:
         if folded or not kid_total:
             return block, 0.0
 
-        parts, owners = [], []
+        parts, owners, kid_ids = [], [], []
         for gi, g in enumerate(ordered):
             for ki, kid in enumerate(g["kids"]):
                 kb, kx = self.desc(kid, row + 1)
                 parts.append((kb, kx))
                 owners.append((gi, ki))
+                kid_ids.append(kid)
         kids_block, xs = pack(parts, lambda i: GROUP_GAP if owners[i][1] == 0 else SIB_GAP)
         centers = [x + CARD_W / 2 for x in xs]
         unit_w = (len(spouses) + 1) * CARD_W + len(spouses) * COUPLE_GAP
@@ -239,9 +245,18 @@ class TreeLayout:
         kids_block.shift(shift)
         block.merge(kids_block)
         for gi, g in enumerate(ordered):
-            cs = [centers[i] + shift for i, (ogi, _k) in enumerate(owners) if ogi == gi]
+            mine = [i for i, (ogi, _k) in enumerate(owners) if ogi == gi]
+            cs = [centers[i] + shift for i in mine]
             if cs:
-                self._connect(block, g["drop"], cs, row + 1, level=gi if len(ordered) > 1 else 0)
+                self._connect(block, g["drop"], cs, row + 1, level=gi if len(ordered) > 1 else 0,
+                              ids=[kid_ids[i] for i in mine])
+        return block, 0.0
+
+    def _alone(self, pk, row):
+        """Just this person's card (no brothers, sisters or ancestors)."""
+        block = Block()
+        self.placed.add(pk)
+        block.add_node({"id": pk, "x": 0.0, "row": row, "dup": False, "sibs": None})
         return block, 0.0
 
     # ---- ancestors and their families ----------------------------------------
@@ -281,13 +296,16 @@ class TreeLayout:
         mother = me.mother_id if me.mother_id in self.a.people else None
         if not father and not mother:
             return row_block, pk_x
+        # "Father's side only": the mother is still shown next to the father,
+        # but without her own family (and the other way round).
+        alone = {"paternal": mother, "maternal": father}.get(self.side) if is_focus else None
 
         left = right = None
         fx = mx = 0.0
         if father:
-            left, fx = self.up(father, row - 1, "left", level + 1)
+            left, fx = self._alone(father, row - 1) if father == alone else self.up(father, row - 1, "left", level + 1)
         if mother:
-            right, mx = self.up(mother, row - 1, "right", level + 1)
+            right, mx = self._alone(mother, row - 1) if mother == alone else self.up(mother, row - 1, "right", level + 1)
         if left and right:
             dx = max(gap_needed(left, right, COUPLE_GAP), fx + CARD_W + COUPLE_GAP - mx)
             right.shift(dx)
@@ -332,16 +350,17 @@ class TreeLayout:
             )
             if not between:
                 mid = row_y(prow) + CARD_H / 2
-                block.add_line([(fx + CARD_W, mid), (mx, mid)], kind)
+                block.add_line([(fx + CARD_W, mid), (mx, mid)], kind, a=father, b=mother)
                 drop = ((fx + CARD_W + mx) / 2, mid)
             else:
                 low_y = row_y(prow) + CARD_H + ROW_GAP / 4
                 block.add_line([(fx + CARD_W / 2, row_y(prow) + CARD_H), (fx + CARD_W / 2, low_y),
-                                (mx + CARD_W / 2, low_y), (mx + CARD_W / 2, row_y(prow) + CARD_H)], kind)
+                                (mx + CARD_W / 2, low_y), (mx + CARD_W / 2, row_y(prow) + CARD_H)], kind,
+                               a=father, b=mother)
                 drop = ((fx + mx + CARD_W) / 2, low_y)
         else:
             drop = (drop_x(), row_y(prow) + CARD_H)
-        self._connect(block, drop, centers, row)
+        self._connect(block, drop, centers, row, ids=members)
         return block, pk_x
 
     def build(self):
@@ -353,35 +372,45 @@ class TreeLayout:
         min_x = min(n["x"] for n in nodes)
         min_y = min(row_y(n["row"]) for n in nodes)
         dx, dy = PAD - min_x, PAD - min_y
+        rows = sorted({n["row"] for n in nodes})
         for n in nodes:
             n["x"] = round(n["x"] + dx, 1)
+            n["gen"] = n["row"]
             n["y"] = round(row_y(n.pop("row")) + dy, 1)
-        lines = [{"kind": line["kind"], "points": [[round(x + dx, 1), round(y + dy, 1)] for x, y in line["points"]]}
+        lines = [{**line, "points": [[round(x + dx, 1), round(y + dy, 1)] for x, y in line["points"]]}
                  for line in block.lines]
         width = max(n["x"] for n in nodes) + CARD_W + PAD
         height = max(n["y"] for n in nodes) + CARD_H + PAD + 24
-        return {"nodes": nodes, "lines": lines, "width": round(width), "height": round(height)}
+        return {"nodes": nodes, "lines": lines, "width": round(width), "height": round(height),
+                "rows": [{"gen": row, "y": round(row_y(row) + dy, 1)} for row in rows]}
 
 
-def build_tree(archive: Archive, focus_id, photo_urls=True, viewer_is_owner=True,
-               open_all=False, opened=(), closed=(), folded=(), unfolded=()):
-    """Layout plus the text of every card, in the active language."""
+def build_tree(archive: Archive, focus_id, photo_urls=True, viewer_person=None,
+               open_all=False, opened=(), closed=(), folded=(), unfolded=(), side=None):
+    """Layout plus the text of every card, in the active language.
+
+    viewer_person: the viewer's own record; the centre card is labelled
+    "You" only when it is that record.
+    """
     layout = TreeLayout(archive, focus_id, open_all=open_all, opened=opened, closed=closed, folded=folded,
-                        unfolded=unfolded).build()
-    owner_self = archive.owner.person_id if viewer_is_owner else None
+                        unfolded=unfolded, side=side).build()
+    branches = archive.branches(focus_id)
+    ancestors = set(archive.ancestors(focus_id))
     for node in layout["nodes"]:
         person = archive.people[node["id"]]
-        # "You" only when the centre is the viewer's own record.
-        is_centre_not_owner = person.pk == focus_id and focus_id != owner_self
+        is_centre_not_viewer = person.pk == focus_id and focus_id != viewer_person
         kids, sibs = node.get("kids"), node.get("sibs")
         node.update(
             name=person.short_name,
+            first=person.first_name,
             initials=person.initials,
             years=person.lifespan,
-            label="" if is_centre_not_owner else archive.label(focus_id, person.pk),
+            label="" if is_centre_not_viewer else archive.label(focus_id, person.pk),
             gender=person.gender,
             deceased=person.is_deceased,
             focus=person.pk == focus_id,
+            branch=branches.get(person.pk, "other"),
+            direct=person.pk in ancestors,
             url=person.get_absolute_url(),
             photo=person.photo.url if photo_urls and person.photo else "",
             kids_label=(ngettext("%(count)d child", "%(count)d children", kids["count"])
@@ -389,6 +418,13 @@ def build_tree(archive: Archive, focus_id, photo_urls=True, viewer_is_owner=True
             sibs_label=(ngettext("%(count)d brother or sister", "%(count)d brothers and sisters", sibs["count"])
                         % {"count": sibs["count"]}) if sibs else "",
         )
+    for line in layout["lines"]:
+        to, a, b = line.pop("to", None), line.pop("a", None), line.pop("b", None)
+        if (to in ancestors) or (a in ancestors and b in ancestors and a != focus_id and b != focus_id):
+            line["direct"] = True
+    for row in layout["rows"]:
+        row["label"] = generation_label(row["gen"])
     layout["card"] = {"w": CARD_W, "h": CARD_H}
     layout["focus"] = focus_id
+    layout["side"] = side or ""
     return layout

@@ -1,0 +1,1 @@
+<a class="mini{% if is_self %} self{% endif %}" href="{{ person.get_absolute_url }}">{% include "partials/avatar.html" with person=person size="sm" branch=branch %}<span>{{ person.short_name }}{% if label %}<small>{{ label }}</small>{% endif %}</span></a>

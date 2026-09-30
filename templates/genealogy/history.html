@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n uz %}
+{% block title %}{% translate "History" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "History of changes" %}</h1>
+  <p>{% translate "Who added, changed or deleted what. A change or deletion made by mistake can be put back." %}</p>
+</div></div>
+{% if rows %}
+<section class="card">
+  <ul class="log">
+    {% for change, fields in rows %}
+    <li{% if change.undone_at %} class="undone"{% endif %}>
+      <span class="setting-icon">{% if change.action == "created" %}{% include "partials/icon.html" with name="plus" %}{% elif change.action == "deleted" %}{% include "partials/icon.html" with name="trash" %}{% elif change.action == "restored" %}{% include "partials/icon.html" with name="history" %}{% elif change.action == "merged" %}{% include "partials/icon.html" with name="merge" %}{% elif change.action == "linked" %}{% include "partials/icon.html" with name="link" %}{% else %}{% include "partials/icon.html" with name="pencil" %}{% endif %}</span>
+      <span class="what">
+        {% if change.person %}<a href="{{ change.person.get_absolute_url }}"><b>{{ change.subject }}</b></a>{% else %}<b>{{ change.subject }}</b>{% endif %}
+        <span class="muted">— {{ change.get_action_display }}</span>
+        <small>{% if change.actor %}{{ change.actor.display_name }} · {% endif %}{{ change.created_at|uzdate }}{% if fields %} · {{ fields|join:", " }}{% endif %}{% if change.undone_at %} · {% translate "undone" %}{% endif %}</small>
+      </span>
+      {% if can_undo and change.can_undo %}
+      <form method="post" action="{% url 'genealogy:history_undo' change.pk %}">{% csrf_token %}
+        <button class="btn btn-sm" type="submit">{% include "partials/icon.html" with name="history" %}{% translate "Undo" %}</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% else %}
+<div class="empty"><div class="ornament">{% include "partials/logo.svg" %}</div>
+  <h3>{% translate "No changes yet." %}</h3>
+  <p>{% translate "Every addition and correction will be listed here." %}</p></div>
+{% endif %}
+{% endblock %}

@@ -17,10 +17,10 @@ struct ShajaraApp: App {
         Window("Shajara", id: "main") {
             ContentView()
                 .environmentObject(browser)
-                .frame(minWidth: 960, minHeight: 640)
+                .frame(minWidth: 1040, minHeight: 640)
         }
         .defaultSize(width: 1320, height: 860)
-        .windowToolbarStyle(.unified(showsTitle: true))
+        .windowToolbarStyle(.unifiedCompact(showsTitle: false))
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .printItem) {
@@ -42,7 +42,8 @@ struct ShajaraApp: App {
                 Button(L.t("relatives", lang)) { browser.open(path: "/qarindoshlar/") }.keyboardShortcut("2")
                 Button(L.t("events", lang)) { browser.open(path: "/voqealar/") }.keyboardShortcut("3")
                 Button(L.t("friends", lang)) { browser.open(path: "/dostlar/") }.keyboardShortcut("4")
-                Button(L.t("search", lang)) { browser.open(path: "/qidiruv/") }.keyboardShortcut("f")
+                Button(L.t("timeline", lang)) { browser.open(path: "/vaqt-chizigi/") }.keyboardShortcut("5")
+                Button(L.t("search", lang)) { browser.openSearch() }.keyboardShortcut("f")
                 Button(L.t("addRelative", lang)) { browser.open(path: "/qarindoshlar/yangi/") }.keyboardShortcut("n")
                 Divider()
                 Button(L.t("notifications", lang)) { browser.open(path: "/xabarlar/") }.keyboardShortcut("b", modifiers: [.command, .shift])
@@ -127,7 +128,7 @@ struct ContentView: View {
             if browser.isLoading {
                 ProgressView(value: browser.progress)
                     .progressViewStyle(.linear)
-                    .tint(Color(red: 0.36, green: 0.28, blue: 0.79))
+                    .tint(Color(red: 0.85, green: 0.62, blue: 0.14))
                     .frame(height: 2)
             }
             if let message = browser.errorMessage {
@@ -135,7 +136,10 @@ struct ContentView: View {
             }
         }
         .navigationTitle(browser.title.isEmpty ? L.t("appMenu", lang) : browser.title)
-        .onAppear { AppDelegate.openMain = { openWindow(id: "main") } }
+        .onAppear {
+            AppDelegate.openMain = { openWindow(id: "main") }
+            DispatchQueue.main.async { browser.applyTheme() }
+        }
         .toolbar {
             ToolbarItemGroup(placement: .navigation) {
                 Button(action: browser.goBack) { Image(systemName: "chevron.left") }
@@ -143,9 +147,8 @@ struct ContentView: View {
                 Button(action: browser.goForward) { Image(systemName: "chevron.right") }
                     .disabled(!browser.canGoForward).help(L.t("forward", lang))
             }
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button(action: browser.goHome) { Image(systemName: "house") }.help(L.t("home", lang))
-                Button { browser.open(path: "/shajara/") } label: { Image(systemName: "tree") }.help(L.t("myTree", lang))
+            // The site has its own sidebar: the window only adds what a page cannot do.
+            ToolbarItem(placement: .primaryAction) {
                 Button(action: browser.reload) { Image(systemName: "arrow.clockwise") }.help(L.t("reload", lang))
             }
         }

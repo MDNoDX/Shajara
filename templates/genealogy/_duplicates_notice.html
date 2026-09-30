@@ -1,0 +1,9 @@
+{% load i18n %}{% if form.duplicates %}
+<div class="notice" style="display:block">
+  <b>{% translate "Already in the family tree?" %}</b>
+  <div class="kin-list" style="margin:10px 0">
+    {% for person in form.duplicates %}{% include "partials/person_card.html" with label="" branch="" %}{% endfor %}
+  </div>
+  <label class="checkbox">{{ form.confirm_duplicate }} {{ form.confirm_duplicate.label }}</label>
+</div>
+{% endif %}

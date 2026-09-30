@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Timeline" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "Timeline" %}</h1>
+  <p>{% translate "The years of the family in order: births, weddings, farewells and events." %}</p>
+</div></div>
+<div class="chips" style="margin-bottom:20px">
+  <a class="chip" href="{% url 'genealogy:timeline' %}" aria-current="{% if not show %}true{% else %}false{% endif %}">{% translate "Everything" %}</a>
+  <a class="chip" href="?f=birth" aria-current="{% if show == 'birth' %}true{% else %}false{% endif %}">{% translate "Births" %}</a>
+  <a class="chip" href="?f=wedding" aria-current="{% if show == 'wedding' %}true{% else %}false{% endif %}">{% translate "Weddings" %}</a>
+  <a class="chip" href="?f=death" aria-current="{% if show == 'death' %}true{% else %}false{% endif %}">{% translate "Farewells" %}</a>
+  <a class="chip" href="?f=event" aria-current="{% if show == 'event' %}true{% else %}false{% endif %}">{% translate "Events" %}</a>
+</div>
+{% for decade, items in decades %}
+  <h2 class="decade">{% blocktranslate %}{{ decade }}s{% endblocktranslate %}</h2>
+  <ul class="timeline">
+    {% for item in items %}
+    <li class="k-{{ item.kind }}">
+      <div class="when">{{ item.when }}</div>
+      <a href="{{ item.url }}"><b>{{ item.text }}</b></a>
+    </li>
+    {% endfor %}
+  </ul>
+{% empty %}
+  <div class="empty"><div class="ornament">{% include "partials/logo.svg" %}</div>
+    <h3>{% translate "The timeline is still empty." %}</h3>
+    <p>{% translate "It fills in by itself as you add years of birth, weddings and events." %}</p></div>
+{% endfor %}
+{% endblock %}

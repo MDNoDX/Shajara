@@ -1,0 +1,19 @@
+{% load i18n %}<details class="dropdown archive-switch">
+  <summary title="{% translate 'Family tree in use' %}">
+    {% include "partials/icon.html" with name="tree" %}
+    <span>{% if archive.pk == user.pk %}<b>{% translate "My own family tree" %}</b>{% else %}<b>{{ archive.display_name }}</b><small>{% if can_edit %}{% translate "You can edit" %}{% else %}{% translate "View only" %}{% endif %}</small>{% endif %}</span>
+  </summary>
+  <div class="menu">
+    <div class="menu-label">{% translate "Family tree in use" %}</div>
+    <form method="post" action="{% url 'accounts:archive_switch' user.pk %}">{% csrf_token %}
+      <button type="submit">{% include "partials/icon.html" with name="user" %}{% translate "My own family tree" %}{% if archive.pk == user.pk %}{% include "partials/icon.html" with name="check" %}{% endif %}</button>
+    </form>
+    {% for m in shared_archives %}
+    <form method="post" action="{% url 'accounts:archive_switch' m.owner.pk %}">{% csrf_token %}
+      <button type="submit">{% include "partials/icon.html" with name="people" %}{{ m.owner.display_name }}{% if archive.pk == m.owner.pk %}{% include "partials/icon.html" with name="check" %}{% endif %}</button>
+    </form>
+    {% endfor %}
+    <hr>
+    <a href="{% url 'accounts:family' %}">{% include "partials/icon.html" with name="settings" %}{% translate "Family members" %}</a>
+  </div>
+</details>

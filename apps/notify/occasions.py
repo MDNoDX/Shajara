@@ -28,6 +28,7 @@ class Occasion:
     key: str
     params: dict = field(default_factory=dict)
     url: str = ""
+    person: int | None = None  # the relative it is about (for their photo)
 
     @property
     def icon(self):
@@ -52,7 +53,8 @@ def _yearly(month, day, start, end):
 
 
 def occasions(user, start, end, prefs=None):
-    """All occasions from `start` to `end` (inclusive), sorted by date."""
+    """All occasions in the archive owned by `user` from `start` to `end`
+    (inclusive), sorted by date."""
     want = (lambda name: getattr(prefs, name, True)) if prefs else (lambda name: True)
     out = []
     people = list(Person.objects.filter(owner=user))
@@ -62,14 +64,14 @@ def occasions(user, start, end, prefs=None):
             for d in _yearly(p.birth_month, p.birth_day, start, end):
                 age = d.year - p.birth_year if p.birth_year else None
                 out.append(Occasion("birthday", d, f"birthday:{p.pk}:{d.year}",
-                                    {"name": p.short_name, "age": age}, p.get_absolute_url()))
+                                    {"name": p.short_name, "age": age}, p.get_absolute_url(), p.pk))
         if want("memorials") and p.is_deceased and p.death_month and p.death_day:
             for d in _yearly(p.death_month, p.death_day, start, end):
                 years = d.year - p.death_year if p.death_year else None
                 if years == 0:
                     continue
                 out.append(Occasion("memorial", d, f"memorial:{p.pk}:{d.year}",
-                                    {"name": p.short_name, "years": years}, p.get_absolute_url()))
+                                    {"name": p.short_name, "years": years}, p.get_absolute_url(), p.pk))
 
     if want("anniversaries"):
         for m in Marriage.objects.filter(owner=user, is_divorced=False).select_related("husband", "wife"):
@@ -81,7 +83,7 @@ def occasions(user, start, end, prefs=None):
                     continue
                 out.append(Occasion("anniversary", d, f"anniversary:{m.pk}:{d.year}",
                                     {"names": f"{m.husband.short_name} · {m.wife.short_name}", "years": years},
-                                    m.husband.get_absolute_url()))
+                                    m.husband.get_absolute_url(), m.husband_id))
 
     if want("friends"):
         for c in Contact.objects.filter(owner=user).select_related("person"):

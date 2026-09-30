@@ -1,22 +1,30 @@
 {% load i18n static %}<!doctype html>
-<html lang="{{ html_lang }}" dir="ltr" data-palette="{{ palette }}">
+<html lang="{{ html_lang }}" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}{% endblock %} · {% translate "Family tree" context "site name" %}</title>
   <meta name="description" content="{% translate 'Family tree — a family archive for Uzbek families.' %}">
-  <meta name="theme-color" content="#5b47c9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#121119" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e111a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <script>
-    /* Apply the saved colour theme before the page is drawn (no flash). */
-    try { var t = localStorage.getItem("theme") || "light"; if (t !== "auto") document.documentElement.setAttribute("data-theme", t); }
-    catch (e) { document.documentElement.setAttribute("data-theme", "light"); }
+    /* Apply the saved theme and sidebar width before the page is drawn (no flash). */
+    (function (d) {
+      try {
+        var t = localStorage.getItem("theme") || "light";
+        if (t === "auto") t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        d.setAttribute("data-theme", t);
+        if (localStorage.getItem("nav") === "rail") d.setAttribute("data-nav", "rail");
+      } catch (e) { d.setAttribute("data-theme", "light"); }
+    })(document.documentElement);
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Serif:wght@600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;1,8..60,600&display=swap">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="icon" href="{% static 'img/icon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
   <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
   <script src="{% url 'javascript-catalog' %}"></script>
   <script src="{% static 'js/app.js' %}" defer></script>
@@ -25,121 +33,139 @@
 <body{% if user.is_authenticated %} class="has-tabbar"{% endif %}>
 <a class="skip" href="#main">{% translate "Skip to content" %}</a>
 {% with url_name=request.resolver_match.url_name app_name=request.resolver_match.app_name %}
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="{% url 'home' %}">
-      <span class="brand-mark">{% include "partials/logo.svg" %}</span>
-      <span>{% translate "Family tree" context "site name" %}</span>
-    </a>
-    {% if user.is_authenticated %}
-      <form class="top-search" action="{% url 'genealogy:search' %}" method="get" role="search">
-        {% include "partials/icon.html" with name="search" %}
-        <label class="visually-hidden" for="top-q">{% translate "Search" %}</label>
-        <input id="top-q" type="search" name="q" value="{{ query|default:'' }}" placeholder="{% translate 'Search relatives…' %}"
-               autocomplete="off" role="combobox" aria-expanded="false" aria-controls="top-q-results"
-               data-live-search="{% url 'genealogy:search_json' %}" data-mode="navigate">
-        <div class="live-results" id="top-q-results" role="listbox" hidden></div>
-      </form>
-    {% endif %}
-    <div class="top-actions">
-      <button class="icon-btn theme-btn" type="button" data-theme-toggle
-              title="{% translate 'Colour theme' %}" aria-label="{% translate 'Colour theme' %}">
-        <span data-theme-icon="auto">{% include "partials/icon.html" with name="auto" %}</span>
-        <span data-theme-icon="light">{% include "partials/icon.html" with name="sun" %}</span>
-        <span data-theme-icon="dark">{% include "partials/icon.html" with name="moon" %}</span>
-      </button>
-      {% include "partials/lang_switch.html" %}
-      {% if user.is_authenticated %}
-        <details class="dropdown bell">
-          <summary class="icon-btn" aria-label="{% translate 'Notifications' %}" title="{% translate 'Notifications' %}">
-            {% include "partials/icon.html" with name="bell" %}
-            {% if unread_count %}<span class="dot-badge">{{ unread_count }}</span>{% endif %}
-          </summary>
-          <div class="menu notif-menu">
-            <div class="menu-head">
-              <b>{% translate "Notifications" %}</b>
-              {% if unread_count %}
-              <form method="post" action="{% url 'notify:read_all' %}">{% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button class="linklike small" type="submit">{% translate "Mark all as read" %}</button>
-              </form>
-              {% endif %}
-            </div>
-            {% for n in latest_notifications %}
-              {% with t=n.text %}
-              <a class="notif{% if not n.read_at %} unread{% endif %}" href="{% url 'notify:open' n.pk %}">
-                <span class="notif-icon">{{ t.icon }}</span>
-                <span><b>{{ t.title }}</b><br><span class="muted small">{{ t.body }}</span></span>
-              </a>
-              {% endwith %}
-            {% empty %}
-              <p class="muted small notif-empty">{% translate "No notifications yet." %}</p>
-            {% endfor %}
-            <div class="menu-foot">
-              <a href="{% url 'notify:list' %}">{% translate "All notifications" %}</a>
-              <a href="{% url 'notify:settings' %}">{% translate "Reminder settings" %}</a>
-            </div>
-          </div>
-        </details>
-        <details class="usermenu">
-          <summary aria-label="{% translate 'Account' %}">
-            {% include "partials/avatar.html" with person=user.person size="sm" %}
-            <span class="uname">{{ user.first_name|default:user.username }}</span>
-          </summary>
-          <div class="menu">
-            <div class="menu-user">
-              {% include "partials/avatar.html" with person=user.person %}
-              <span><b>{{ user.display_name }}</b><small>{{ user.email|default:user.username }}</small></span>
-            </div>
-            <hr>
-            {% if user.person %}<a href="{{ user.person.get_absolute_url }}">{% include "partials/icon.html" with name="user" %}{% translate "My record in the tree" %}</a>{% endif %}
-            <a href="{% url 'accounts:settings' %}">{% include "partials/icon.html" with name="settings" %}{% translate "Settings" %}</a>
-            <a href="{% url 'notify:settings' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Reminder settings" %}</a>
-            <a href="{% url 'friends:sharing' %}">{% include "partials/icon.html" with name="share" %}{% translate "Share the family tree" %}{% if pending_requests %} <span class="badge">{{ pending_requests }}</span>{% endif %}</a>
-            {% if user.is_superuser %}<a href="{% url 'control_panel' %}">{% include "partials/icon.html" with name="shield" %}{% translate "Control panel" %}</a>{% endif %}
-            <hr>
-            <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
-              <button type="submit">{% include "partials/icon.html" with name="logout" %}{% translate "Sign out" %}</button>
-            </form>
-          </div>
-        </details>
-      {% else %}
-        <a class="btn btn-ghost btn-sm" href="{% url 'accounts:login' %}">{% translate "Sign in" %}</a>
-        <a class="btn btn-primary btn-sm" href="{% url 'accounts:register' %}">{% translate "Sign up" %}</a>
-      {% endif %}
-    </div>
-  </div>
-  {% if user.is_authenticated %}
-  <div class="mainnav-wrap">
-  <nav class="mainnav" aria-label="{% translate 'Main menu' %}">
-    <a href="{% url 'home' %}" {% if url_name == "home" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="home" %}{% translate "Home" %}</a>
-    <a href="{% url 'genealogy:tree' %}" {% if url_name == "tree" or url_name == "tree_for" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="tree" %}{% translate "My family tree" %}</a>
-    <a href="{% url 'genealogy:people' %}" {% if url_name in "people person person_edit person_create relative_add marriage_edit search" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="people" %}{% translate "My relatives" %}</a>
-    <a href="{% url 'genealogy:upcoming' %}" {% if url_name in "upcoming event event_create event_edit" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="calendar" %}{% translate "Events" %}</a>
-    <a href="{% url 'genealogy:stories' %}" {% if url_name in "stories story story_create story_edit" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="book" %}{% translate "Stories" %}</a>
-    <a href="{% url 'friends:list' %}" {% if app_name == "friends" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="friends" %}{% translate "My friends" %}</a>
-    <a href="{% url 'genealogy:calculator' %}" {% if url_name == "calculator" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="link" %}{% translate "Who is who?" %}</a>
-  </nav>
-  </div>
-  {% endif %}
-</header>
-{% endwith %}
-
 {% if user.is_authenticated %}
-{% with url_name=request.resolver_match.url_name app_name=request.resolver_match.app_name %}
-<nav class="tabbar" aria-label="{% translate 'Main menu' %}">
-  <a href="{% url 'home' %}" {% if url_name == "home" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="home" %}{% translate "Home" %}</a>
-  <a href="{% url 'genealogy:tree' %}" {% if url_name == "tree" or url_name == "tree_for" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="tree" %}{% translate "Family tree" context "site name" %}</a>
-  <a href="{% url 'genealogy:people' %}" {% if url_name in "people person person_edit person_create relative_add marriage_edit search" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="people" %}{% translate "Relatives" %}</a>
-  <a href="{% url 'genealogy:upcoming' %}" {% if url_name in "upcoming event event_create event_edit" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="calendar" %}{% translate "Events" %}</a>
-  <a href="{% url 'friends:list' %}" {% if app_name == "friends" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="friends" %}{% translate "Friends" %}</a>
-</nav>
-{% endwith %}
+<div class="shell">
+  <aside class="sidebar" aria-label="{% translate 'Main menu' %}">
+    <div class="sb-top">
+      <a class="brand" href="{% url 'home' %}">
+        <span class="brand-mark">{% include "partials/logo.svg" %}</span>
+        <span>{% translate "Family tree" context "site name" %}</span>
+      </a>
+      <button class="icon-btn sb-collapse" type="button" data-nav-toggle
+              title="{% translate 'Collapse the menu' %}" aria-label="{% translate 'Collapse the menu' %}">{% include "partials/icon.html" with name="sidebar" %}</button>
+    </div>
+    {% if shared_archives %}{% include "partials/archive_switch.html" %}{% endif %}
+    <button class="sb-search" type="button" data-cmdk-open title="{% translate 'Search' %}">
+      {% include "partials/icon.html" with name="search" %}<span>{% translate "Search" %}</span><kbd>⌘K</kbd>
+    </button>
+    <nav class="sb-nav">
+      <a href="{% url 'home' %}" {% if url_name == "home" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="home" %}<span>{% translate "Home" %}</span></a>
+      <a href="{% url 'genealogy:tree' %}" {% if url_name == "tree" or url_name == "tree_for" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="tree" %}<span>{% translate "Family tree" context "kinship" %}</span></a>
+      <a href="{% url 'genealogy:people' %}" {% if url_name in "people person person_edit person_create relative_add marriage_edit search duplicates" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="people" %}<span>{% translate "Relatives" %}</span></a>
+      <a href="{% url 'genealogy:upcoming' %}" {% if url_name in "upcoming event event_create event_edit" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="calendar" %}<span>{% translate "Events" %}</span></a>
+      <a href="{% url 'genealogy:timeline' %}" {% if url_name == "timeline" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="timeline" %}<span>{% translate "Timeline" %}</span></a>
+      <a href="{% url 'genealogy:stories' %}" {% if url_name in "stories story story_create story_edit" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="book" %}<span>{% translate "Stories" %}</span></a>
+      <a href="{% url 'friends:list' %}" {% if app_name == "friends" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="friends" %}<span>{% translate "Friends" %}</span></a>
+      <a href="{% url 'genealogy:calculator' %}" {% if url_name == "calculator" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="link" %}<span>{% translate "Who is who?" %}</span></a>
+    </nav>
+    <div class="sb-bottom">
+      <a class="sb-link" href="{% url 'notify:list' %}" {% if url_name == "list" and app_name == "notify" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="bell" %}<span>{% translate "Notifications" %}</span>{% if unread_count %}<span class="badge sb-badge">{{ unread_count }}</span>{% endif %}</a>
+      <a class="sb-link" href="{% url 'genealogy:history' %}" {% if url_name == "history" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="history" %}<span>{% translate "History" %}</span></a>
+      <a class="sb-link" href="{% url 'accounts:settings' %}" {% if settings_tab %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="settings" %}<span>{% translate "Settings" %}</span></a>
+      <details class="dropdown sb-user">
+        <summary aria-label="{% translate 'Account' %}">
+          {% include "partials/avatar.html" with person=user.person size="sm" branch="own" %}
+          <span class="who"><b>{{ user.display_name }}</b><small>{{ user.email|default:user.username }}</small></span>
+        </summary>
+        {% include "partials/user_menu.html" with up=True %}
+      </details>
+    </div>
+  </aside>
+  <div class="main-col">
+    <header class="mobilebar">
+      <a class="brand" href="{% url 'home' %}">
+        <span class="brand-mark">{% include "partials/logo.svg" %}</span>
+        <span>{% translate "Family tree" context "site name" %}</span>
+      </a>
+      <span class="spacer"></span>
+      <button class="icon-btn" type="button" data-cmdk-open aria-label="{% translate 'Search' %}">{% include "partials/icon.html" with name="search" %}</button>
+      <a class="icon-btn" href="{% url 'notify:list' %}" aria-label="{% translate 'Notifications' %}">{% include "partials/icon.html" with name="bell" %}{% if unread_count %}<span class="dot-badge">{{ unread_count }}</span>{% endif %}</a>
+      <details class="dropdown usermenu">
+        <summary aria-label="{% translate 'Account' %}">{% include "partials/avatar.html" with person=user.person size="sm" branch="own" %}</summary>
+        {% include "partials/user_menu.html" %}
+      </details>
+    </header>
+{% else %}
+<header class="guestbar">
+  <a class="brand" href="{% url 'home' %}">
+    <span class="brand-mark">{% include "partials/logo.svg" %}</span>
+    <span>{% translate "Family tree" context "site name" %}</span>
+  </a>
+  <span class="spacer"></span>
+  <button class="icon-btn theme-btn" type="button" data-theme-toggle
+          title="{% translate 'Colour theme' %}" aria-label="{% translate 'Colour theme' %}">
+    <span data-theme-icon="auto">{% include "partials/icon.html" with name="auto" %}</span>
+    <span data-theme-icon="light">{% include "partials/icon.html" with name="sun" %}</span>
+    <span data-theme-icon="dark">{% include "partials/icon.html" with name="moon" %}</span>
+  </button>
+  {% include "partials/lang_switch.html" %}
+  {% if url_name != "login" %}<a class="btn btn-ghost btn-sm" href="{% url 'accounts:login' %}">{% translate "Sign in" %}</a>{% endif %}
+  {% if url_name != "register" %}<a class="btn btn-primary btn-sm" href="{% url 'accounts:register' %}">{% translate "Sign up" %}</a>{% endif %}
+</header>
 {% endif %}
 
 <main id="main" class="container {% block main_class %}{% endblock %}">
   {% block content %}{% endblock %}
 </main>
+
+{% if user.is_authenticated %}
+  </div>
+</div>
+<nav class="tabbar" aria-label="{% translate 'Main menu' %}">
+  <a href="{% url 'home' %}" {% if url_name == "home" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="home" %}<span>{% translate "Home" %}</span></a>
+  <a href="{% url 'genealogy:tree' %}" {% if url_name == "tree" or url_name == "tree_for" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="tree" %}<span>{% translate "Family tree" context "kinship" %}</span></a>
+  <a href="{% url 'genealogy:people' %}" {% if url_name in "people person person_edit person_create relative_add marriage_edit search" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="people" %}<span>{% translate "Relatives" %}</span></a>
+  <a href="{% url 'genealogy:upcoming' %}" {% if url_name in "upcoming event event_create event_edit" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="calendar" %}<span>{% translate "Events" %}</span></a>
+  <details class="dropdown">
+    <summary>{% include "partials/icon.html" with name="more" %}<span>{% translate "More" %}</span></summary>
+    <div class="menu up">
+      <a href="{% url 'genealogy:timeline' %}">{% include "partials/icon.html" with name="timeline" %}{% translate "Timeline" %}</a>
+      <a href="{% url 'genealogy:stories' %}">{% include "partials/icon.html" with name="book" %}{% translate "Stories" %}</a>
+      <a href="{% url 'friends:list' %}">{% include "partials/icon.html" with name="friends" %}{% translate "Friends" %}</a>
+      <a href="{% url 'genealogy:calculator' %}">{% include "partials/icon.html" with name="link" %}{% translate "Who is who?" %}</a>
+      <a href="{% url 'genealogy:history' %}">{% include "partials/icon.html" with name="history" %}{% translate "History" %}</a>
+      <a href="{% url 'accounts:settings' %}">{% include "partials/icon.html" with name="settings" %}{% translate "Settings" %}</a>
+    </div>
+  </details>
+</nav>
+
+<div class="cmdk" id="cmdk" hidden role="dialog" aria-modal="true" aria-label="{% translate 'Search' %}">
+  <div class="cmdk-box">
+    <div class="cmdk-input">
+      {% include "partials/icon.html" with name="search" %}
+      <input type="search" id="cmdk-q" autocomplete="off" placeholder="{% translate 'Find a relative or a page…' %}"
+             data-search-url="{% url 'genealogy:search_json' %}" aria-controls="cmdk-list">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="cmdk-list" id="cmdk-list" role="listbox"></div>
+  </div>
+  <div hidden id="cmdk-actions">
+    <a href="{% url 'genealogy:person_create' %}">{% include "partials/icon.html" with name="plus" %}{% translate "Add a new relative" %}</a>
+    <a href="{% url 'genealogy:event_create' %}">{% include "partials/icon.html" with name="calendar" %}{% translate "Add a family event" %}</a>
+    <a href="{% url 'genealogy:story_create' %}">{% include "partials/icon.html" with name="pencil" %}{% translate "Write a story" %}</a>
+    <a href="{% url 'friends:create' %}">{% include "partials/icon.html" with name="friends" %}{% translate "Add a friend" %}</a>
+    <a href="{% url 'genealogy:tree' %}">{% include "partials/icon.html" with name="tree" %}{% translate "Family tree" context "kinship" %}</a>
+    <a href="{% url 'genealogy:people' %}">{% include "partials/icon.html" with name="people" %}{% translate "Relatives" %}</a>
+    <a href="{% url 'genealogy:upcoming' %}">{% include "partials/icon.html" with name="calendar" %}{% translate "Events" %}</a>
+    <a href="{% url 'genealogy:timeline' %}">{% include "partials/icon.html" with name="timeline" %}{% translate "Timeline" %}</a>
+    <a href="{% url 'genealogy:stories' %}">{% include "partials/icon.html" with name="book" %}{% translate "Stories" %}</a>
+    <a href="{% url 'genealogy:calculator' %}">{% include "partials/icon.html" with name="link" %}{% translate "Who is who?" %}</a>
+    <a href="{% url 'genealogy:history' %}">{% include "partials/icon.html" with name="history" %}{% translate "History" %}</a>
+    <a href="{% url 'accounts:family' %}">{% include "partials/icon.html" with name="share" %}{% translate "Family members" %}</a>
+    <a href="{% url 'notify:settings' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Reminder settings" %}</a>
+    <a href="{% url 'accounts:settings' %}">{% include "partials/icon.html" with name="settings" %}{% translate "Settings" %}</a>
+    <a href="{% url 'accounts:data' %}">{% include "partials/icon.html" with name="database" %}{% translate "Your data" %}</a>
+  </div>
+</div>
+{% else %}
+<footer class="footer">
+  <div class="footer-inner">
+    <span>{% translate "Family tree — a family archive for Uzbek families." %}</span>
+    {% include "partials/lang_list.html" %}
+  </div>
+</footer>
+{% endif %}
+{% endwith %}
 
 {% if messages %}
   <div class="toasts" role="status" aria-live="polite">
@@ -149,13 +175,6 @@
     {% endfor %}
   </div>
 {% endif %}
-
-<footer class="footer">
-  <div class="footer-inner">
-    <span>{% translate "Family tree — a family archive for Uzbek families." %}</span>
-    {% include "partials/lang_list.html" %}
-  </div>
-</footer>
 {% block scripts %}{% endblock %}
 </body>
 </html>

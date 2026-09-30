@@ -157,6 +157,33 @@ def send_message(chat_id, text):
     return call("sendMessage", chat_id=chat_id, text=text, parse_mode="HTML", disable_web_page_preview=True)
 
 
+def send_document(chat_id, filename, data, caption=""):
+    """Upload a file to a chat (multipart/form-data; Telegram accepts up to 50 MB)."""
+    import uuid
+
+    boundary = uuid.uuid4().hex
+    parts = []
+    for name, value in (("chat_id", str(chat_id)), ("caption", caption)):
+        if value:
+            parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'.encode())
+    parts.append((f'--{boundary}\r\nContent-Disposition: form-data; name="document"; filename="{filename}"\r\n'
+                  "Content-Type: application/octet-stream\r\n\r\n").encode() + data + b"\r\n")
+    parts.append(f"--{boundary}--\r\n".encode())
+    req = urllib.request.Request(
+        f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendDocument", data=b"".join(parts),
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            payload = json.loads(resp.read().decode())
+    except urllib.error.HTTPError as exc:
+        raise TelegramError(f"{exc.code}", forbidden=exc.code == 403) from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise TelegramError(str(exc)) from exc
+    if not payload.get("ok"):
+        raise TelegramError(payload.get("description", "error"))
+    return payload["result"]
+
+
 # ---------------------------------------------------------------------------
 # Linking a site account
 # ---------------------------------------------------------------------------

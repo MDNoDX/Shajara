@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Find yourself in the tree" %}{% endblock %}
+{% block content %}
+<div class="auth-wrap" style="max-width:520px">
+  <div class="card">
+    <h1>{% translate "Find yourself in the tree" %}</h1>
+    <p class="muted">{% blocktranslate with name=owner.display_name %}Which person in {{ name }}’s family tree are you? Then everyone is named from your side: your father, your aunt, your cousin.{% endblocktranslate %}</p>
+    <form method="post" novalidate>{% csrf_token %}
+      <div class="field">
+        <label for="me-name">{% translate "Your name" %}</label>
+        <div class="picker picker-field">
+          {% include "partials/icon.html" with name="search" %}
+          <input id="me-name" type="search" autocomplete="off" placeholder="{% translate 'Type a name…' %}" role="combobox" aria-expanded="false"
+                 aria-controls="me-results" data-live-search="{% url 'genealogy:search_json' %}" data-mode="pick" data-pick-target="me-id" data-pick-clear>
+          <div class="live-results" id="me-results" role="listbox" hidden></div>
+        </div>
+        <input type="hidden" name="person" id="me-id">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">{% translate "This is me" %}</button>
+        <a class="btn btn-ghost" href="{% url 'home' %}">{% translate "I am not in the tree yet" %}</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

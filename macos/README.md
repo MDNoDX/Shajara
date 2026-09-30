@@ -2,6 +2,8 @@
 
 Saytni alohida, qulay Mac oynasida ochadi va unga Mac’ning oʻz imkoniyatlarini qoʻshadi:
 
+- **Bitta yuza** — oyna ramkasi sahifa rangida (yorugʻ / qorongʻi mavzu sayt bilan birga almashadi), yuqorida faqat
+  ixcham satr: orqaga / oldinga va yangilash. Menyu saytning oʻz yon panelida — takrorlanadigan tugmalar yoʻq;
 - **Tizim bildirishnomalari** — tugʻilgan kunlar, yilliklar va voqealar haqida, **oʻz ovozi** bilan
   (Shajara qoʻngʻirogʻi / tizim ovozi / ovozsiz); har 10 daqiqada va ilova ochilganda tekshiradi;
 - **Menyu satridagi qoʻngʻiroqcha** — oʻqilmagan eslatmalar roʻyxati va tezkor havolalar;
@@ -10,14 +12,19 @@ Saytni alohida, qulay Mac oynasida ochadi va unga Mac’ning oʻz imkoniyatlarin
 - **Sayt tilida** — menyular va sozlamalar saytda tanlangan tilga oʻzi oʻtadi (oʻzbek lotin / kirill, rus, ingliz);
 - **Google orqali kirish** — Mac’ning xavfsiz kirish oynasida (Google ilova ichidagi sahifada kirishga ruxsat bermaydi);
 - **Telegram** — «@bot ni ochish» tugmasi toʻgʻridan-toʻgʻri Telegram ilovasini ochadi;
-- **Yuklab olish** — PDF, PNG, GEDCOM va JSON fayllar «Saqlash» oynasi orqali, keyin Finder’da koʻrsatiladi;
-- **Chop etish** (⌘P), rasm va arxiv faylini tanlash, tasdiqlash oynalari; tashqi havolalar oddiy brauzerda ochiladi;
+- **Yuklab olish** — PDF (kitob, plakat), PNG, GEDCOM va JSON fayllar «Saqlash» oynasi orqali, keyin Finder’da koʻrsatiladi;
+- **Chop etish** (⌘P), albomga surat, hujjat va ovozli yozuv tanlash, GEDCOM / JSON import, tasdiqlash oynalari;
+  tashqi havolalar oddiy brauzerda ochiladi;
 - Oxirgi ochilgan sahifa va masshtab eslab qolinadi;
-- Tugmalar: ⌘1 Shajaram, ⌘2 Qarindoshlarim, ⌘3 Voqealar, ⌘4 Doʻstlarim, ⌘F Qidiruv, ⌘N Qarindosh qoʻshish,
+- Tugmalar: ⌘1 Shajaram, ⌘2 Qarindoshlarim, ⌘3 Voqealar, ⌘4 Doʻstlarim, ⌘5 Vaqt chizigʻi,
+  ⌘F yoki ⌘K Tezkor qidiruv (odamlar va sahifalar), ⌘N Qarindosh qoʻshish,
   ⇧⌘B Bildirishnomalar, ⌘R Yangilash, ⌘[ / ⌘] Orqaga / Oldinga, ⌘+ / ⌘− / ⌘0 Masshtab, ⌘, Sozlamalar;
 - Internet boʻlmasa — «Qayta urinish» oynasi; tizimga bir marta kirasiz, keyingi safar eslab qoladi.
 
-macOS 13 (Ventura) va yangilari, Apple Silicon va Intel.
+Telefondagi push-bildirishnomalar saytning oʻzida yoqiladi; Mac ilovasi eslatmalarni oʻzi koʻrsatadi, shuning uchun
+ilova ichida «Shu qurilmada» boʻlimi koʻrinmaydi.
+
+macOS 13 (Ventura) va yangilari, Apple Silicon va Intel. Hozirgi versiya: 1.2.
 
 ## Yigʻish va oʻrnatish
 
@@ -65,13 +72,13 @@ Ogohlantirishsiz tarqatish yoki App Store uchun:
 | Fayl | Vazifasi |
 |---|---|
 | `Shajara/ShajaraApp.swift` | Ilova, oyna, menyular, menyu satri, Dock menyusi, oflayn oyna |
-| `Shajara/Browser.swift` | WebKit oynasi, navigatsiya, Google orqali kirish |
-| `Shajara/WebView.swift` | Yuklab olish, rasm tanlash, tasdiqlash oynalari, tashqi havolalar |
+| `Shajara/Browser.swift` | WebKit oynasi, navigatsiya, mavzu rangi, tezkor qidiruv, Google orqali kirish |
+| `Shajara/WebView.swift` | Yuklab olish, fayl tanlash, tasdiqlash oynalari, tashqi havolalar |
 | `Shajara/Notifier.swift` | Bildirishnomalar, ovoz va Dock belgisi (`/xabarlar/holat.json`) |
 | `Shajara/SettingsView.swift` | Sozlamalar oynasi |
 | `Shajara/L10n.swift` | Ilova matnlari toʻrt tilda |
 | `make_sound.py` | Bildirishnoma ovozini yaratadi (`Resources/Shajara.wav`) |
-| `make_icon.py` | Ilova belgisini yaratadi (`Resources/AppIcon.icns`) |
+| `../tools/make_icons.py` | Sayt va ilova belgilarini yaratadi (`Resources/AppIcon.icns`) |
 | `build.sh` | Universal (arm64 + x86_64) `Shajara.app` yigʻadi va imzolaydi |
 
 Google orqali kirish qanday ishlaydi: ilova `/ilova/kirish/boshlash/` sahifasini Mac’ning kirish oynasida ochadi →

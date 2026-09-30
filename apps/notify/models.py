@@ -25,6 +25,8 @@ class NotificationSettings(models.Model):
     telegram_token = models.CharField(max_length=40, blank=True, db_index=True)
     telegram_token_at = models.DateTimeField(null=True, blank=True)
     send_hour = models.PositiveSmallIntegerField(_("send at (hour)"), default=8)
+    # Administrators: a weekly copy of the whole database to their Telegram.
+    backup_telegram = models.BooleanField(default=False)
 
     last_generated = models.DateField(null=True, blank=True)
 
@@ -50,6 +52,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(null=True, blank=True)
     telegram_sent_at = models.DateTimeField(null=True, blank=True)
+    push_sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at", "-id"]
@@ -76,3 +79,14 @@ class BotState(models.Model):
     @classmethod
     def put(cls, key, value):
         cls.objects.update_or_create(key=key, defaults={"value": str(value)})
+
+
+class PushSubscription(models.Model):
+    """A browser or phone that asked for reminders as push notifications."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="push_subscriptions")
+    endpoint = models.TextField(unique=True)
+    p256dh = models.CharField(max_length=200)
+    auth = models.CharField(max_length=100)
+    device = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)

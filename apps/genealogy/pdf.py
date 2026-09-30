@@ -4,7 +4,6 @@ All text comes from the active gettext catalogue, so a user who works in
 Кириллча receives a Cyrillic PDF. DejaVu Sans is embedded because the
 standard PDF fonts have no glyphs for Ў Қ Ғ Ҳ or the Uzbek apostrophe ʻ.
 """
-from collections import deque
 from io import BytesIO
 from xml.sax.saxutils import escape
 
@@ -14,15 +13,18 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext, pgettext
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.pagesizes import A3, A4, landscape
+from reportlab.lib.utils import ImageReader
+from reportlab.lib.pagesizes import A1, A2, A3, A4, landscape
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.platypus import (
+    HRFlowable,
     Image,
     KeepTogether,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -32,7 +34,7 @@ from reportlab.platypus import (
 
 from apps.core.dates import format_date
 
-from .terminology import SECTION
+from .terminology import BRANCHES, SECTION, generation_label
 from .tree import CARD_H, CARD_W
 
 FONT = "DejaVuSans"
@@ -40,16 +42,25 @@ FONT_BOLD = "DejaVuSans-Bold"
 FONT_ITALIC = "DejaVuSans-Oblique"
 FONT_BOLD_ITALIC = "DejaVuSans-BoldItalic"
 
-INK = colors.HexColor("#2d2420")
-MUTED = colors.HexColor("#7a6b62")
-ACCENT = colors.HexColor("#c2694a")
-LINE = colors.HexColor("#e0d2c2")
-MALE_BG = colors.HexColor("#eaf2fb")
-FEMALE_BG = colors.HexColor("#fdeef3")
-FOCUS_BG = colors.HexColor("#fbece5")
-MALE_LINE = colors.HexColor("#7ba7d7")
-FEMALE_LINE = colors.HexColor("#e28ba8")
-TREE_LINE = colors.HexColor("#d4c4b3")
+# The brand: indigo and gold on warm paper (static/css/app.css).
+INK = colors.HexColor("#171c2b")
+MUTED = colors.HexColor("#6f7585")
+ACCENT = colors.HexColor("#27357e")
+ACCENT_DARK = colors.HexColor("#182152")
+ACCENT_SOFT = colors.HexColor("#e8ebf7")
+GOLD = colors.HexColor("#d89e24")
+GOLD_TEXT = colors.HexColor("#9a6a0c")
+LINE = colors.HexColor("#d6cdb9")
+PAPER = colors.HexColor("#faf7f0")
+TREE_LINE = colors.HexColor("#cbc2ad")
+BRANCH = {  # side of the family: (colour, soft background)
+    "own": (colors.HexColor("#9a6a0c"), colors.HexColor("#f8edd0")),
+    "paternal": (colors.HexColor("#2f4aa6"), colors.HexColor("#e5ebfa")),
+    "maternal": (colors.HexColor("#a8433a"), colors.HexColor("#f9e6e2")),
+    "other": (colors.HexColor("#586273"), colors.HexColor("#eceef2")),
+}
+POSTER_SIZES = {"A2": landscape(A2), "A1": landscape(A1)}
+POSTER_MAX_WIDTH = 3000 * mm
 
 _registered = False
 
@@ -71,14 +82,19 @@ def register_fonts():
 def _styles():
     register_fonts()
     return {
-        "title": ParagraphStyle("title", fontName=FONT_BOLD, fontSize=20, leading=25, textColor=INK, spaceAfter=4),
-        "subtitle": ParagraphStyle("subtitle", fontName=FONT, fontSize=11, leading=15, textColor=MUTED, spaceAfter=10),
-        "h2": ParagraphStyle("h2", fontName=FONT_BOLD, fontSize=13, leading=17, textColor=ACCENT, spaceBefore=12, spaceAfter=5),
-        "h3": ParagraphStyle("h3", fontName=FONT_BOLD, fontSize=11, leading=14, textColor=INK, spaceBefore=6, spaceAfter=2),
-        "body": ParagraphStyle("body", fontName=FONT, fontSize=10, leading=14.5, textColor=INK),
-        "small": ParagraphStyle("small", fontName=FONT, fontSize=8.5, leading=11.5, textColor=MUTED),
+        "title": ParagraphStyle("title", fontName=FONT_BOLD, fontSize=21, leading=26, textColor=INK, spaceAfter=3),
+        "subtitle": ParagraphStyle("subtitle", fontName=FONT, fontSize=10.5, leading=15, textColor=MUTED, spaceAfter=10),
+        "chapter": ParagraphStyle("chapter", fontName=FONT_BOLD, fontSize=17, leading=22, textColor=ACCENT,
+                                  spaceBefore=4, spaceAfter=2),
+        "eyebrow": ParagraphStyle("eyebrow", fontName=FONT_BOLD, fontSize=8, leading=11, textColor=GOLD_TEXT),
+        "h2": ParagraphStyle("h2", fontName=FONT_BOLD, fontSize=12, leading=16, textColor=ACCENT, spaceBefore=13, spaceAfter=5),
+        "h3": ParagraphStyle("h3", fontName=FONT_BOLD, fontSize=11.5, leading=15, textColor=INK, spaceBefore=2, spaceAfter=1),
+        "rel": ParagraphStyle("rel", fontName=FONT_BOLD, fontSize=8.5, leading=12, textColor=GOLD_TEXT),
+        "body": ParagraphStyle("body", fontName=FONT, fontSize=10, leading=15, textColor=INK),
+        "small": ParagraphStyle("small", fontName=FONT, fontSize=8.5, leading=12, textColor=MUTED),
         "label": ParagraphStyle("label", fontName=FONT, fontSize=9, leading=12, textColor=MUTED),
         "center": ParagraphStyle("center", fontName=FONT, fontSize=9, leading=12, textColor=MUTED, alignment=TA_CENTER),
+        "toc": ParagraphStyle("toc", fontName=FONT, fontSize=11, leading=19, textColor=INK),
     }
 
 
@@ -87,13 +103,72 @@ def _p(text, style):
     return Paragraph(escape(str(text)).replace("\n", "<br/>"), style)
 
 
-class _NumberedCanvas(pdf_canvas.Canvas):
-    """Adds "Page 2 of 5" and the generation date to every page."""
+def draw_mark(c, x, y, size, colour):
+    """The Shajara mark (templates/partials/logo.svg) with its top-left at (x, y + size)."""
+    k = size / 32.0
 
-    def __init__(self, *args, footer="", **kwargs):
+    def pt(px, py):
+        return x + px * k, y + (32 - py) * k
+
+    c.saveState()
+    c.setStrokeColor(colour)
+    c.setFillColor(colour)
+    c.setLineWidth(2 * k)
+    c.setLineCap(1)
+    c.setLineJoin(1)
+    path = c.beginPath()
+    for i, (px, py) in enumerate([(16, 2.5), (25, 11.5), (16, 20.5), (7, 11.5)]):
+        (path.moveTo if i == 0 else path.lineTo)(*pt(px, py))
+    path.close()
+    c.drawPath(path, stroke=1, fill=0)
+    for cx, cy, r in ((16, 11.5, 3.4), (3.6, 11.5, 1.9), (28.4, 11.5, 1.9)):
+        d = c.beginPath()
+        for i, (px, py) in enumerate([(cx, cy - r), (cx + r, cy), (cx, cy + r), (cx - r, cy)]):
+            (d.moveTo if i == 0 else d.lineTo)(*pt(px, py))
+        d.close()
+        c.drawPath(d, stroke=0, fill=1)
+    c.line(*pt(16, 20.5), *pt(16, 25.5))
+    c.line(*pt(10.5, 30), *pt(16, 25.5))
+    c.line(*pt(21.5, 30), *pt(16, 25.5))
+    c.restoreState()
+
+
+def draw_ikat(c, x, y, w, h, colour, step=20 * mm, alpha=0.08):
+    """The ikat diamond pattern over a rectangle (cover, poster title band)."""
+    c.saveState()
+    clip = c.beginPath()
+    clip.rect(x, y, w, h)
+    c.clipPath(clip, stroke=0, fill=0)
+    c.setStrokeColor(colour)
+    c.setFillColor(colour)
+    c.setStrokeAlpha(alpha)
+    c.setFillAlpha(alpha)
+    c.setLineWidth(0.5 * mm)
+    half = step / 2
+    rows, cols = int(h / step) + 2, int(w / step) + 2
+    for row in range(rows):
+        for col in range(cols):
+            cx, cy = x + col * step + half, y + row * step + half
+            for r, fill in ((half * 0.9, 0), (half * 0.47, 0), (half * 0.18, 1)):
+                d = c.beginPath()
+                d.moveTo(cx, cy + r)
+                d.lineTo(cx + r, cy)
+                d.lineTo(cx, cy - r)
+                d.lineTo(cx - r, cy)
+                d.close()
+                c.drawPath(d, stroke=1 - fill, fill=fill)
+    c.restoreState()
+
+
+class _NumberedCanvas(pdf_canvas.Canvas):
+    """Adds "Page 2 of 5", the date and a thin gold rule to every page; an
+    optional cover (a callable drawing the first page) gets no footer."""
+
+    def __init__(self, *args, footer="", cover=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._saved = []
         self._footer = footer
+        self._cover = cover
 
     def showPage(self):
         self._saved.append(dict(self.__dict__))
@@ -101,34 +176,40 @@ class _NumberedCanvas(pdf_canvas.Canvas):
 
     def save(self):
         total = len(self._saved)
-        for state in self._saved:
+        for number, state in enumerate(self._saved, start=1):
             self.__dict__.update(state)
-            self._draw_footer(total)
+            if self._cover and number == 1:
+                self._cover(self)
+            else:
+                self._draw_footer(total)
             super().showPage()
         super().save()
 
     def _draw_footer(self, total):
         w, _h = self._pagesize
+        self.setStrokeColor(GOLD)
+        self.setLineWidth(0.6)
+        self.line(15 * mm, 14 * mm, w - 15 * mm, 14 * mm)
         self.setFont(FONT, 8)
         self.setFillColor(MUTED)
-        self.drawString(15 * mm, 10 * mm, self._footer)
+        self.drawString(15 * mm, 9.5 * mm, self._footer)
         page = _("Page %(page)d of %(total)d") % {"page": self._pageNumber, "total": total}
-        self.drawRightString(w - 15 * mm, 10 * mm, page)
+        self.drawRightString(w - 15 * mm, 9.5 * mm, page)
 
 
 def _footer_text():
     return _("Created on %(date)s · Family tree") % {"date": format_date(timezone.now())}
 
 
-def _build(story_items, pagesize=A4, title=""):
+def _build(story_items, pagesize=A4, title="", cover=None):
     register_fonts()
     buf = BytesIO()
     doc = SimpleDocTemplate(
-        buf, pagesize=pagesize, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=16 * mm, bottomMargin=18 * mm,
+        buf, pagesize=pagesize, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=16 * mm, bottomMargin=20 * mm,
         title=title, author=_("Family tree"),
     )
     footer = _footer_text()
-    doc.build(story_items, canvasmaker=lambda *a, **k: _NumberedCanvas(*a, footer=footer, **k))
+    doc.build(story_items, canvasmaker=lambda *a, **k: _NumberedCanvas(*a, footer=footer, cover=cover, **k))
     return buf.getvalue()
 
 
@@ -189,17 +270,32 @@ def _family_lines(archive, person):
     return out
 
 
-def _photo(person, size):
+def _photo_bytes(person):
+    """The person's photo as bytes (photos live in the database), or None."""
     if not person.photo:
         return None
     try:
-        img = Image(person.photo.path)
-    except Exception:
+        with person.photo.open("rb") as f:
+            return f.read()
+    except Exception:  # noqa: BLE001 - a missing or broken photo must not break the PDF
         return None
-    ratio = img.imageWidth / float(img.imageHeight or 1)
-    img.drawHeight = size
-    img.drawWidth = size * ratio
-    return img
+
+
+def _photo_reader(person):
+    data = _photo_bytes(person)
+    try:
+        return ImageReader(BytesIO(data)) if data else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _photo(person, size):
+    """The photo `size` high for a page flow, or None."""
+    reader = _photo_reader(person)
+    if reader is None:
+        return None
+    iw, ih = reader.getSize()
+    return Image(BytesIO(_photo_bytes(person)), width=min(size * 1.1, size * iw / float(ih or 1)), height=size)
 
 
 def person_pdf(archive, person, focus_id=None, stories=()):
@@ -249,70 +345,115 @@ def person_pdf(archive, person, focus_id=None, stories=()):
     return _build(items, title=person.full_name)
 
 
-def generations(archive, focus_id):
-    """Group everyone in the archive by generation relative to focus_id.
-
-    Generation numbers are relative (parents −1, children +1, spouses equal);
-    people not connected to the focus person are listed last.
-    """
-    gen = {focus_id: 0}
-    queue = deque([focus_id])
-    while queue:
-        cur = queue.popleft()
-        steps = [(p, -1) for p in archive.parents(cur)]
-        steps += [(c, 1) for c in archive.children.get(cur, [])]
-        steps += [(s, 0) for s in archive.spouses(cur)]
-        for nxt, d in steps:
-            if nxt not in gen:
-                gen[nxt] = gen[cur] + d
-                queue.append(nxt)
+def _generation_groups(archive, focus_id):
+    """[(heading, [person ids])] oldest generation first, unlinked people last."""
+    gens = archive.generations(focus_id)
     groups = {}
-    for pk, g in gen.items():
-        groups.setdefault(g, []).append(pk)
-    ordered = [sorted(groups[g], key=lambda pk: archive.people[pk].birth_key or (9999,)) for g in sorted(groups)]
-    unconnected = sorted(
-        (pk for pk in archive.people if pk not in gen), key=lambda pk: archive.people[pk].full_name
-    )
-    return ordered, unconnected
+    for pk, g in gens.items():
+        groups.setdefault(max(-3, min(3, g)), []).append(pk)
+    out = [(generation_label(g), sorted(groups[g], key=lambda pk: (archive.people[pk].birth_key or (9999,), pk)))
+           for g in sorted(groups)]
+    unlinked = sorted((pk for pk in archive.people if pk not in gens), key=lambda pk: archive.people[pk].full_name)
+    if unlinked:
+        out.append((_("Not yet linked to the family"), unlinked))
+    return out
 
 
-def family_book_pdf(archive, focus_id, owner_name, viewer_is_owner=True):
-    """Whole archive: the tree chart (if given) and everyone by generation."""
+def _cover(title, family, lines):
+    """Draws the cover of the family book on a canvas."""
+    def draw(c):
+        w, h = c._pagesize
+        c.setFillColor(ACCENT_DARK)
+        c.rect(0, 0, w, h, stroke=0, fill=1)
+        c.setFillColor(ACCENT)
+        c.rect(0, h * 0.34, w, h * 0.66, stroke=0, fill=1)
+        draw_ikat(c, 0, 0, w, h, colors.white, step=22 * mm, alpha=0.07)
+        c.setStrokeColor(GOLD)
+        c.setLineWidth(1.2)
+        c.rect(11 * mm, 11 * mm, w - 22 * mm, h - 22 * mm, stroke=1, fill=0)
+        c.setLineWidth(0.5)
+        c.rect(13 * mm, 13 * mm, w - 26 * mm, h - 26 * mm, stroke=1, fill=0)
+        mark = 34 * mm
+        draw_mark(c, (w - mark) / 2, h * 0.64, mark, GOLD)
+        c.setFillColor(colors.white)
+        size = 40
+        while size > 18 and pdfmetrics.stringWidth(family, FONT_BOLD, size) > w - 50 * mm:
+            size -= 2
+        c.setFont(FONT_BOLD, size)
+        c.drawCentredString(w / 2, h * 0.52, family)
+        c.setFillColor(GOLD)
+        c.setFont(FONT_BOLD, 13)
+        c.drawCentredString(w / 2, h * 0.52 - 12 * mm, title.upper())
+        c.setFillColor(colors.HexColor("#d5d9ee"))
+        c.setFont(FONT, 10.5)
+        y = h * 0.24
+        for line in lines:
+            c.drawCentredString(w / 2, y, line)
+            y -= 6 * mm
+    return draw
+
+
+def family_book_pdf(archive, focus_id, owner_name, viewer_is_owner=True, family=""):
+    """The whole archive as a book: a cover, the contents, then everyone by
+    generation with photo, dates, family and life story."""
     st = _styles()
-    items = [
-        _p(_("Family tree"), st["title"]),
-        _p(owner_name, st["subtitle"]),
-    ]
+    width = A4[0] - 36 * mm - 12  # the frame of the page has 6 pt of padding on each side
     people_count = len(archive.people)
-    items.append(_p(ngettext("%(count)d person", "%(count)d people", people_count) % {"count": people_count}, st["small"]))
-    ordered, unconnected = generations(archive, focus_id)
-    width = A4[0] - 36 * mm
-    for i, group in enumerate(ordered, start=1):
-        items.append(_p(_("Generation %(number)d") % {"number": i}, st["h2"]))
-        for pk in group:
+    groups = _generation_groups(archive, focus_id)
+    cover = _cover(
+        _("Family book"), family or owner_name,
+        [ngettext("%(count)d person", "%(count)d people", people_count) % {"count": people_count},
+         ngettext("%(count)d generation", "%(count)d generations", len(groups)) % {"count": len(groups)},
+         format_date(timezone.now())],
+    )
+    items = [Spacer(1, 1), PageBreak()]  # the cover is drawn on the first page
+    items.append(_p(_("Family book").upper(), st["eyebrow"]))
+    items.append(_p(family or owner_name, st["title"]))
+    items.append(_p(_("Compiled by %(name)s") % {"name": owner_name}, st["subtitle"]))
+    items.append(_p(_("Contents"), st["h2"]))
+    for heading, members in groups:
+        items.append(_p(f"{heading} — " + ngettext("%(count)d person", "%(count)d people", len(members))
+                        % {"count": len(members)}, st["toc"]))
+    for heading, members in groups:
+        items.append(PageBreak())
+        items.append(_p(heading, st["chapter"]))
+        items.append(HRFlowable(width="100%", thickness=1.2, color=GOLD, spaceAfter=10))
+        for pk in members:
             items.append(_person_entry(archive, archive.people[pk], focus_id, st, width, viewer_is_owner))
-    if unconnected:
-        items.append(_p(_("Not yet linked to the family"), st["h2"]))
-        for pk in unconnected:
-            items.append(_person_entry(archive, archive.people[pk], focus_id, st, width, viewer_is_owner))
-    return _build(items, title=_("Family tree"))
+    return _build(items, title=f"{_('Family book')} — {family or owner_name}", cover=cover)
 
 
 def _person_entry(archive, person, focus_id, st, width, viewer_is_owner=True):
-    parts = [_p(person.full_name, st["h3"])]
+    text = [_p(person.full_name, st["h3"])]
     label = "" if person.pk == focus_id and not viewer_is_owner else archive.label(focus_id, person.pk)
-    sub = [s for s in (person.lifespan, label) if s]
+    sub = " · ".join(x for x in (label, person.lifespan) if x)
     if sub:
-        parts.append(_p(" · ".join(sub), st["small"]))
+        text.append(_p(sub, st["rel"]))
     facts = [f"{k}: {v}" for k, v in _facts(person)[1:]]
     if facts:
-        parts.append(_p("; ".join(facts), st["body"]))
+        text.append(Spacer(1, 2))
+        text.append(_p("; ".join(facts), st["body"]))
     for heading, names in _family_lines(archive, person)[:4]:
-        parts.append(_p(f"{heading}: " + ", ".join(names), st["small"]))
-    if person.biography:
-        parts.append(_p(person.biography, st["body"]))
-    parts.append(Spacer(1, 6))
-    return KeepTogether(parts)
+        text.append(_p(f"{heading}: " + ", ".join(names), st["small"]))
+    for story in (person.biography, person.life_story):
+        if story:
+            text.append(Spacer(1, 3))
+            text.append(_p(story, st["body"]))
+    photo = _photo(person, 24 * mm)
+    if photo is not None:
+        col = photo.drawWidth + 5 * mm
+        table = Table([[photo, text]], colWidths=[col, width - col], hAlign="LEFT")
+    else:
+        table = Table([[text]], colWidths=[width], hAlign="LEFT")
+    table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
+        ("LINEBELOW", (0, 0), (-1, -1), 0.4, LINE),
+    ]))
+    # Long life stories may run over several pages; short entries stay together.
+    long_text = len(person.biography or "") + len(person.life_story or "") > 900
+    return KeepTogether([table, Spacer(1, 9)]) if not long_text else table
 
 
 # ---------------------------------------------------------------------------
@@ -343,35 +484,89 @@ def _wrap(text, font, size, max_w, max_lines):
     return fixed
 
 
-def tree_pdf(layout, title, subtitle):
-    """The chart from tree.build_tree on one landscape page (A4 or A3)."""
+def tree_pdf(layout, title, subtitle, poster=None, family="", photos=None):
+    """The chart from tree.build_tree on one landscape page.
+
+    Ordinary: A4 or A3, or one wide page for a large family. poster="A2" /
+    "A1": a wall poster with a title band, an ornamental frame and a legend.
+    photos: {person id: ImageReader} drawn in the avatar circles.
+    """
     register_fonts()
+    photos = photos or {}
     lw, lh = layout["width"], layout["height"]
-    margin, head_h = 12 * mm, 20 * mm
-    min_scale = 0.5  # below this the card text is too small to read
-    for size in (landscape(A4), landscape(A3)):
-        pw, ph = size
-        scale = min((pw - 2 * margin) / lw, (ph - 2 * margin - head_h) / lh, 0.9)
-        if scale >= min_scale:
-            break
+    if poster in POSTER_SIZES:
+        # A wall banner: the height of the sheet is fixed (A2: 42 cm, A1: 59 cm,
+        # the widths of printing rolls); a wide family makes the sheet longer.
+        pw, ph = POSTER_SIZES[poster]
+        margin, head_h, foot_h = 22 * mm, 46 * mm, 16 * mm
+        fit_h = (ph - 2 * margin - head_h - foot_h) / lh
+        scale = min((pw - 2 * margin) / lw, fit_h, 1.6)
+        if scale < fit_h and scale < 1.0:
+            scale = min(fit_h, 1.0, (POSTER_MAX_WIDTH - 2 * margin) / lw)
+            pw = max(pw, lw * scale + 2 * margin)
     else:
-        # A large family: one wide page (a poster) that PDF viewers can zoom.
-        scale = min_scale
-        pw = lw * scale + 2 * margin
-        ph = max(lh * scale + 2 * margin + head_h, landscape(A4)[1])
+        margin, head_h, foot_h = 12 * mm, 20 * mm, 0
+        min_scale = 0.5  # below this the card text is too small to read
+        for size in (landscape(A4), landscape(A3)):
+            pw, ph = size
+            scale = min((pw - 2 * margin) / lw, (ph - 2 * margin - head_h) / lh, 0.9)
+            if scale >= min_scale:
+                break
+        else:
+            # A large family: one wide page that PDF viewers can zoom.
+            scale = min_scale
+            pw = lw * scale + 2 * margin
+            ph = max(lh * scale + 2 * margin + head_h, landscape(A4)[1])
     pagesize = (pw, ph)
     ox = (pw - lw * scale) / 2
     top = ph - margin - head_h
+    if poster in POSTER_SIZES:  # centre the chart in the space under the title
+        top -= max(0, (ph - 2 * margin - head_h - foot_h - lh * scale) / 2)
 
     buf = BytesIO()
-    c = _NumberedCanvas(buf, pagesize=pagesize, footer=_footer_text())
+    c = pdf_canvas.Canvas(buf, pagesize=pagesize)
     c.setTitle(title)
-    c.setFont(FONT_BOLD, 16)
-    c.setFillColor(INK)
-    c.drawString(margin, ph - margin - 7 * mm, title)
-    c.setFont(FONT, 9.5)
-    c.setFillColor(MUTED)
-    c.drawString(margin, ph - margin - 13 * mm, subtitle)
+    if poster in POSTER_SIZES:
+        c.setFillColor(PAPER)
+        c.rect(0, 0, pw, ph, stroke=0, fill=1)
+        band_y = ph - 12 * mm - head_h + 8 * mm
+        c.setFillColor(ACCENT_DARK)
+        c.rect(12 * mm, band_y, pw - 24 * mm, head_h - 8 * mm, stroke=0, fill=1)
+        draw_ikat(c, 12 * mm, band_y, pw - 24 * mm, head_h - 8 * mm, colors.white, step=19 * mm, alpha=0.08)
+        c.setStrokeColor(GOLD)
+        c.setLineWidth(1.4)
+        c.rect(12 * mm, 12 * mm, pw - 24 * mm, ph - 24 * mm, stroke=1, fill=0)
+        c.setLineWidth(0.5)
+        c.rect(14.5 * mm, 14.5 * mm, pw - 29 * mm, ph - 29 * mm, stroke=1, fill=0)
+        mark = 22 * mm
+        draw_mark(c, 22 * mm, band_y + (head_h - 8 * mm - mark) / 2, mark, GOLD)
+        heading = family or title
+        c.setFillColor(colors.white)
+        c.setFont(FONT_BOLD, 30)
+        c.drawString(22 * mm + mark + 8 * mm, band_y + (head_h - 8 * mm) / 2 + 1 * mm, heading)
+        c.setFillColor(GOLD)
+        c.setFont(FONT_BOLD, 11)
+        c.drawString(22 * mm + mark + 8 * mm, band_y + (head_h - 8 * mm) / 2 - 8 * mm, title.upper())
+        # Legend and date at the bottom.
+        c.setFont(FONT, 9)
+        x = 22 * mm
+        for key in ("own", "paternal", "maternal", "other"):
+            c.setFillColor(BRANCH[key][0])
+            c.circle(x + 1.5 * mm, 20.2 * mm, 1.6 * mm, stroke=0, fill=1)
+            c.setFillColor(MUTED)
+            text = str(BRANCHES[key])
+            c.drawString(x + 5 * mm, 19 * mm, text)
+            x += 5 * mm + pdfmetrics.stringWidth(text, FONT, 9) + 8 * mm
+        c.drawRightString(pw - 22 * mm, 19 * mm, _footer_text())
+    else:
+        c.setFont(FONT_BOLD, 16)
+        c.setFillColor(INK)
+        c.drawString(margin, ph - margin - 7 * mm, title)
+        c.setFont(FONT, 9.5)
+        c.setFillColor(MUTED)
+        c.drawString(margin, ph - margin - 13 * mm, subtitle)
+        c.setFont(FONT, 8)
+        c.drawString(margin, 8 * mm, _footer_text())
 
     def tx(x):
         return ox + x * scale
@@ -379,11 +574,15 @@ def tree_pdf(layout, title, subtitle):
     def ty(y):
         return top - y * scale
 
-    for line in layout["lines"]:
+    for line in sorted(layout["lines"], key=lambda ln: bool(ln.get("direct"))):
         child = line["kind"] == "child"
-        c.setStrokeColor(TREE_LINE if child else ACCENT)
-        c.setLineWidth((1.6 if child else 2.3) * scale)
-        c.setDash(6 * scale, 4 * scale) if line["kind"] in ("divorced", "partners") else c.setDash()
+        if line.get("direct"):
+            c.setStrokeColor(GOLD)
+            c.setLineWidth(2.6 * scale)
+        else:
+            c.setStrokeColor(TREE_LINE if child else ACCENT)
+            c.setLineWidth((1.6 if child else 2.3) * scale)
+        c.setDash(6 * scale, 4 * scale) if line["kind"] == "partners" else c.setDash()
         path = c.beginPath()
         (x0, y0), *rest = line["points"]
         path.moveTo(tx(x0), ty(y0))
@@ -396,23 +595,35 @@ def tree_pdf(layout, title, subtitle):
     av_cx, av_cy, av_r, text_x, pad_r = 34, 34, 20, 64, 10
     inner = (CARD_W - text_x - pad_r) * scale
     for n in layout["nodes"]:
-        female = n["gender"] == "female"
+        tint, soft = BRANCH.get(n.get("branch"), BRANCH["other"])
         x, y = tx(n["x"]), ty(n["y"] + CARD_H)
         w, h = CARD_W * scale, CARD_H * scale
-        c.setFillColor(FOCUS_BG if n["focus"] else colors.white)
-        c.setStrokeColor(ACCENT if n["focus"] else LINE)
-        c.setLineWidth((2.4 if n["focus"] else 1) * scale)
+        c.setFillColor(ACCENT_SOFT if n["focus"] else colors.white)
+        c.setStrokeColor(ACCENT if n["focus"] else (GOLD if n.get("direct") else LINE))
+        c.setLineWidth((2.4 if n["focus"] else 1.6 if n.get("direct") else 1) * scale)
         if n["dup"]:
             c.setDash(5 * scale, 4 * scale)
         c.roundRect(x, y, w, h, 14 * scale, stroke=1, fill=1)
         c.setDash()
-        c.setFillColor(FEMALE_LINE if female else MALE_LINE)
+        c.setFillColor(tint)
         c.roundRect(x, y + 12 * scale, 4 * scale, h - 24 * scale, 2 * scale, stroke=0, fill=1)
-        c.setFillColor(FEMALE_BG if female else MALE_BG)
-        c.circle(tx(n["x"] + av_cx), ty(n["y"] + av_cy), av_r * scale, stroke=0, fill=1)
-        c.setFillColor(MUTED)
-        c.setFont(FONT_BOLD, 13 * scale)
-        c.drawCentredString(tx(n["x"] + av_cx), ty(n["y"] + av_cy + 4.5), n.get("initials", ""))
+        cx, cy, r = tx(n["x"] + av_cx), ty(n["y"] + av_cy), av_r * scale
+        c.setFillColor(soft)
+        c.circle(cx, cy, r, stroke=0, fill=1)
+        reader = photos.get(n["id"])
+        if reader is not None:
+            iw, ih = reader.getSize()
+            k = max(2 * r / iw, 2 * r / ih)
+            c.saveState()
+            clip = c.beginPath()
+            clip.circle(cx, cy, r)
+            c.clipPath(clip, stroke=0, fill=0)
+            c.drawImage(reader, cx - iw * k / 2, cy - ih * k / 2, iw * k, ih * k, mask="auto")
+            c.restoreState()
+        else:
+            c.setFillColor(tint)
+            c.setFont(FONT_BOLD, 13 * scale)
+            c.drawCentredString(cx, ty(n["y"] + av_cy + 4.5), n.get("initials", ""))
 
         name_size = 13.5 * scale
         c.setFillColor(INK)
@@ -429,7 +640,7 @@ def tree_pdf(layout, title, subtitle):
             size = 11 * scale
             label = _wrap(n["label"], FONT_BOLD, size, inner - 12 * scale, 1)[0]
             lw_ = pdfmetrics.stringWidth(label, FONT_BOLD, size) + 12 * scale
-            c.setFillColor(colors.white if n["focus"] else FOCUS_BG)
+            c.setFillColor(colors.white if n["focus"] else ACCENT_SOFT)
             c.roundRect(tx(n["x"] + text_x), ty(n["y"] + CARD_H - 8), lw_, 17 * scale, 8.5 * scale, stroke=0, fill=1)
             c.setFillColor(ACCENT)
             c.setFont(FONT_BOLD, size)
@@ -454,3 +665,15 @@ def tree_pdf(layout, title, subtitle):
     c.showPage()
     c.save()
     return buf.getvalue()
+
+
+def tree_photos(archive, layout):
+    """{person id: ImageReader} for the people on a chart who have a photo."""
+    out = {}
+    for node in layout["nodes"]:
+        person = archive.people.get(node["id"])
+        if person is not None and person.photo and node["id"] not in out:
+            reader = _photo_reader(person)
+            if reader is not None:
+                out[node["id"]] = reader
+    return out

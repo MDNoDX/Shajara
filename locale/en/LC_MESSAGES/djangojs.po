@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 08:21+0500\n"
+"POT-Creation-Date: 2026-09-30 13:32+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: English\n"
@@ -18,87 +18,107 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: static/js/app.js:11
+#: static/js/app.js:20
 msgid "Are you sure you want to delete this?"
 msgstr ""
 
-#: static/js/app.js:24
-msgid "The photo is too large. The maximum size is %(size)s MB."
-msgstr ""
-
-#: static/js/app.js:74
-msgid "Saving…"
-msgstr ""
-
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Automatic"
 msgstr ""
 
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Light"
 msgstr ""
 
-#: static/js/app.js:95
+#: static/js/app.js:38
 msgid "Dark"
 msgstr ""
 
-#: static/js/app.js:96
+#: static/js/app.js:41
 msgid "Colour theme"
 msgstr ""
 
-#: static/js/app.js:126
-msgid "Copied"
+#: static/js/app.js:124
+msgid "Saving…"
 msgstr ""
 
-#: static/js/app.js:163
+#: static/js/app.js:133
 msgid "Type a name to filter…"
 msgstr ""
 
-#: static/js/app.js:227
+#: static/js/app.js:167
+msgid "Copied"
+msgstr ""
+
+#: static/js/app.js:214
+msgid "The photo is too large. The maximum size is %(size)s MB."
+msgstr ""
+
+#: static/js/app.js:256
+msgid "Close"
+msgstr ""
+
+#: static/js/app.js:327 static/js/app.js:468
 msgid "No results found."
 msgstr ""
 
-#: static/js/app.js:257
-msgid "All results"
+#: static/js/app.js:538
+msgid "On for this device"
 msgstr ""
 
-#: static/js/tree.js:135
+#: static/js/app.js:539
+msgid "Blocked in the browser settings"
+msgstr ""
+
+#: static/js/app.js:539
+msgid "Off for this device"
+msgstr ""
+
+#: static/js/tree.js:146 static/js/tree.js:250
 msgid "Family tree"
 msgstr ""
 
-#: static/js/tree.js:170
+#: static/js/tree.js:188
 msgid "Hide brothers and sisters"
 msgstr ""
 
-#: static/js/tree.js:170
+#: static/js/tree.js:188
 msgid "Show brothers and sisters"
 msgstr ""
 
-#: static/js/tree.js:175
+#: static/js/tree.js:193
 msgid "Hide children"
 msgstr ""
 
-#: static/js/tree.js:175
+#: static/js/tree.js:193
 msgid "Show children"
 msgstr ""
 
-#: static/js/tree.js:379
-msgid "Loading the family tree…"
+#: static/js/tree.js:297
+msgid "Add father"
 msgstr ""
 
-#: static/js/tree.js:386
-msgid "The family tree is empty."
+#: static/js/tree.js:297
+msgid "Add mother"
 msgstr ""
 
-#: static/js/tree.js:393
-msgid "Could not load the family tree. Please try again."
+#: static/js/tree.js:594
+msgid "You"
 msgstr ""
 
-#: static/js/tree.js:464
+#: static/js/tree.js:675 static/js/tree.js:813
 msgid "An error occurred."
 msgstr ""
 
-#: static/js/tree.js:467
+#: static/js/tree.js:702
+msgid "Could not load the family tree. Please try again."
+msgstr ""
+
+#: static/js/tree.js:711 static/js/tree.js:726
+msgid "The family tree is empty."
+msgstr ""
+
+#: static/js/tree.js:816
 msgctxt "file name"
 msgid "family-tree"
 msgstr "family-tree"

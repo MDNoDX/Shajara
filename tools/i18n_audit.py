@@ -37,7 +37,8 @@ BAD_TUTUQ = re.compile(r"(?<=[^\W\d_])['’`](?=[^\W\d_])")
 PLACEHOLDER = re.compile(r"%\(\w+\)[sd]|%[sd]|\{\w+\}")
 # Format names, key names and bot commands stay in Latin in both scripts.
 ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "Alisher", "MB", "GEDCOM", "Ctrl", "Mac", "Start", "stop", "JSON", "Google",
-                             "Telegram", "Web", "MyHeritage", "Ancestry", "Gramps", "UTC", "Shajara", "next", "help", "start", "URL", "cookie"}
+                             "Telegram", "Web", "MyHeritage", "Ancestry", "Gramps", "UTC", "Shajara", "next", "help", "start", "URL", "cookie",
+                             "Authenticator", "Microsoft", "Push", "iPhone", "iPad"}
 # Brand and format names that appear as they are in every language.
 BRANDS = {"Google", "Telegram", "GEDCOM", "JSON", "PDF", "PNG"}
 
@@ -106,7 +107,7 @@ def check_catalogues():
 
 
 class _TextCollector(HTMLParser):
-    SKIP = {"script", "style", "svg", "code"}
+    SKIP = {"script", "style", "svg", "code", "kbd"}
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -169,6 +170,9 @@ def check_javascript():
                 text = m.group(2)
                 # CSS selectors and SVG attribute values are code, not text.
                 if re.match(r"^[.#\[]", text) or text.startswith("xMid") or re.fullmatch(r"[a-z-]+( [a-z-]+){0,2}", text):
+                    continue
+                # Markup and the code between two neighbouring literals are not sentences.
+                if "<" in text or re.search(r"&&|===|\);|\) ", text):
                     continue
                 if text == "use strict" or any(k in text for k in ("Noto Sans", "system-ui", "image/", "same-origin", "application/json")):
                     continue

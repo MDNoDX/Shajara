@@ -4,8 +4,8 @@
 {% block content %}
 <section class="hero">
   <div>
-    <span class="kind-badge">{% translate "For Uzbek families" %}</span>
-    <h1 style="margin-top:14px">{% blocktranslate %}Keep your family’s <em>history</em> in one place{% endblocktranslate %}</h1>
+    <span class="eyebrow">{% translate "For Uzbek families" %}</span>
+    <h1>{% blocktranslate %}Keep your family’s <em>history</em> in one place{% endblocktranslate %}</h1>
     <p class="lead">{% translate "Build your family tree, record the life stories of your relatives and share them with your family. In Uzbek (Latin or Cyrillic), Russian or English." %}</p>
     <div class="row" style="margin-top:22px">
       <a class="btn btn-primary" href="{% url 'accounts:register' %}">{% translate "Create an account" %}</a>
@@ -14,18 +14,30 @@
     </div>
   </div>
   <div class="hero-art" aria-hidden="true">
-    <svg viewBox="0 0 440 290" width="100%" role="presentation">
-      <g class="t-line"><path d="M150 58 H290"/><path d="M220 58 V104 Q220 110 214 110 H108 Q102 110 102 116 V134"/><path d="M214 110 H332 Q338 110 338 116 V134"/><path d="M220 110 V134"/><path d="M102 180 V214"/></g>
-      <g class="t-line couple"><path d="M150 58 H290"/></g>
-      {% translate "Grandfather" context "kinship" as t1 %}{% translate "Grandmother" context "kinship" as t2 %}
-      {% translate "Father" context "kinship" as t3 %}{% translate "Father's sister" context "kinship" as t4 %}
-      {% translate "Father's brother" context "kinship" as t5 %}{% translate "You" context "kinship" as t6 %}
-      <g class="t-card male"><rect class="box" x="50" y="34" width="100" height="48" rx="12"/><circle class="avatar" cx="72" cy="58" r="12"/><text class="t-name" x="90" y="63">{{ t1 }}</text></g>
-      <g class="t-card female"><rect class="box" x="290" y="34" width="100" height="48" rx="12"/><circle class="avatar" cx="312" cy="58" r="12"/><text class="t-name" x="330" y="63">{{ t2 }}</text></g>
-      <g class="t-card male"><rect class="box" x="52" y="134" width="100" height="46" rx="12"/><circle class="avatar" cx="74" cy="157" r="11"/><text class="t-name" x="92" y="162">{{ t3 }}</text></g>
-      <g class="t-card female"><rect class="box" x="170" y="134" width="100" height="46" rx="12"/><circle class="avatar" cx="192" cy="157" r="11"/><text class="t-name" x="210" y="162">{{ t4 }}</text></g>
-      <g class="t-card male"><rect class="box" x="288" y="134" width="100" height="46" rx="12"/><circle class="avatar" cx="310" cy="157" r="11"/><text class="t-name" x="328" y="162">{{ t5 }}</text></g>
-      <g class="t-card focus male"><rect class="box" x="52" y="214" width="100" height="48" rx="12"/><circle class="avatar" cx="74" cy="238" r="12"/><text class="t-name" x="92" y="243">{{ t6 }}</text></g>
+    {% translate "Grandfather" context "kinship" as t1 %}{% translate "Grandmother" context "kinship" as t2 %}
+    {% translate "Father" context "kinship" as t3 %}{% translate "Mother" context "kinship" as t4 %}
+    {% translate "Older brother" context "kinship" as t5 %}{% translate "You" context "kinship" as t6 %}
+    {% translate "Younger sister" context "kinship" as t7 %}
+    <svg viewBox="0 0 460 300" role="presentation" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="13">
+      <g fill="none" stroke="#f0c34e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M156 52H196"/><path d="M176 52v38q0 8-8 8H126q-8 0-8 8v14"/><path d="M188 142H228"/>
+        <path d="M208 142v40q0 8-8 8H88q-8 0-8 8v14"/><path d="M208 190v22"/><path d="M208 190h116q8 0 8 8v14"/>
+      </g>
+      <g fill="#fffdf8">
+        <rect x="46" y="30" width="110" height="44" rx="12"/><rect x="196" y="30" width="110" height="44" rx="12"/>
+        <rect x="78" y="120" width="110" height="44" rx="12"/><rect x="228" y="120" width="110" height="44" rx="12"/>
+        <rect x="25" y="212" width="110" height="46" rx="12"/><rect x="277" y="212" width="116" height="46" rx="12"/>
+      </g>
+      <rect x="153" y="212" width="110" height="46" rx="12" fill="#f0c34e"/>
+      <g fill="#2f4aa6"><circle cx="68" cy="52" r="11"/><circle cx="218" cy="52" r="11"/><circle cx="100" cy="142" r="11"/></g>
+      <g fill="#a8433a"><circle cx="250" cy="142" r="11"/></g>
+      <g fill="#9a6a0c"><circle cx="47" cy="235" r="11"/><circle cx="299" cy="235" r="11"/></g>
+      <circle cx="175" cy="235" r="11" fill="#27357e"/>
+      <g fill="#171c2b">
+        <text x="86" y="57">{{ t1 }}</text><text x="236" y="57">{{ t2 }}</text>
+        <text x="118" y="147">{{ t3 }}</text><text x="268" y="147">{{ t4 }}</text>
+        <text x="65" y="240">{{ t5 }}</text><text x="193" y="240" font-weight="700">{{ t6 }}</text><text x="317" y="240">{{ t7 }}</text>
+      </g>
     </svg>
   </div>
 </section>
@@ -37,14 +49,19 @@
     <p>{% translate "Relationship names are worked out for you: aka and uka, amaki and togʻa, kelin and kuyov." %}</p>
   </div>
   <div class="card">
+    <div class="feature-icon">{% include "partials/icon.html" with name="share" %}</div>
+    <h3>{% translate "One tree for the whole family" %}</h3>
+    <p>{% translate "Invite relatives with a link: everyone adds what they know, and any change can be undone." %}</p>
+  </div>
+  <div class="card">
     <div class="feature-icon">{% include "partials/icon.html" with name="bell" %}</div>
     <h3>{% translate "Reminders" %}</h3>
     <p>{% translate "Birthdays, anniversaries, memorial days and family events — on the site and in Telegram." %}</p>
   </div>
   <div class="card">
-    <div class="feature-icon">{% include "partials/icon.html" with name="book" %}</div>
+    <div class="feature-icon">{% include "partials/icon.html" with name="image" %}</div>
     <h3>{% translate "Life stories" %}</h3>
-    <p>{% translate "Write down biographies and family stories so that they are not forgotten." %}</p>
+    <p>{% translate "Photos, documents, biographies and family stories, kept so that they are not forgotten." %}</p>
   </div>
   <div class="card">
     <div class="feature-icon">{% include "partials/icon.html" with name="calendar" %}</div>
@@ -52,14 +69,9 @@
     <p>{% translate "Record weddings, births, celebrations and memorial gatherings so the family remembers them." %}</p>
   </div>
   <div class="card">
-    <div class="feature-icon">{% include "partials/icon.html" with name="download" %}</div>
-    <h3>{% translate "Download as PDF" %}</h3>
-    <p>{% translate "Download the family tree or a relative's biography as a PDF in the language you use." %}</p>
-  </div>
-  <div class="card">
-    <div class="feature-icon">{% include "partials/icon.html" with name="share" %}</div>
-    <h3>{% translate "Share the family tree" %}</h3>
-    <p>{% translate "Relatives who have their own account on the site can see your family tree once you connect." %}</p>
+    <div class="feature-icon">{% include "partials/icon.html" with name="book" %}</div>
+    <h3>{% translate "A book and a poster" %}</h3>
+    <p>{% translate "Print the family book or a wall poster of the tree, in the language you use." %}</p>
   </div>
 </section>
 {% endblock %}

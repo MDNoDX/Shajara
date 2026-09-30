@@ -18,7 +18,7 @@
   </form>
 </section>
 
-<form method="post" novalidate id="appearance" data-palette-form>{% csrf_token %}
+<form method="post" novalidate id="appearance">{% csrf_token %}
 <section class="card">
   <h2>{% translate "Language" %}</h2>
   <p class="muted small">{% translate "The whole site, reminders, Telegram messages and PDF downloads use this language." %}</p>
@@ -33,14 +33,6 @@
 
 <section class="card">
   <h2>{% translate "Appearance" %}</h2>
-  <div class="field">
-    <span class="field-label">{% translate "Colours" %}</span>
-    <div class="palette-choice">
-      {% for radio in prefs_form.palette %}
-        <label>{{ radio.tag }}<span class="swatch swatch-{{ radio.data.value }}" aria-hidden="true"></span>{{ radio.choice_label }}</label>
-      {% endfor %}
-    </div>
-  </div>
   <div class="field">
     <span class="field-label">{% translate "Theme on this device" %}</span>
     <div class="segmented" role="group" data-theme-choice>

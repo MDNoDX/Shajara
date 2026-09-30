@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.friends.models import FriendRequest
+from apps.accounts.models import Invite, Membership
 from apps.genealogy.models import Marriage, Person, Story
 
 DEMO_PASSWORD = "namuna-shajara-2026"  # local development only
@@ -103,7 +103,7 @@ class Command(BaseCommand):
         user.person = people["timur"]
         user.save()
 
-        # A friend (Cyrillic interface) and a pending friend request.
+        # A relative with view access (Cyrillic interface) and an open invite.
         friend = User.objects.create_user(
             "dilnoza_a", "dilnoza@example.com", DEMO_PASSWORD,
             first_name="Дилноза", last_name="Алиева", gender="female", preferred_language="uz-cyrl",
@@ -111,13 +111,13 @@ class Command(BaseCommand):
         friend.person = Person.objects.create(owner=friend, first_name="Дилноза", last_name="Алиева", gender="female",
                                               birth_year=1960)
         friend.save()
-        FriendRequest.objects.create(from_user=friend, to_user=user, status=FriendRequest.Status.ACCEPTED)
+        Membership.objects.create(owner=user, member=friend, role="viewer")
         other = User.objects.create_user(
             "anvar_y", "anvar@example.com", DEMO_PASSWORD, first_name="Anvar", last_name="Yusupov", gender="male",
         )
         other.person = Person.objects.create(owner=other, first_name="Anvar", last_name="Yusupov", gender="male")
         other.save()
-        FriendRequest.objects.create(from_user=other, to_user=user)
+        Invite.objects.create(owner=user, created_by=user, role="editor")
 
         self.stdout.write(self.style.SUCCESS(
             f"Demo data created: {len(people)} people. Users: namuna, dilnoza_a, anvar_y "

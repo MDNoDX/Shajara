@@ -1,0 +1,26 @@
+{% extends "accounts/settings_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Two-step sign-in" %}{% endblock %}
+{% block settings %}
+<section class="card">
+  <h2>{% translate "Turn on two-step sign-in" %}</h2>
+  <div class="tg-connect">
+    <ol class="steps">
+      <li><b>{% translate "Install an authenticator app on your phone" %}</b>
+        <span class="muted small">{% translate "Google Authenticator, Microsoft Authenticator or any similar app." %}</span></li>
+      <li><b>{% translate "Scan the code — or type this key into the app:" %}</b>
+        <div class="code-box"><code id="totp-key" style="font-size:1rem;letter-spacing:.08em">{{ secret }}</code>
+          <button class="icon-btn" type="button" data-copy="totp-key" title="{% translate 'Copy' %}" aria-label="{% translate 'Copy' %}">{% include "partials/icon.html" with name="copy" %}</button></div></li>
+      <li><b>{% translate "Type the six digits the app shows" %}</b>
+        <form method="post" novalidate>{% csrf_token %}
+          {% include "partials/field.html" with field=form.code %}
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">{% translate "Turn on" %}</button>
+            <a class="btn btn-ghost" href="{% url 'accounts:security' %}">{% translate "Cancel" %}</a>
+          </div>
+        </form></li>
+    </ol>
+    <figure class="qr">{{ qr|safe }}<figcaption>{% translate "Scan with the authenticator app" %}</figcaption></figure>
+  </div>
+</section>
+{% endblock %}

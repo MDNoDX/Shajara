@@ -321,8 +321,8 @@ class LiveSearchTests(TestCase):
     def test_cross_script_and_ranking(self):
         Person.objects.create(owner=self.user, first_name="Olim", last_name="Laylov", gender="male")
         names = [r["name"] for r in self.search("Лайло")]
-        self.assertEqual(names[0], "Nurmatova Laylo")          # first-name match first
-        self.assertIn("Laylov Olim", names)
+        self.assertEqual(names[0], "Laylo Nurmatova")          # first-name match first
+        self.assertIn("Olim Laylov", names)
         first = self.search("lay")[0]
         self.assertEqual((first["label"], first["url"]), ("Singil", self.p["younger_sister"].get_absolute_url()))
 
@@ -444,7 +444,7 @@ class ServerlessTests(TestCase):
         self.assertTrue(StoredFile.objects.filter(name=person.photo.name).exists())
         served = self.client.get(person.photo.url)
         self.assertEqual(served.status_code, 200)
-        self.assertEqual(served["Content-Type"], "image/png")
+        self.assertEqual(served["Content-Type"], "image/jpeg")  # photos are shrunk and stored as JPEG
         self.assertIn("private", served["Cache-Control"])
         # Photos are private: not for guests, not for other users.
         self.client.logout()

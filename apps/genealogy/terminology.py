@@ -163,6 +163,28 @@ ADD_RELATION = {
 }
 
 
+# Names of generations counted from the person in the centre.
+GENERATIONS = {
+    -3: pgettext_lazy("generation", "Great-grandparents and earlier"),
+    -2: pgettext_lazy("generation", "Grandparents"),
+    -1: pgettext_lazy("generation", "Parents"),
+    0: pgettext_lazy("generation", "Own generation"),
+    1: pgettext_lazy("generation", "Children"),
+    2: pgettext_lazy("generation", "Grandchildren"),
+    3: pgettext_lazy("generation", "Great-grandchildren and later"),
+}
+BRANCHES = {
+    "own": pgettext_lazy("branch", "Own family"),
+    "paternal": pgettext_lazy("branch", "Father's side"),
+    "maternal": pgettext_lazy("branch", "Mother's side"),
+    "other": pgettext_lazy("branch", "Relatives by marriage"),
+}
+
+
+def generation_label(offset):
+    return str(GENERATIONS[max(-3, min(3, offset))])
+
+
 def kin(code):
     return str(KIN.get(code, KIN["relative"]))
 

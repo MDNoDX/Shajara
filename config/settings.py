@@ -67,6 +67,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    # Which family archive the user works in (their own or a shared one).
+    "apps.accounts.middleware.ArchiveMiddleware",
     # Accounts created through Google finish their profile (gender) first.
     "apps.accounts.middleware.ProfileCompletionMiddleware",
     # For signed-in users the saved account preference wins (language, time zone).
@@ -196,7 +198,7 @@ STORAGES = {
         else "whitenoise.storage.CompressedManifestStaticFilesStorage"
     },
 }
-PHOTO_MAX_BYTES = 5 * 1024 * 1024
+PHOTO_MAX_BYTES = 12 * 1024 * 1024  # before shrinking; the browser also scales photos down
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
 # Unicode font embedded into every PDF (covers Oʻ Gʻ and Ў Қ Ғ Ҳ).
@@ -212,6 +214,12 @@ TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "")
 TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 # Vercel Cron sends "Authorization: Bearer $CRON_SECRET" to /cron/kunlik/.
 CRON_SECRET = os.environ.get("CRON_SECRET", "")
+# Web Push (reminders on phones and in browsers): a VAPID key pair.
+VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "")
+VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "")
+# Who the push services may contact about this sender: the site itself.
+VAPID_SUBJECT = os.environ.get("VAPID_SUBJECT", "") or (
+    SITE_URL if SITE_URL.startswith("https://") else "mailto:admin@example.com")
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 60  # stay signed in for two months
 

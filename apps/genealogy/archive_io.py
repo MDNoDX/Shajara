@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from apps.friends.models import Contact
 
-from .models import Event, Marriage, Person, Story
+from .models import Event, Marriage, Media, Person, Story
 
 FORMAT = "shajara-archive-1"
 PERSON_FIELDS = [
@@ -25,15 +25,19 @@ PERSON_FIELDS = [
 ]
 
 
-def _photo(person):
-    if not person.photo:
+def _file(field):
+    if not field:
         return None
     try:
-        with person.photo.open("rb") as f:
+        with field.open("rb") as f:
             data = f.read()
-    except Exception:
+    except Exception:  # noqa: BLE001 - a missing file must not stop the export
         return None
-    return {"name": person.photo.name.rsplit("/", 1)[-1], "data": base64.b64encode(data).decode()}
+    return {"name": field.name.rsplit("/", 1)[-1], "data": base64.b64encode(data).decode()}
+
+
+def _photo(person):
+    return _file(person.photo)
 
 
 def export_archive(user):
@@ -42,7 +46,7 @@ def export_archive(user):
         "format": FORMAT,
         "exported_at": timezone.now().isoformat(),
         "owner": {"username": user.username, "first_name": user.first_name, "last_name": user.last_name,
-                  "self": user.person_id},
+                  "self": user.home_person_id},
         "people": [{"id": p.pk, "father": p.father_id, "mother": p.mother_id, "photo": _photo(p),
                     **{f: getattr(p, f) for f in PERSON_FIELDS}} for p in people],
         "marriages": [{"husband": m.husband_id, "wife": m.wife_id, "year": m.year, "month": m.month, "day": m.day}
@@ -56,6 +60,8 @@ def export_archive(user):
         "friends": [{"person": c.person_id, "name": c.name, "how_met": c.how_met, "phone": c.phone,
                      "birth_year": c.birth_year, "birth_month": c.birth_month, "birth_day": c.birth_day,
                      "note": c.note} for c in Contact.objects.filter(owner=user)],
+        "album": [{"person": m.person_id, "kind": m.kind, "caption": m.caption, "year": m.year,
+                   "file": _file(m.file)} for m in Media.objects.filter(owner=user)],
     }
 
 
@@ -92,6 +98,11 @@ def import_archive(user, data):
     for row in data.get("friends", []):
         if row.get("person") in ids:
             Contact.objects.create(owner=user, **{**row, "person": ids[row["person"]]})
+    for row in data.get("album", []):
+        if row.get("person") in ids and row.get("file"):
+            item = Media(owner=user, person=ids[row["person"]], kind=row.get("kind") or "photo",
+                         caption=row.get("caption") or "", year=row.get("year"))
+            item.file.save(row["file"]["name"], ContentFile(base64.b64decode(row["file"]["data"])), save=True)
     own = data.get("owner", {}).get("self")
     if own in ids and not user.person_id:
         user.person = ids[own]

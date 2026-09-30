@@ -33,12 +33,24 @@ final class Browser: NSObject, ObservableObject {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default()          // keeps you signed in between launches
         config.preferences.isElementFullscreenEnabled = true
-        config.applicationNameForUserAgent = "ShajaraMac/1.1"
+        config.applicationNameForUserAgent = "ShajaraMac/1.2"
         webView = WKWebView(frame: .zero, configuration: config)
         webView.allowsBackForwardNavigationGestures = true
         webView.allowsMagnification = true
         if #available(macOS 13.3, *) { webView.isInspectable = true }
         super.init()
+        // The page tells the window when its colour theme changes (light / dark).
+        let watcher = """
+        (function () {
+          var root = document.documentElement;
+          var tell = function () { window.webkit.messageHandlers.shajara.postMessage({theme: root.getAttribute('data-theme') || 'light'}); };
+          new MutationObserver(tell).observe(root, {attributes: true, attributeFilter: ['data-theme']});
+          tell();
+        })();
+        """
+        let controller = webView.configuration.userContentController
+        controller.addUserScript(WKUserScript(source: watcher, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        controller.add(self, name: "shajara")
         let zoom = defaults.double(forKey: "zoom")
         if zoom > 0 { webView.pageZoom = zoom }
         observers = [
@@ -78,6 +90,30 @@ final class Browser: NSObject, ObservableObject {
         defaults.set(Double(webView.pageZoom), forKey: "zoom")
     }
     func openInBrowser() { NSWorkspace.shared.open(webView.url ?? server) }
+
+    /// ⌘F: the site's quick search (people and pages); the search page if it is not there.
+    func openSearch() {
+        let script = "(function(){var b=document.querySelector('[data-cmdk-open]');if(b){b.click();return true}return false})()"
+        webView.evaluateJavaScript(script) { [weak self] result, _ in
+            if (result as? Bool) != true { self?.open(path: "/qidiruv/") }
+        }
+    }
+
+    // MARK: Colour theme
+
+    /// The window frame takes the colour of the page, so the two read as one surface.
+    func applyTheme(_ theme: String? = nil) {
+        if let theme { defaults.set(theme, forKey: "theme") }
+        let dark = (defaults.string(forKey: "theme") ?? "light") == "dark"
+        let paper = dark ? NSColor(srgbRed: 0.055, green: 0.067, blue: 0.102, alpha: 1)
+                         : NSColor(srgbRed: 0.965, green: 0.953, blue: 0.925, alpha: 1)
+        NSApp.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        webView.underPageBackgroundColor = paper
+        for window in NSApp.windows where window.identifier?.rawValue.hasPrefix("main") == true {
+            window.titlebarAppearsTransparent = true
+            window.backgroundColor = paper
+        }
+    }
 
     func isOwnSite(_ url: URL) -> Bool {
         url.host == server.host || ["blob", "data", "about"].contains(url.scheme ?? "")
@@ -143,6 +179,14 @@ final class Browser: NSObject, ObservableObject {
         alert.messageText = text
         alert.addButton(withTitle: L.t("ok"))
         if let window = webView.window { alert.beginSheetModal(for: window) } else { alert.runModal() }
+    }
+}
+
+extension Browser: WKScriptMessageHandler {
+    func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.frameInfo.isMainFrame, let url = message.frameInfo.request.url, url.host == server.host,
+              let body = message.body as? [String: Any], let theme = body["theme"] as? String else { return }
+        applyTheme(theme == "dark" ? "dark" : "light")
     }
 }
 

@@ -13,19 +13,11 @@ class Gender(models.TextChoices):
     FEMALE = "female", pgettext_lazy("gender", "Female")
 
 
-class Palette(models.TextChoices):
-    ATLAS = "atlas", pgettext_lazy("palette", "Atlas")
-    OSMON = "osmon", pgettext_lazy("palette", "Sky")
-    BOG = "bog", pgettext_lazy("palette", "Garden")
-    ANOR = "anor", pgettext_lazy("palette", "Pomegranate")
-
-
 class User(AbstractUser):
     preferred_language = models.CharField(
         _("interface language"), max_length=10, choices=language_choices(), default=LATIN
     )
     gender = models.CharField(_("gender"), max_length=10, choices=Gender.choices, blank=True)
-    palette = models.CharField(_("colours"), max_length=10, choices=Palette.choices, default=Palette.ATLAS)
     time_zone = models.CharField(_("time zone"), max_length=40, default=timezones.DEFAULT)
     # The person in the user's own family tree who represents them.
     person = models.OneToOneField(
@@ -36,6 +28,20 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         related_name="account",
     )
+    # Working in a relative's shared family tree: that archive is "active",
+    # `person` is then who the user is in it, and `own_person` remembers the
+    # record in the user's own archive.
+    active_archive = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+        verbose_name=_("family tree in use"),
+    )
+    own_person = models.ForeignKey(
+        "genealogy.Person", null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+    )
+    # Two-step sign-in (an authenticator app).
+    totp_secret = models.CharField(max_length=64, blank=True, editable=False)
+    totp_enabled = models.BooleanField(default=False)
+    recovery_codes = models.JSONField(default=list, blank=True, editable=False)
     search_key = models.TextField(editable=False, blank=True, default="")
 
     class Meta:
@@ -49,3 +55,71 @@ class User(AbstractUser):
     @property
     def display_name(self):
         return self.get_full_name() or self.username
+
+    @property
+    def archive_owner(self):
+        """The account whose family archive this user is working in."""
+        return self.active_archive if self.active_archive_id else self
+
+    @property
+    def home_person_id(self):
+        """This user's record in their *own* archive (wherever they work now)."""
+        return self.own_person_id if self.active_archive_id else self.person_id
+
+
+class Role(models.TextChoices):
+    VIEWER = "viewer", pgettext_lazy("role", "Can view")
+    EDITOR = "editor", pgettext_lazy("role", "Can edit")
+
+
+class Membership(models.Model):
+    """Access of one account to another account's family archive."""
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="members")
+    member = models.ForeignKey(User, on_delete=models.CASCADE, related_name="memberships")
+    role = models.CharField(_("access"), max_length=10, choices=Role.choices, default=Role.VIEWER)
+    # Who the member is in the owner's tree (kept while they work elsewhere).
+    person = models.ForeignKey("genealogy.Person", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["owner", "member"], name="unique_membership")]
+        ordering = ["created_at"]
+
+
+def _invite_token():
+    import secrets
+
+    return secrets.token_urlsafe(18)
+
+
+class Invite(models.Model):
+    """A one-time link that lets a relative join a family archive."""
+
+    VALID_DAYS = 14
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="invites")
+    created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name="+")
+    token = models.CharField(max_length=40, unique=True, default=_invite_token)
+    role = models.CharField(_("access"), max_length=10, choices=Role.choices, default=Role.EDITOR)
+    # The relative this link is meant for: they become this person on joining.
+    person = models.ForeignKey("genealogy.Person", null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+                               verbose_name=_("who is invited"))
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    accepted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    @property
+    def expires_at(self):
+        import datetime
+
+        return self.created_at + datetime.timedelta(days=self.VALID_DAYS)
+
+    @property
+    def is_open(self):
+        from django.utils import timezone
+
+        return self.accepted_at is None and timezone.now() < self.expires_at

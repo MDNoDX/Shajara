@@ -25,7 +25,7 @@
     </div>
   {% elif link %}
     <div class="tg-connect" data-telegram-wait="{% url 'notify:telegram_status' %}">
-      <ol class="tg-steps">
+      <ol class="steps">
         <li>
           <b>{% translate "Open the bot in the Telegram app" %}</b>
           <div class="row">
@@ -46,7 +46,7 @@
           <div class="tg-wait" role="status"><span class="spinner" aria-hidden="true"></span>{% translate "Waiting for Telegram…" %}</div>
         </li>
       </ol>
-      <figure class="tg-qr">
+      <figure class="qr">
         {{ link.qr|safe }}
         <figcaption>{% translate "On your phone: scan with the camera" %}</figcaption>
       </figure>
@@ -57,6 +57,22 @@
   {% else %}
     <p class="muted">{% translate "Telegram reminders are not available at the moment." %}</p>
   {% endif %}
+</section>
+
+<section class="card" id="push">
+  <h2>{% include "partials/icon.html" with name="phone" %}{% translate "On this device" %}</h2>
+  <div class="setting-row" data-push="{{ vapid_key }}" data-push-hint="push-hint">
+    <span class="setting-icon">{% include "partials/icon.html" with name="bell" %}</span>
+    <div class="spacer">
+      <b>{% translate "Push notifications" %}</b>
+      <div class="muted small" data-push-state>{% translate "Off for this device" %}</div>
+    </div>
+    <button class="btn btn-sm btn-ghost" type="button" data-push-test="{% url 'notify:push_test' %}" hidden>{% translate "Try it" %}</button>
+    <button class="btn btn-sm" type="button" data-push-off="{% url 'notify:push_unsubscribe' %}" hidden>{% translate "Turn off" %}</button>
+    <button class="btn btn-primary btn-sm" type="button" data-push-on="{% url 'notify:push_subscribe' %}">{% translate "Turn on" %}</button>
+  </div>
+  <p class="muted small" id="push-hint" hidden style="margin:0">{% translate "On an iPhone or iPad first add the site to the Home Screen (Share → Add to Home Screen), open it from there and come back to this page." %}</p>
+  <p class="muted small" style="margin:12px 0 0">{% translate "Reminders then arrive like messages, even when the site is closed." %}</p>
 </section>
 
 <form method="post" novalidate>{% csrf_token %}

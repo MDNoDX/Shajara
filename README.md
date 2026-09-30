@@ -9,23 +9,36 @@ Hammasi Django’ning rasmiy i18n tizimi orqali ishlaydi (`gettext`, `.po` → `
 
 ## Imkoniyatlar
 
-- **Shajara daraxti** — bitta bogʻlangan chizma: ota va onaning oilalari yonma-yon, ajdodlarning aka-uka,
-  opa-singillari «+ / −» bilan ochiladi va yopiladi; PNG va PDF eksport.
+- **Shajara daraxti** — bitta bogʻlangan chizma. Tarmoqlar rang bilan ajratilgan (oʻz oilasi, ota tomoni,
+  ona tomoni), toʻgʻri ajdodlar chizigʻi zarhal; chapda avlod nomlari, burchakda kichik xarita;
+  uzoqlashtirganda kartalar soddalashadi. Kartani bosganda yon panel ochiladi va qarindosh **shu yerning oʻzida**
+  qoʻshiladi. «Faqat ota tomoni / ona tomoni» koʻrinishi va **ajdodlar yelpigʻichi** ham bor.
+- **Birgalikda tuzish** — qarindoshni havola orqali taklif qilasiz (koʻrish yoki tahrirlash huquqi bilan);
+  u shajarani oʻz oʻrnidan nomlangan holda koʻradi. **Oʻzgarishlar tarixi**: kim nimani qoʻshgani koʻrinadi,
+  xato oʻzgarish yoki oʻchirish ortga qaytariladi.
+- **Dublikatlar** — qoʻshayotganda ogohlantirish, topilgan juftlarni birlashtirish (maʼlumot yoʻqolmaydi).
+- **Albom** — har bir odamga suratlar, hujjatlar (PDF) va ovozli yozuvlar; suratlar yuklashda kichraytiriladi.
+- **Hayot yoʻli va vaqt chizigʻi** — odam sahifasida tugʻilish, toʻy, farzandlar; butun oila boʻyicha oʻn yilliklar.
 - **Qarindoshlik nomlari** avtomatik: aka/uka, opa/singil, amaki/amma/togʻa/xola, amakivachcha…,
   kelin/kuyov, qaynota/qaynona, yanga/pochcha, «Buvining ukasi», «Onaning xolavachchasi», «Togʻaning xotini».
 - **Muchal** — har bir odamning muchali (yil Navroʻzda almashadi), keyingi muchal yili, Navroʻzda eslatma.
 - **Oilaviy voqealar** — toʻy, fotiha, farzand kutilmoqda, tugʻilish, beshik toʻyi, sunnat toʻyi, yil oshi
-  va boshqalar; oila xronikasi; kelajakdagi sanalar.
+  va boshqalar; kelajakdagi sanalar.
 - **Doʻstlar** — istalgan kishining (oʻzingiz, dadangiz, buvingiz…) doʻstlari, tugʻilgan kunlari bilan.
-- **Eslatmalar** — tugʻilgan kunlar, nikoh yilliklari, xotira kunlari, voqealar, muchal yili; saytdagi
-  qoʻngʻiroqcha va **Telegram bot** orqali; har bir foydalanuvchi oʻzi yoqadi/oʻchiradi.
+- **Eslatmalar** — tugʻilgan kunlar, nikoh yilliklari, xotira kunlari, voqealar, muchal yili: saytda,
+  **Telegram bot** orqali va **telefonga push-bildirishnoma** qilib (sayt bosh ekranga qoʻshilganda).
+  Bosh sahifadagi «Bugun» blokidan bir bosishda tabrik yuboriladi.
 - **Kim kimga kim?** — ikki odam orasidagi qarindoshlik va bogʻlanish zanjiri.
 - **Familiya taklifi** — oʻgʻil nevaraga ota tarafdagi bobosining ismidan (Madaminjon → Madaminov).
-- **Eksport** — PDF (tarjimai hol, daraxt, shajara kitobi) va GEDCOM (boshqa shajara dasturlari uchun).
-- **Yorugʻ / qorongʻi mavzu** va toʻrtta rang palitrasi, telefon ekraniga moslashgan dizayn, toʻrt til.
-- **Sozlamalar**: Umumiy (til, ranglar, vaqt mintaqasi), Eslatmalar (Telegram), Xavfsizlik (parol, Google,
-  boshqa qurilmalar), Maʼlumotlar (yuklab olish, arxivni yuklash, hisobni oʻchirish).
-- **Google orqali kirish**, **Boshqaruv paneli** (`/boshqaruv/`) va toʻliq zaxira nusxa.
+- **Chop etish** — muqovali **shajara kitobi**, **devoriy plakat** (balandligi 42 yoki 59 sm, uzunligi oilaga qarab),
+  tarjimai hol va daraxt PDF; PNG.
+- **GEDCOM** — eksport va **import** (MyHeritage, Ancestry, Gramps va boshqalardan).
+- **Xavfsizlik** — ikki bosqichli kirish (autentifikator ilovasi + tiklash kodlari), Google orqali kirish,
+  boshqa qurilmalardan chiqish, notoʻgʻri parolda vaqtincha toʻxtatish.
+- **Zaxira** — har hafta butun baza bitta fayl boʻlib administratorning Telegramiga yuboriladi; qoʻlda ham yuklab olinadi.
+- **Dizayn** — «nil va zar» (toʻq koʻk + zarhal, ikat naqshi), Source Serif 4 + Inter, yorugʻ / qorongʻi / tizim
+  mavzusi, chap yon menyu (yigʻiladi), telefonda pastki menyu, **⌘K / Ctrl+K** tezkor qidiruv, toʻrt til.
+- **Boshqaruv paneli** (`/boshqaruv/`) — holat, foydalanuvchilar, zaxira.
 - **Mac ilovasi** — [macos/](macos/README.md): alohida oyna, tizim bildirishnomalari, Dock belgisi.
 
 Sayt: **https://shajara-liard.vercel.app** · Serverga joylash va koʻchirish: [DEPLOY.md](DEPLOY.md).
@@ -42,8 +55,8 @@ python3 -m venv .venv
 .venv/bin/python manage.py run_worker      # eslatmalar va Telegram (alohida oynada, ixtiyoriy)
 ```
 
-`seed_demo` uchta sinov foydalanuvchisini yaratadi: `namuna` (lotin), `dilnoza_a` (kirill, doʻst)
-va `anvar_y` (kutilayotgan doʻstlik soʻrovi). Parol `apps/genealogy/management/commands/seed_demo.py` faylida
+`seed_demo` uchta sinov foydalanuvchisini yaratadi: `namuna` (lotin), `dilnoza_a` (kirill, shajarani koʻra oladi)
+va `anvar_y` (unga taklif havolasi tayyorlangan). Parol `apps/genealogy/management/commands/seed_demo.py` faylida
 yozilgan va faqat lokal ishlab chiqish uchun moʻljallangan.
 
 PostgreSQL uchun `DATABASE_URL=postgres://…` oʻzgaruvchisini bering (qarang: `.env.example`).
@@ -54,7 +67,8 @@ shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 
 | Joy | Vazifasi |
 |---|---|
-| `config/settings.py` | `LANGUAGE_CODE="uz"`, `LANGUAGES` (`uz`, `uz-cyrl`), `LOCALE_PATHS`, middleware |
+| `config/settings.py` | `LANGUAGE_CODE="uz"`, `LANGUAGES` (`uz`, `uz-cyrl`, `ru`, `en`), `LOCALE_PATHS`, middleware |
+| `static/css/app.css` | Dizayn tizimi: ranglar, shriftlar, radiuslar (8 / 12 / 18), barcha komponentlar |
 | `config/formats/uz`, `config/formats/uz_Cyrl` | Django sana/son formatlari |
 | `apps/core/languages.py` | Tillar va ularning oʻz yozuvidagi nomlari (Oʻzbekcha / Кириллча) |
 | `apps/core/middleware.py` | Tizimga kirgan foydalanuvchiga akkauntida saqlangan tilni yoqadi |
@@ -64,9 +78,17 @@ shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 | `apps/genealogy/terminology.py` | **Qarindoshlik atamalari lugʻati** (yagona manba) |
 | `apps/genealogy/kinship.py` | Aka/uka, opa/singil, amaki/amma/togʻa/xola, kelin/kuyov… ni aniqlash |
 | `apps/genealogy/tree.py` | Shajara joylashuvi (sayt va PDF uchun umumiy) |
-| `apps/genealogy/pdf.py` | PDF: tarjimai hol, shajara daraxti, shajara kitobi |
-| `apps/friends/` | Doʻstlar (kontaktlar) va shajarani boshqa foydalanuvchilar bilan ulashish |
-| `apps/genealogy/gedcom.py` | GEDCOM 5.5.1 eksport |
+| `apps/genealogy/pdf.py` | PDF: tarjimai hol, shajara daraxti, devoriy plakat, muqovali shajara kitobi |
+| `apps/friends/` | Doʻstlar (kontaktlar) |
+| `apps/accounts/sharing.py` | Umumiy shajara: aʼzolik (`Membership`), taklif havolalari (`Invite`), huquqlar |
+| `apps/accounts/totp.py` | Ikki bosqichli kirish (TOTP, tiklash kodlari) |
+| `apps/genealogy/history.py` | Oʻzgarishlar tarixi va ortga qaytarish |
+| `apps/genealogy/duplicates.py` | Dublikatlarni topish va birlashtirish |
+| `apps/genealogy/gedcom.py` | GEDCOM 5.5.1 eksport va import |
+| `apps/notify/push.py` | Push-bildirishnomalar (Web Push, VAPID); `templates/sw.js` — service worker |
+| `apps/core/backup.py` | Toʻliq zaxira nusxa (qoʻlda va haftalik) |
+| `apps/core/images.py` | Suratlarni yuklashda kichraytirish |
+| `tools/make_icons.py` | Logotip, sayt va Mac ilovasi belgilarini yaratadi |
 | `apps/core/muchal.py` | Muchal (12 yillik hayvonlar davri, Navroʻzdan boshlanadi) |
 | `apps/notify/` | Eslatmalar: sanalarni hisoblash, qoʻngʻiroqcha, Telegram bot, `run_worker`, Cron |
 | `apps/accounts/app_bridge.py` | Mac ilovasi uchun Google orqali kirish (`shajara://`) |
@@ -80,8 +102,8 @@ shuning uchun bazaning zaxira nusxasi hamma narsani oʻz ichiga oladi.
 
 ## Til tizimi
 
-* **Tanlash:** sarlavhadagi globus menyusi, sahifa pastidagi roʻyxat, hamda *Sozlamalar → Til*.
-* **Saqlash:** tizimga kirgan foydalanuvchi uchun `User.preferred_language` (`uz` yoki `uz-cyrl`)
+* **Tanlash:** foydalanuvchi menyusi (yon menyu pastida), mehmonlar uchun yuqoridagi globus, hamda *Sozlamalar → Til*.
+* **Saqlash:** tizimga kirgan foydalanuvchi uchun `User.preferred_language` (`uz`, `uz-cyrl`, `ru`, `en`)
   maydoniga yoziladi va har safar tizimga kirganda qoʻllanadi. Mehmonlar uchun `til` cookie,
   keyin brauzer tili (faqat oʻzbek lotin/kirill), keyin standart holatda lotin yozuvi ishlatiladi. Rus va ingliz tillari
   faqat foydalanuvchi oʻzi tanlaganda yoqiladi: sayt avval oʻzbek tilida ochiladi.
@@ -134,7 +156,10 @@ JS katalogi, shajara JSON va PDF fayl nomlari ham kiradi.
 ## Maʼlum cheklovlar
 
 * Django admin (`/admin/`) oddiy foydalanuvchi uchun emas. Oʻzbek kirill rejimida u Django’ning lotincha tarjimasida qoladi.
-* Veb shrift (Noto Sans) Google Fonts’dan yuklanadi. Internet boʻlmasa, tizim shrifti ishlatiladi:
-  macOS, Windows va Android shriftlari oʻzbek kirill harflarini qoʻllaydi.
+* Veb shriftlar (Source Serif 4, Inter) Google Fonts’dan yuklanadi; ikkalasida ham Ў Қ Ғ Ҳ va ʻ ʼ bor.
+  Internet boʻlmasa, tizim shrifti ishlatiladi.
+* Push-bildirishnomalar iPhone/iPad’da faqat sayt bosh ekranga qoʻshilgandan keyin ishlaydi (iOS 16.4+).
+* Umumiy shajarada har bir hisobning oʻz arxivi saqlanadi; ikki alohida arxivni bittaga qoʻshish uchun
+  GEDCOM yoki JSON import va dublikatlarni birlashtirish ishlatiladi.
 * Qarindoshlik nomlari qon qarindoshlik, nikoh, kelin/kuyov, qaynota/qaynona, yanga/pochcha va oʻgay
   qarindoshlarni qamraydi. Uzoqroq qarindoshlar «Qarindosh» deb koʻrsatiladi.

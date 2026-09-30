@@ -28,6 +28,9 @@ urlpatterns = [
     path("boshqaruv/", core_views.control_panel, name="control_panel"),
     path("boshqaruv/zaxira.json", core_views.full_backup, name="full_backup"),
     path("boshqaruv/telegram/", core_views.set_telegram_webhook, name="set_telegram_webhook"),
+    path("boshqaruv/zaxira/telegram/", core_views.backup_telegram, name="backup_telegram"),
+    path("sw.js", core_views.service_worker, name="service_worker"),
+    path("oflayn/", core_views.offline, name="offline"),
     path("admin/", admin.site.urls),
 ]
 

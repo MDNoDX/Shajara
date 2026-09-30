@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Possible duplicates" %}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "Possible duplicates" %}</h1>
+  <p>{% translate "People with the same name and the same surname or year of birth. If two records are one person, merge them: nothing is lost, the details are combined." %}</p>
+</div>
+  <a class="btn" href="{% url 'genealogy:people' %}">{% translate "Relatives" %}</a>
+</div>
+{% for a, b in pairs %}
+<section class="card">
+  <div class="pair">
+    {% include "partials/person_card.html" with person=a.0 label=a.1 branch="" %}
+    <span class="muted" aria-hidden="true">=</span>
+    {% include "partials/person_card.html" with person=b.0 label=b.1 branch="" %}
+  </div>
+  <form method="post" action="{% url 'genealogy:merge' %}" class="form-actions" style="margin-top:14px">{% csrf_token %}
+    <input type="hidden" name="keep" value="{{ a.0.pk }}"><input type="hidden" name="drop" value="{{ b.0.pk }}">
+    <button class="btn btn-primary btn-sm" type="submit" data-confirm="{% translate 'Merge these two records into one?' %}">{% include "partials/icon.html" with name="merge" %}{% translate "This is one person — merge" %}</button>
+    <span class="muted small">{% translate "Different people? Leave them as they are." %}</span>
+  </form>
+</section>
+{% empty %}
+<div class="empty"><div class="ornament">{% include "partials/logo.svg" %}</div>
+  <h3>{% translate "No duplicates found." %}</h3></div>
+{% endfor %}
+{% endblock %}
