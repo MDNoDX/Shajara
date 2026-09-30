@@ -254,17 +254,26 @@
       var q = input.value.trim();
       var mine = ++request;
       target.classList.add("updating");
-      fetch(base + "?partial=1&q=" + encodeURIComponent(q), { credentials: "same-origin" })
+      var sep = base.indexOf("?") === -1 ? "?" : "&";
+      fetch(base + sep + "partial=1&q=" + encodeURIComponent(q), { credentials: "same-origin" })
         .then(function (r) { return r.text(); })
         .then(function (html) {
           if (mine !== request) return;
           target.innerHTML = html;
           target.classList.remove("updating");
-          window.history.replaceState(null, "", base + (q ? "?q=" + encodeURIComponent(q) : ""));
+          window.history.replaceState(null, "", base + (q ? sep + "q=" + encodeURIComponent(q) : ""));
         })
         .catch(function () { target.classList.remove("updating"); });
     }, 200);
     input.addEventListener("input", update);
     form.addEventListener("submit", function (e) { e.preventDefault(); update(); });
+  });
+
+  // Colour palettes: preview immediately when a palette is chosen.
+  document.querySelectorAll("[data-palette-form] input[type=radio]").forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      document.documentElement.setAttribute("data-palette", radio.value);
+      try { document.cookie = "palette=" + radio.value + ";path=/;max-age=31536000;samesite=lax"; } catch (e) {}
+    });
   });
 })();

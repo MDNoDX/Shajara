@@ -1,12 +1,18 @@
+import json
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from django.http import HttpResponse, JsonResponse
+from django.utils.crypto import constant_time_compare
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from . import telegram
+from . import service, telegram
 from .forms import NotificationSettingsForm
 from .models import Notification, NotificationSettings
 
@@ -70,3 +76,33 @@ def telegram_disconnect(request):
     prefs.save(update_fields=["telegram_enabled", "telegram_chat_id", "telegram_name"])
     messages.info(request, _("Telegram has been disconnected."))
     return redirect("notify:settings")
+
+
+# ---------------------------------------------------------------------------
+# Serverless entry points: Vercel Cron and the Telegram webhook
+# ---------------------------------------------------------------------------
+@csrf_exempt
+def cron_daily(request):
+    """Daily job (Vercel Cron sends "Authorization: Bearer <CRON_SECRET>")."""
+    secret = settings.CRON_SECRET
+    if not secret or not constant_time_compare(request.headers.get("Authorization", ""), f"Bearer {secret}"):
+        return HttpResponse(status=401)
+    created = service.run_daily()
+    sent = service.send_pending_telegram(ignore_hour=True)
+    return JsonResponse({"created": created, "telegram_sent": sent})
+
+
+@csrf_exempt
+@require_POST
+def telegram_webhook(request):
+    if not telegram.configured():
+        return HttpResponse(status=404)
+    token = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+    if not constant_time_compare(token, telegram.webhook_secret()):
+        return HttpResponse(status=403)
+    try:
+        update = json.loads(request.body.decode())
+    except (ValueError, UnicodeDecodeError):
+        return HttpResponse(status=400)
+    telegram.handle_update(update)
+    return JsonResponse({"ok": True})

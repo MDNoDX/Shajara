@@ -45,15 +45,18 @@ def ensure_today(user):
         generate(user)
 
 
-def send_pending_telegram(now=None):
-    """Send today's unsent reminders to users who linked Telegram."""
+def send_pending_telegram(now=None, ignore_hour=False):
+    """Send today's unsent reminders to users who linked Telegram.
+
+    ignore_hour: the once-a-day Vercel Cron sends everything in one go.
+    """
     if not telegram.configured():
         return 0
     now = timezone.localtime(now or timezone.now())
     sent = 0
     for prefs in NotificationSettings.objects.filter(enabled=True, telegram_enabled=True).exclude(
             telegram_chat_id=None).select_related("user"):
-        if now.hour < prefs.send_hour:
+        if not ignore_hour and now.hour < prefs.send_hour:
             continue
         pending = Notification.objects.filter(user=prefs.user, telegram_sent_at=None,
                                               created_at__date__gte=now.date() - datetime.timedelta(days=1))

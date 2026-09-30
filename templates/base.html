@@ -1,12 +1,12 @@
 {% load i18n static %}<!doctype html>
-<html lang="{{ html_lang }}" dir="ltr">
+<html lang="{{ html_lang }}" dir="ltr" data-palette="{{ palette }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}{% endblock %} · {% translate "Family tree" context "site name" %}</title>
   <meta name="description" content="{% translate 'Family tree — a family archive for Uzbek families.' %}">
-  <meta name="theme-color" content="#c2694a" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1b1614" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#5b47c9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121119" media="(prefers-color-scheme: dark)">
   <script>
     /* Apply the saved colour theme before the page is drawn (no flash). */
     try { var t = localStorage.getItem("theme") || "light"; if (t !== "auto") document.documentElement.setAttribute("data-theme", t); }
@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Serif:wght@600;700&display=swap">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="icon" href="{% static 'img/icon.svg' %}" type="image/svg+xml">
   <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
@@ -22,7 +22,7 @@
   <script src="{% static 'js/app.js' %}" defer></script>
   {% block head %}{% endblock %}
 </head>
-<body>
+<body{% if user.is_authenticated %} class="has-tabbar"{% endif %}>
 <a class="skip" href="#main">{% translate "Skip to content" %}</a>
 {% with url_name=request.resolver_match.url_name app_name=request.resolver_match.app_name %}
 <header class="topbar">
@@ -78,6 +78,8 @@
             <div class="menu-foot">
               <a href="{% url 'notify:list' %}">{% translate "All notifications" %}</a>
               <a href="{% url 'notify:settings' %}">{% translate "Reminder settings" %}</a>
+            <a href="{% url 'genealogy:stories' %}">{% translate "Stories" %}</a>
+            <a href="{% url 'genealogy:calculator' %}">{% translate "Who is who?" %}</a>
             </div>
           </div>
         </details>
@@ -90,6 +92,7 @@
             <a href="{% url 'accounts:profile' %}">{% translate "My profile" %}</a>
             <a href="{% url 'accounts:settings' %}">{% translate "Settings" %}</a>
             <a href="{% url 'notify:settings' %}">{% translate "Reminder settings" %}</a>
+            {% if user.is_superuser %}<a href="{% url 'control_panel' %}">{% translate "Control panel" %}</a>{% endif %}
             <a href="{% url 'friends:sharing' %}">{% translate "Share the family tree" %}{% if pending_requests %} <span class="badge">{{ pending_requests }}</span>{% endif %}</a>
             <hr>
             <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
@@ -118,6 +121,18 @@
   {% endif %}
 </header>
 {% endwith %}
+
+{% if user.is_authenticated %}
+{% with url_name=request.resolver_match.url_name app_name=request.resolver_match.app_name %}
+<nav class="tabbar" aria-label="{% translate 'Main menu' %}">
+  <a href="{% url 'home' %}" {% if url_name == "home" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="home" %}{% translate "Home" %}</a>
+  <a href="{% url 'genealogy:tree' %}" {% if url_name == "tree" or url_name == "tree_for" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="tree" %}{% translate "Family tree" context "site name" %}</a>
+  <a href="{% url 'genealogy:people' %}" {% if url_name in "people person person_edit person_create relative_add marriage_edit search" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="people" %}{% translate "Relatives" %}</a>
+  <a href="{% url 'genealogy:upcoming' %}" {% if url_name in "upcoming event event_create event_edit" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="calendar" %}{% translate "Events" %}</a>
+  <a href="{% url 'friends:list' %}" {% if app_name == "friends" %}aria-current="page"{% endif %}>{% include "partials/icon.html" with name="friends" %}{% translate "Friends" %}</a>
+</nav>
+{% endwith %}
+{% endif %}
 
 <main id="main" class="container {% block main_class %}{% endblock %}">
   {% block content %}{% endblock %}

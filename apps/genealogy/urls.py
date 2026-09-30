@@ -34,4 +34,5 @@ urlpatterns = [
     path("voqealar/<int:pk>/ochirish/", views.event_delete, name="event_delete"),
     path("kim-kimga-kim/", views.calculator, name="calculator"),
     path("shajara/eksport.ged", views.gedcom_export, name="gedcom"),
+    path("shajara/eksport.json", views.archive_export, name="archive_export"),
 ]

@@ -6,6 +6,10 @@
   <div class="card">
     <h1>{% translate "Sign in" %}</h1>
     <p class="muted">{% translate "Sign in to see your family tree." %}</p>
+    {% if google_login %}
+      {% include "partials/google_button.html" with next=next %}
+      <div class="or"><span>{% translate "or" %}</span></div>
+    {% endif %}
     <form method="post" novalidate>{% csrf_token %}
       {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
       {% include "partials/field.html" with field=form.username %}

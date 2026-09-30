@@ -1,0 +1,15 @@
+.venv
+.git
+.claude
+__pycache__
+*.pyc
+db.sqlite3
+media
+staticfiles
+files
+macos
+deploy
+Dockerfile
+docker-compose.yml
+.env
+.env.*

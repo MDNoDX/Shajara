@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-28 19:11+0500\n"
+"POT-Creation-Date: 2026-09-30 07:10+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: Uzbek (Latin)\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: apps/accounts/admin.py:11 apps/genealogy/apps.py:8 apps/genealogy/pdf.py:128 apps/genealogy/pdf.py:283 apps/genealogy/pdf.py:298 apps/genealogy/views.py:260
+#: apps/accounts/admin.py:11 apps/genealogy/apps.py:8 apps/genealogy/pdf.py:128 apps/genealogy/pdf.py:283 apps/genealogy/pdf.py:298 apps/genealogy/views.py:270
 msgid "Family tree"
 msgstr "Shajara"
 
@@ -26,19 +26,19 @@ msgstr "Hisoblar"
 msgid "Letters, digits and the characters @ . + - _ only."
 msgstr "Faqat harflar, raqamlar va @ . + - _ belgilari."
 
-#: apps/accounts/forms.py:22 apps/accounts/forms.py:78
+#: apps/accounts/forms.py:22 apps/accounts/forms.py:78 apps/accounts/forms.py:146
 msgid "First name"
 msgstr "Ism"
 
-#: apps/accounts/forms.py:23 apps/accounts/forms.py:79
+#: apps/accounts/forms.py:23 apps/accounts/forms.py:79 apps/accounts/forms.py:147
 msgid "Last name"
 msgstr "Familiya"
 
-#: apps/accounts/forms.py:24 apps/accounts/forms.py:80 apps/accounts/forms.py:118
+#: apps/accounts/forms.py:24 apps/accounts/forms.py:80 apps/accounts/forms.py:125
 msgid "Email"
 msgstr "Elektron pochta"
 
-#: apps/accounts/forms.py:25 apps/accounts/forms.py:81 apps/genealogy/pdf.py:142 templates/genealogy/person_detail.html:28
+#: apps/accounts/forms.py:25 apps/accounts/forms.py:81 apps/accounts/forms.py:148 apps/genealogy/pdf.py:142 templates/genealogy/person_detail.html:28
 msgid "Gender"
 msgstr "Jinsi"
 
@@ -46,7 +46,7 @@ msgstr "Jinsi"
 msgid "Username"
 msgstr "Foydalanuvchi nomi"
 
-#: apps/accounts/forms.py:35 apps/accounts/forms.py:70 templates/accounts/settings.html:46
+#: apps/accounts/forms.py:35 apps/accounts/forms.py:70 templates/accounts/settings.html:60
 msgid "Password"
 msgstr "Parol"
 
@@ -54,7 +54,7 @@ msgstr "Parol"
 msgid "Confirm password"
 msgstr "Parolni tasdiqlash"
 
-#: apps/accounts/forms.py:38 apps/accounts/forms.py:112 apps/accounts/forms.py:133
+#: apps/accounts/forms.py:38 apps/accounts/forms.py:119 apps/accounts/forms.py:140
 msgid "Enter the same password again."
 msgstr "Parolni yana bir marta kiriting."
 
@@ -62,19 +62,19 @@ msgstr "Parolni yana bir marta kiriting."
 msgid "An account with this email address already exists."
 msgstr "Bu elektron pochta manzili bilan hisob allaqachon mavjud."
 
-#: apps/accounts/forms.py:98 templates/accounts/settings.html:9 templates/accounts/settings.html:12 templates/partials/lang_switch.html:1
+#: apps/accounts/forms.py:105 templates/accounts/settings.html:9 templates/accounts/settings.html:12 templates/partials/lang_switch.html:1
 msgid "Language"
 msgstr "Til"
 
-#: apps/accounts/forms.py:108
+#: apps/accounts/forms.py:115
 msgid "Current password"
 msgstr "Hozirgi parol"
 
-#: apps/accounts/forms.py:109 apps/accounts/forms.py:130
+#: apps/accounts/forms.py:116 apps/accounts/forms.py:137
 msgid "New password"
 msgstr "Yangi parol"
 
-#: apps/accounts/forms.py:111 apps/accounts/forms.py:132
+#: apps/accounts/forms.py:118 apps/accounts/forms.py:139
 msgid "Confirm the new password"
 msgstr "Yangi parolni tasdiqlash"
 
@@ -88,41 +88,73 @@ msgctxt "gender"
 msgid "Female"
 msgstr "Ayol"
 
+#: apps/accounts/models.py:16
+msgctxt "palette"
+msgid "Atlas"
+msgstr "Atlas"
+
 #: apps/accounts/models.py:17
+msgctxt "palette"
+msgid "Sky"
+msgstr "Osmon"
+
+#: apps/accounts/models.py:18
+msgctxt "palette"
+msgid "Garden"
+msgstr "Bogʻ"
+
+#: apps/accounts/models.py:19
+msgctxt "palette"
+msgid "Pomegranate"
+msgstr "Anor"
+
+#: apps/accounts/models.py:24
 msgid "interface language"
 msgstr "interfeys tili"
 
-#: apps/accounts/models.py:19 apps/genealogy/models.py:36
+#: apps/accounts/models.py:26 apps/genealogy/models.py:36
 msgid "gender"
 msgstr "jinsi"
 
-#: apps/accounts/models.py:23
+#: apps/accounts/models.py:27
+msgid "colours"
+msgstr "ranglar"
+
+#: apps/accounts/models.py:31
 msgid "own record in the family tree"
 msgstr "shajaradagi oʻz yozuvi"
 
-#: apps/accounts/models.py:32
+#: apps/accounts/models.py:40
 msgid "user"
 msgstr "foydalanuvchi"
 
-#: apps/accounts/models.py:33
+#: apps/accounts/models.py:41
 msgid "users"
 msgstr "foydalanuvchilar"
 
-#: apps/accounts/views.py:31
+#: apps/accounts/views.py:34 apps/accounts/views.py:140
 msgid "Welcome! Your account has been created."
 msgstr "Xush kelibsiz! Hisobingiz yaratildi."
 
-#: apps/accounts/views.py:77 apps/friends/views.py:152 apps/genealogy/views.py:141 apps/genealogy/views.py:207 apps/genealogy/views.py:391 apps/notify/views.py:45
+#: apps/accounts/views.py:75 apps/accounts/views.py:87 apps/friends/views.py:152 apps/genealogy/views.py:151 apps/genealogy/views.py:217 apps/genealogy/views.py:401 apps/notify/views.py:51
 msgid "The information has been saved."
 msgstr "Maʼlumotlar saqlandi."
 
-#: apps/accounts/views.py:85
+#: apps/accounts/views.py:95
 msgid "The interface language has been changed."
 msgstr "Interfeys tili oʻzgartirildi."
 
-#: apps/accounts/views.py:98
+#: apps/accounts/views.py:108
 msgid "Your password has been changed."
 msgstr "Parolingiz oʻzgartirildi."
+
+#: apps/accounts/views.py:157
+msgid "Your account and all its data have been deleted."
+msgstr "Hisobingiz va undagi barcha maʼlumotlar oʻchirildi."
+
+#: apps/accounts/views.py:159
+msgid "The username does not match."
+msgstr "Foydalanuvchi nomi mos kelmadi."
 
 #: apps/core/dates.py:15
 msgctxt "month name"
@@ -320,7 +352,7 @@ msgstr "Tekshirish uchun parolni yana bir marta kiriting."
 msgid "Please enter a correct %(username)s and password. Note that both fields may be case-sensitive."
 msgstr "Kiritilgan %(username)s yoki parol notoʻgʻri. Katta va kichik harflar farqlanishini unutmang."
 
-#: apps/core/django_messages.py:61
+#: apps/core/django_messages.py:61 templates/account/account_inactive.html:6
 msgid "This account is inactive."
 msgstr "Bu hisob faol emas."
 
@@ -449,9 +481,41 @@ msgctxt "muchal"
 msgid "Pig"
 msgstr "Toʻngʻiz"
 
-#: apps/friends/apps.py:8 templates/friends/list.html:7 templates/genealogy/person_detail.html:67
+#: apps/core/views.py:157
+msgid "Users"
+msgstr "Foydalanuvchilar"
+
+#: apps/core/views.py:158
+msgid "People in all trees"
+msgstr "Barcha shajaralardagi odamlar"
+
+#: apps/core/views.py:159 templates/base.html:115 templates/base.html:131 templates/genealogy/events.html:3 templates/genealogy/events.html:7 templates/genealogy/person_detail.html:54
+msgid "Events"
+msgstr "Voqealar"
+
+#: apps/core/views.py:160 apps/genealogy/pdf.py:242 templates/base.html:81 templates/base.html:116 templates/genealogy/person_detail.html:79 templates/genealogy/story_list.html:3 templates/genealogy/story_list.html:7
+msgid "Stories"
+msgstr "Hikoyalar"
+
+#: apps/core/views.py:161 apps/friends/apps.py:8 templates/base.html:132 templates/friends/list.html:7 templates/genealogy/person_detail.html:67
 msgid "Friends"
 msgstr "Doʻstlar"
+
+#: apps/core/views.py:162 templates/core/control_panel.html:34
+msgid "Photos"
+msgstr "Suratlar"
+
+#: apps/core/views.py:163 apps/notify/apps.py:8 templates/base.html:54 templates/base.html:60 templates/notify/list.html:3 templates/notify/list.html:7
+msgid "Notifications"
+msgstr "Bildirishnomalar"
+
+#: apps/core/views.py:164
+msgid "Telegram connected"
+msgstr "Telegram ulanganlar"
+
+#: apps/core/views.py:199
+msgid "The Telegram bot is connected to the site."
+msgstr "Telegram bot saytga ulandi."
 
 #: apps/friends/forms.py:31
 msgid "For example: where they met, what they did together."
@@ -585,7 +649,7 @@ msgstr "Doʻstlaringiz roʻyxatidan olib tashlandi."
 msgid "The friend has been added."
 msgstr "Doʻst qoʻshildi."
 
-#: apps/friends/views.py:162 apps/genealogy/views.py:154
+#: apps/friends/views.py:162 apps/genealogy/views.py:164
 msgid "The record has been deleted."
 msgstr "Maʼlumot oʻchirildi."
 
@@ -593,11 +657,11 @@ msgstr "Maʼlumot oʻchirildi."
 msgid "Person not found."
 msgstr "Qarindosh topilmadi."
 
-#: apps/genealogy/access.py:25 apps/genealogy/access.py:41 apps/genealogy/access.py:60 apps/genealogy/views.py:419 templates/403.html:3 templates/403.html:6 templates/403_csrf.html:3
+#: apps/genealogy/access.py:25 apps/genealogy/access.py:41 apps/genealogy/access.py:60 apps/genealogy/views.py:429 templates/403.html:3 templates/403.html:6 templates/403_csrf.html:3
 msgid "Access denied."
 msgstr "Kirish taqiqlangan."
 
-#: apps/genealogy/access.py:32 apps/genealogy/access.py:48 apps/genealogy/views.py:197 apps/genealogy/views.py:426
+#: apps/genealogy/access.py:32 apps/genealogy/access.py:48 apps/genealogy/views.py:207 apps/genealogy/views.py:436
 msgid "You do not have permission to change this information."
 msgstr "Ushbu maʼlumotni oʻzgartirish huquqingiz yoʻq."
 
@@ -1014,7 +1078,7 @@ msgstr "Kasbi"
 msgid "Education"
 msgstr "Taʼlimi"
 
-#: apps/genealogy/pdf.py:226 templates/accounts/settings.html:24 templates/genealogy/person_detail.html:26
+#: apps/genealogy/pdf.py:226 templates/accounts/settings.html:38 templates/genealogy/person_detail.html:26
 msgid "Personal details"
 msgstr "Shaxsiy maʼlumotlar"
 
@@ -1029,10 +1093,6 @@ msgstr "Biografiya"
 #: apps/genealogy/pdf.py:239 templates/genealogy/person_detail.html:49
 msgid "Life story"
 msgstr "Hayot tarixi"
-
-#: apps/genealogy/pdf.py:242 templates/base.html:113 templates/genealogy/person_detail.html:79 templates/genealogy/story_list.html:3 templates/genealogy/story_list.html:7
-msgid "Stories"
-msgstr "Hikoyalar"
 
 #: apps/genealogy/pdf.py:287
 #, python-format
@@ -1049,12 +1109,12 @@ msgstr "%(number)d-avlod"
 msgid "Not yet linked to the family"
 msgstr "Oilaga hali bogʻlanmaganlar"
 
-#: apps/genealogy/terminology.py:17 templates/core/landing.html:23 templates/genealogy/person_detail.html:13
+#: apps/genealogy/terminology.py:17 templates/core/landing.html:22 templates/genealogy/person_detail.html:13
 msgctxt "kinship"
 msgid "You"
 msgstr "Siz"
 
-#: apps/genealogy/terminology.py:18 templates/core/landing.html:19
+#: apps/genealogy/terminology.py:18 templates/core/landing.html:21
 msgctxt "kinship"
 msgid "Father"
 msgstr "Ota"
@@ -1074,12 +1134,12 @@ msgctxt "kinship"
 msgid "Daughter"
 msgstr "Qiz"
 
-#: apps/genealogy/terminology.py:22 templates/core/landing.html:17
+#: apps/genealogy/terminology.py:22 templates/core/landing.html:20
 msgctxt "kinship"
 msgid "Grandfather"
 msgstr "Bobo"
 
-#: apps/genealogy/terminology.py:23 templates/core/landing.html:18
+#: apps/genealogy/terminology.py:23 templates/core/landing.html:20
 msgctxt "kinship"
 msgid "Grandmother"
 msgstr "Buvi"
@@ -1154,12 +1214,12 @@ msgctxt "kinship"
 msgid "Sister (age unknown)"
 msgstr "Opa / singil"
 
-#: apps/genealogy/terminology.py:38 templates/core/landing.html:21
+#: apps/genealogy/terminology.py:38 templates/core/landing.html:22
 msgctxt "kinship"
 msgid "Father's brother"
 msgstr "Amaki"
 
-#: apps/genealogy/terminology.py:39 templates/core/landing.html:20
+#: apps/genealogy/terminology.py:39 templates/core/landing.html:21
 msgctxt "kinship"
 msgid "Father's sister"
 msgstr "Amma"
@@ -1369,7 +1429,7 @@ msgctxt "kinship"
 msgid "Friend"
 msgstr "Doʻst"
 
-#: apps/genealogy/terminology.py:91 templates/core/landing.html:28 templates/friends/sharing.html:47 templates/genealogy/tree.html:3 templates/genealogy/tree.html:45
+#: apps/genealogy/terminology.py:91 templates/core/landing.html:36 templates/friends/sharing.html:47 templates/genealogy/tree.html:3 templates/genealogy/tree.html:45
 msgctxt "kinship"
 msgid "Family tree"
 msgstr "Shajara"
@@ -1435,68 +1495,64 @@ msgctxt "kinship chain"
 msgid "{whose}'s {what}"
 msgstr "{whose}ning {what}"
 
-#: apps/genealogy/tree.py:377
+#: apps/genealogy/tree.py:378
 #, python-format
 msgid "%(count)d child"
 msgid_plural "%(count)d children"
 msgstr[0] "%(count)d farzand"
 
-#: apps/genealogy/tree.py:379
+#: apps/genealogy/tree.py:380
 #, python-format
 msgid "%(count)d brother or sister"
 msgid_plural "%(count)d brothers and sisters"
 msgstr[0] "%(count)d aka-uka, opa-singil"
 
-#: apps/genealogy/views.py:129 apps/genealogy/views.py:182
+#: apps/genealogy/views.py:139 apps/genealogy/views.py:192
 msgid "The person has been added to the family tree."
 msgstr "Qarindosh shajaraga qoʻshildi."
 
-#: apps/genealogy/views.py:150
+#: apps/genealogy/views.py:160
 msgid "Your own record cannot be deleted."
 msgstr "Oʻz yozuvingizni oʻchirib boʻlmaydi."
 
-#: apps/genealogy/views.py:203
+#: apps/genealogy/views.py:213
 msgid "The marriage record has been deleted."
 msgstr "Nikoh haqidagi maʼlumot oʻchirildi."
 
-#: apps/genealogy/views.py:254 apps/genealogy/views.py:270 templates/genealogy/tree.html:56
+#: apps/genealogy/views.py:264 apps/genealogy/views.py:280 templates/genealogy/tree.html:56
 msgid "The family tree is empty."
 msgstr "Shajara hali boʻsh."
 
-#: apps/genealogy/views.py:258
+#: apps/genealogy/views.py:268
 #, python-format
 msgid "Centred on %(name)s. Relationship names are given as seen from this person."
 msgstr "Markazda: %(name)s. Qarindoshlik nomlari shu odamga nisbatan berilgan."
 
-#: apps/genealogy/views.py:261 apps/genealogy/views.py:501
+#: apps/genealogy/views.py:271 apps/genealogy/views.py:511
 msgctxt "file name"
 msgid "family-tree"
 msgstr "shajara"
 
-#: apps/genealogy/views.py:272
+#: apps/genealogy/views.py:282
 msgctxt "file name"
 msgid "family-book"
 msgstr "shajara-kitobi"
 
-#: apps/genealogy/views.py:302 apps/genealogy/views.py:313
+#: apps/genealogy/views.py:312 apps/genealogy/views.py:323
 msgid "The story has been saved."
 msgstr "Hikoya saqlandi."
 
-#: apps/genealogy/views.py:323
+#: apps/genealogy/views.py:333
 msgid "The story has been deleted."
 msgstr "Hikoya oʻchirildi."
 
-#: apps/genealogy/views.py:440 apps/genealogy/views.py:451
+#: apps/genealogy/views.py:450 apps/genealogy/views.py:461
 msgid "The event has been saved."
 msgstr "Voqea saqlandi."
 
-#: apps/genealogy/views.py:461
+#: apps/genealogy/views.py:471
 msgid "The event has been deleted."
 msgstr "Voqea oʻchirildi."
-
-#: apps/notify/apps.py:8 templates/base.html:54 templates/base.html:60 templates/notify/list.html:3 templates/notify/list.html:7
-msgid "Notifications"
-msgstr "Bildirishnomalar"
 
 #: apps/notify/messages.py:15
 msgctxt "reminder"
@@ -1654,35 +1710,35 @@ msgstr "yuborish vaqti"
 msgid "notification settings"
 msgstr "eslatma sozlamalari"
 
-#: apps/notify/telegram.py:107
+#: apps/notify/telegram.py:119
 msgid "This link has expired. Open the settings page on the site and press “Connect Telegram” again."
 msgstr "Bu havolaning muddati tugagan. Saytda sozlamalar sahifasini oching va «Telegramni ulash» tugmasini qaytadan bosing."
 
-#: apps/notify/telegram.py:117
+#: apps/notify/telegram.py:129
 msgid "Your account is connected. Reminders about birthdays and family events will come here. Send /stop to turn them off."
 msgstr "Hisobingiz ulandi. Tugʻilgan kunlar va oilaviy voqealar haqidagi eslatmalar shu yerga keladi. Oʻchirish uchun /stop yuboring."
 
-#: apps/notify/telegram.py:125
+#: apps/notify/telegram.py:137
 msgid "Reminders are turned off. You can turn them on again in the site settings."
 msgstr "Eslatmalar oʻchirildi. Ularni saytdagi sozlamalarda qayta yoqishingiz mumkin."
 
-#: apps/notify/telegram.py:127
+#: apps/notify/telegram.py:139
 msgid "Hello! This bot sends reminders from your family tree. To connect it, open Settings on the site and press “Connect Telegram”."
 msgstr "Assalomu alaykum! Bu bot shajarangizdagi eslatmalarni yuboradi. Ulash uchun saytda «Sozlamalar» boʻlimini oching va «Telegramni ulash» tugmasini bosing."
 
-#: apps/notify/views.py:58 templates/notify/settings.html:40
+#: apps/notify/views.py:64 templates/notify/settings.html:40
 msgid "Telegram reminders are not available at the moment."
 msgstr "Telegram orqali eslatmalar hozircha mavjud emas."
 
-#: apps/notify/views.py:71
+#: apps/notify/views.py:77
 msgid "Telegram has been disconnected."
 msgstr "Telegram uzildi."
 
-#: config/settings.py:102
+#: config/settings.py:162
 msgid "Uzbek (Latin script)"
 msgstr "Oʻzbekcha (lotin yozuvi)"
 
-#: config/settings.py:103
+#: config/settings.py:163
 msgid "Uzbek (Cyrillic script)"
 msgstr "Oʻzbekcha (kirill yozuvi)"
 
@@ -1726,37 +1782,94 @@ msgstr "Serverda xatolik yuz berdi."
 msgid "Something went wrong on our side. Please try again in a few minutes."
 msgstr "Bizning tomonda nimadir notoʻgʻri ketdi. Bir necha daqiqadan soʻng qaytadan urinib koʻring."
 
-#: templates/accounts/login.html:3 templates/accounts/login.html:7 templates/accounts/login.html:15 templates/accounts/password_reset_complete.html:8 templates/accounts/register.html:25 templates/base.html:101 templates/core/landing.html:11
+#: templates/account/account_inactive.html:3 templates/accounts/app_login_start.html:3 templates/accounts/login.html:3 templates/accounts/login.html:7 templates/accounts/login.html:19 templates/accounts/password_reset_complete.html:8 templates/accounts/register.html:29 templates/base.html:104 templates/core/landing.html:12 templates/socialaccount/authentication_error.html:3 templates/socialaccount/login.html:3 templates/socialaccount/login.html:6 templates/socialaccount/login_cancelled.html:3 templates/socialaccount/signup.html:3
 msgid "Sign in"
 msgstr "Kirish"
+
+#: templates/account/account_inactive.html:7 templates/accounts/password_reset_done.html:8 templates/socialaccount/authentication_error.html:8 templates/socialaccount/login_cancelled.html:8 templates/socialaccount/signup.html:8
+msgid "Back to sign in"
+msgstr "Kirish sahifasiga qaytish"
+
+#: templates/accounts/app_login_start.html:8
+msgid "Sign in to the app"
+msgstr "Ilovaga kirish"
+
+#: templates/accounts/app_login_start.html:9
+msgid "After signing in you will be returned to the Shajara app."
+msgstr "Kirganingizdan soʻng Shajara ilovasiga qaytasiz."
+
+#: templates/accounts/app_login_start.html:12
+msgid "Sign in with a username and password"
+msgstr "Foydalanuvchi nomi va parol bilan kirish"
+
+#: templates/accounts/complete_profile.html:3 templates/accounts/complete_profile.html:7
+msgid "Almost done"
+msgstr "Deyarli tayyor"
+
+#: templates/accounts/complete_profile.html:8 templates/accounts/register.html:8
+msgid "Your own record in the family tree is created from these details."
+msgstr "Shu maʼlumotlar asosida shajarada sizning yozuvingiz yaratiladi."
+
+#: templates/accounts/complete_profile.html:15
+msgid "Continue"
+msgstr "Davom etish"
+
+#: templates/accounts/delete_account.html:3 templates/accounts/delete_account.html:6 templates/accounts/settings.html:74 templates/accounts/settings.html:75
+msgid "Delete account"
+msgstr "Hisobni oʻchirish"
+
+#: templates/accounts/delete_account.html:7
+msgid "Your account and your whole family archive — people, photos, events, stories and friends — will be deleted permanently."
+msgstr "Hisobingiz va butun oilaviy arxivingiz — odamlar, suratlar, voqealar, hikoyalar va doʻstlar — butunlay oʻchiriladi."
+
+#: templates/accounts/delete_account.html:8
+msgid "Download your data first if you want to keep a copy."
+msgstr "Nusxasini saqlab qolmoqchi boʻlsangiz, avval maʼlumotlaringizni yuklab oling."
+
+#: templates/accounts/delete_account.html:9 templates/accounts/settings.html:68
+msgid "Download my data (JSON)"
+msgstr "Maʼlumotlarimni yuklab olish (JSON)"
+
+#: templates/accounts/delete_account.html:12
+#, python-format
+msgid "Type your username (%(username)s) to confirm"
+msgstr "Tasdiqlash uchun foydalanuvchi nomingizni (%(username)s) yozing"
+
+#: templates/accounts/delete_account.html:17
+msgid "Delete my account"
+msgstr "Hisobimni oʻchirish"
+
+#: templates/accounts/delete_account.html:18 templates/accounts/password_change.html:15 templates/accounts/password_reset.html:13 templates/accounts/settings.html:48 templates/friends/contact_form.html:23 templates/friends/sharing.html:81 templates/genealogy/confirm_delete.html:12 templates/genealogy/event_form.html:32 templates/genealogy/marriage_form.html:16 templates/genealogy/person_form.html:22 templates/genealogy/relative_form.html:24 templates/genealogy/story_form.html:16
+msgid "Cancel"
+msgstr "Bekor qilish"
 
 #: templates/accounts/login.html:8
 msgid "Sign in to see your family tree."
 msgstr "Shajarangizni koʻrish uchun tizimga kiring."
 
-#: templates/accounts/login.html:16
+#: templates/accounts/login.html:11 templates/accounts/register.html:11
+msgid "or"
+msgstr "yoki"
+
+#: templates/accounts/login.html:20
 msgid "Forgot your password?"
 msgstr "Parolni unutdingizmi?"
 
-#: templates/accounts/login.html:20
+#: templates/accounts/login.html:24
 msgid "No account yet?"
 msgstr "Hali hisobingiz yoʻqmi?"
 
-#: templates/accounts/login.html:20 templates/accounts/register.html:3 templates/accounts/register.html:7 templates/base.html:102
+#: templates/accounts/login.html:24 templates/accounts/register.html:3 templates/accounts/register.html:7 templates/base.html:105
 msgid "Sign up"
 msgstr "Roʻyxatdan oʻtish"
 
-#: templates/accounts/password_change.html:3 templates/accounts/password_change.html:7 templates/accounts/settings.html:47
+#: templates/accounts/password_change.html:3 templates/accounts/password_change.html:7 templates/accounts/settings.html:61
 msgid "Change password"
 msgstr "Parolni oʻzgartirish"
 
-#: templates/accounts/password_change.html:14 templates/accounts/password_reset_confirm.html:11 templates/accounts/settings.html:18 templates/accounts/settings.html:33 templates/friends/contact_form.html:22 templates/genealogy/event_form.html:31 templates/genealogy/marriage_form.html:15 templates/genealogy/person_form.html:21 templates/genealogy/relative_form.html:23 templates/genealogy/story_form.html:15 templates/notify/settings.html:24
+#: templates/accounts/password_change.html:14 templates/accounts/password_reset_confirm.html:11 templates/accounts/settings.html:18 templates/accounts/settings.html:32 templates/accounts/settings.html:47 templates/friends/contact_form.html:22 templates/genealogy/event_form.html:31 templates/genealogy/marriage_form.html:15 templates/genealogy/person_form.html:21 templates/genealogy/relative_form.html:23 templates/genealogy/story_form.html:15 templates/notify/settings.html:24
 msgid "Save"
 msgstr "Saqlash"
-
-#: templates/accounts/password_change.html:15 templates/accounts/password_reset.html:13 templates/accounts/settings.html:34 templates/friends/contact_form.html:23 templates/friends/sharing.html:81 templates/genealogy/confirm_delete.html:12 templates/genealogy/event_form.html:32 templates/genealogy/marriage_form.html:16 templates/genealogy/person_form.html:22 templates/genealogy/relative_form.html:24 templates/genealogy/story_form.html:16
-msgid "Cancel"
-msgstr "Bekor qilish"
 
 #: templates/accounts/password_reset.html:3 templates/accounts/password_reset.html:7
 msgid "Reset your password"
@@ -1798,11 +1911,7 @@ msgstr "Elektron pochtangizni tekshiring"
 msgid "If an account with this email address exists, we have sent instructions for setting a new password. The email should arrive within a few minutes."
 msgstr "Agar bu elektron pochta manzili bilan hisob mavjud boʻlsa, yangi parol oʻrnatish boʻyicha koʻrsatma yubordik. Xat bir necha daqiqa ichida yetib keladi."
 
-#: templates/accounts/password_reset_done.html:8
-msgid "Back to sign in"
-msgstr "Kirish sahifasiga qaytish"
-
-#: templates/accounts/profile.html:3 templates/base.html:90
+#: templates/accounts/profile.html:3 templates/base.html:92
 msgid "My profile"
 msgstr "Profilim"
 
@@ -1815,17 +1924,17 @@ msgstr "Roʻyxatdan oʻtgan sana: %(date)s"
 msgid "My record in the tree"
 msgstr "Shajaradagi yozuvim"
 
-#: templates/accounts/profile.html:14 templates/accounts/settings.html:3 templates/accounts/settings.html:6 templates/base.html:91
+#: templates/accounts/profile.html:14 templates/accounts/settings.html:3 templates/accounts/settings.html:6 templates/base.html:93
 msgid "Settings"
 msgstr "Sozlamalar"
 
-#: templates/accounts/profile.html:18 templates/core/dashboard.html:28
+#: templates/accounts/profile.html:18 templates/core/dashboard.html:30
 msgctxt "count"
 msgid "relative in the tree"
 msgid_plural "relatives in the tree"
 msgstr[0] "qarindosh"
 
-#: templates/accounts/profile.html:19 templates/core/dashboard.html:30
+#: templates/accounts/profile.html:19 templates/core/dashboard.html:32
 msgctxt "count"
 msgid "friend"
 msgid_plural "friends"
@@ -1855,15 +1964,11 @@ msgid "%(counter)s new request"
 msgid_plural "%(counter)s new requests"
 msgstr[0] "%(counter)s yangi soʻrov"
 
-#: templates/accounts/register.html:8
-msgid "Your own record in the family tree is created from these details."
-msgstr "Shu maʼlumotlar asosida shajarada sizning yozuvingiz yaratiladi."
-
-#: templates/accounts/register.html:21 templates/core/landing.html:10
+#: templates/accounts/register.html:25 templates/core/landing.html:11
 msgid "Create an account"
 msgstr "Hisob yaratish"
 
-#: templates/accounts/register.html:25
+#: templates/accounts/register.html:29
 msgid "Already have an account?"
 msgstr "Hisobingiz bormi?"
 
@@ -1871,24 +1976,40 @@ msgstr "Hisobingiz bormi?"
 msgid "Choose the script for the interface. Your choice is saved to your account and used every time you sign in, including in PDF downloads."
 msgstr "Interfeys yozuvini tanlang. Tanlovingiz hisobingizda saqlanadi va har safar tizimga kirganingizda, shuningdek PDF fayllarda ham qoʻllanadi."
 
-#: templates/accounts/settings.html:40 templates/genealogy/events.html:40
+#: templates/accounts/settings.html:24
+msgid "Colours"
+msgstr "Ranglar"
+
+#: templates/accounts/settings.html:54 templates/core/landing.html:41 templates/genealogy/events.html:40
 msgid "Reminders"
 msgstr "Eslatmalar"
 
-#: templates/accounts/settings.html:41
+#: templates/accounts/settings.html:55 templates/core/landing.html:42
 msgid "Birthdays, anniversaries, memorial days and family events — on the site and in Telegram."
 msgstr "Tugʻilgan kunlar, yilliklar, xotira kunlari va oilaviy voqealar — saytda va Telegramda."
 
-#: templates/accounts/settings.html:42 templates/base.html:80 templates/base.html:92 templates/genealogy/events.html:42 templates/notify/list.html:14 templates/notify/settings.html:3 templates/notify/settings.html:7
+#: templates/accounts/settings.html:56 templates/base.html:80 templates/base.html:94 templates/genealogy/events.html:42 templates/notify/list.html:14 templates/notify/settings.html:3 templates/notify/settings.html:7
 msgid "Reminder settings"
 msgstr "Eslatma sozlamalari"
 
-#: templates/base.html:6 templates/base.html:32
+#: templates/accounts/settings.html:65
+msgid "Your data"
+msgstr "Maʼlumotlaringiz"
+
+#: templates/accounts/settings.html:66
+msgid "A complete copy of your family archive. It can be kept as a backup or moved to another server."
+msgstr "Oilaviy arxivingizning toʻliq nusxasi. Uni zaxira sifatida saqlash yoki boshqa serverga koʻchirish mumkin."
+
+#: templates/accounts/settings.html:69 templates/core/dashboard.html:106
+msgid "GEDCOM file (for other genealogy programs)"
+msgstr "GEDCOM fayli (boshqa shajara dasturlari uchun)"
+
+#: templates/base.html:6 templates/base.html:32 templates/base.html:129
 msgctxt "site name"
 msgid "Family tree"
 msgstr "Shajara"
 
-#: templates/base.html:7 templates/base.html:137
+#: templates/base.html:7 templates/base.html:152
 msgid "Family tree — a family archive for Uzbek families."
 msgstr "Shajara — oʻzbek oilalari uchun oilaviy arxiv."
 
@@ -1920,199 +2041,272 @@ msgstr "Hali bildirishnomalar yoʻq."
 msgid "All notifications"
 msgstr "Barcha bildirishnomalar"
 
-#: templates/base.html:93 templates/friends/list.html:70 templates/friends/list.html:72 templates/friends/sharing.html:3 templates/friends/sharing.html:6
-msgid "Share the family tree"
-msgstr "Shajarani ulashish"
-
-#: templates/base.html:96
-msgid "Sign out"
-msgstr "Chiqish"
-
-#: templates/base.html:108
-msgid "Main menu"
-msgstr "Asosiy menyu"
-
-#: templates/base.html:109 templates/core/dashboard.html:3
-msgid "Home"
-msgstr "Bosh sahifa"
-
-#: templates/base.html:110 templates/genealogy/tree.html:3
-msgid "My family tree"
-msgstr "Shajaram"
-
-#: templates/base.html:111 templates/genealogy/people_list.html:3 templates/genealogy/people_list.html:7
-msgid "My relatives"
-msgstr "Qarindoshlarim"
-
-#: templates/base.html:112 templates/genealogy/events.html:3 templates/genealogy/events.html:7 templates/genealogy/person_detail.html:54
-msgid "Events"
-msgstr "Voqealar"
-
-#: templates/base.html:114 templates/friends/list.html:3 templates/friends/list.html:30
-msgid "My friends"
-msgstr "Doʻstlarim"
-
-#: templates/base.html:115 templates/core/dashboard.html:79 templates/genealogy/calculator.html:3 templates/genealogy/calculator.html:7
+#: templates/base.html:82 templates/base.html:118 templates/core/dashboard.html:81 templates/genealogy/calculator.html:3 templates/genealogy/calculator.html:7
 msgid "Who is who?"
 msgstr "Kim kimga kim?"
 
+#: templates/base.html:95 templates/core/control_panel.html:3 templates/core/control_panel.html:6
+msgid "Control panel"
+msgstr "Boshqaruv paneli"
+
+#: templates/base.html:96 templates/core/landing.html:61 templates/friends/list.html:70 templates/friends/list.html:72 templates/friends/sharing.html:3 templates/friends/sharing.html:6
+msgid "Share the family tree"
+msgstr "Shajarani ulashish"
+
+#: templates/base.html:99
+msgid "Sign out"
+msgstr "Chiqish"
+
+#: templates/base.html:111 templates/base.html:127
+msgid "Main menu"
+msgstr "Asosiy menyu"
+
+#: templates/base.html:112 templates/base.html:128 templates/core/dashboard.html:3
+msgid "Home"
+msgstr "Bosh sahifa"
+
+#: templates/base.html:113 templates/genealogy/tree.html:3
+msgid "My family tree"
+msgstr "Shajaram"
+
+#: templates/base.html:114 templates/genealogy/people_list.html:3 templates/genealogy/people_list.html:7
+msgid "My relatives"
+msgstr "Qarindoshlarim"
+
+#: templates/base.html:117 templates/friends/list.html:3 templates/friends/list.html:30
+msgid "My friends"
+msgstr "Doʻstlarim"
+
 #: templates/base.html:130
+msgid "Relatives"
+msgstr "Qarindoshlar"
+
+#: templates/base.html:145
 msgid "Close"
 msgstr "Yopish"
 
-#: templates/core/dashboard.html:7
+#: templates/core/control_panel.html:7
+msgid "The state of the whole site. Only administrators see this page."
+msgstr "Butun saytning holati. Bu sahifani faqat administratorlar koʻradi."
+
+#: templates/core/control_panel.html:10
+msgid "Full backup (JSON)"
+msgstr "Toʻliq zaxira nusxa (JSON)"
+
+#: templates/core/control_panel.html:11
+msgid "Database administration"
+msgstr "Maʼlumotlar bazasini boshqarish"
+
+#: templates/core/control_panel.html:21
+msgid "New users"
+msgstr "Yangi foydalanuvchilar"
+
+#: templates/core/control_panel.html:31
+msgid "Services"
+msgstr "Xizmatlar"
+
+#: templates/core/control_panel.html:33
+msgid "Address"
+msgstr "Manzil"
+
+#: templates/core/control_panel.html:34
+#, python-format
+msgid "%(size)s MB"
+msgstr "%(size)s MB"
+
+#: templates/core/control_panel.html:35
+msgid "Sign in with Google"
+msgstr "Google orqali kirish"
+
+#: templates/core/control_panel.html:36
+msgid "Daily reminders (cron)"
+msgstr "Kunlik eslatmalar"
+
+#: templates/core/control_panel.html:37 templates/notify/settings.html:29
+msgid "Telegram"
+msgstr "Telegram"
+
+#: templates/core/control_panel.html:38
+msgid "Not connected"
+msgstr "Ulanmagan"
+
+#: templates/core/control_panel.html:42
+msgid "Connect the bot to the site"
+msgstr "Botni saytga ulash"
+
+#: templates/core/control_panel.html:47
+msgid "Moving to another server"
+msgstr "Boshqa serverga koʻchish"
+
+#: templates/core/control_panel.html:48
+msgid "Download the full backup and load it on the new server with the command below. Photos are stored in the database and move with it."
+msgstr "Toʻliq zaxira nusxani yuklab oling va yangi serverda quyidagi buyruq bilan yuklang. Suratlar maʼlumotlar bazasida saqlanadi va u bilan birga koʻchadi."
+
+#: templates/core/dashboard.html:8
 #, python-format
 msgid "Welcome, %(name)s!"
 msgstr "Xush kelibsiz, %(name)s!"
 
-#: templates/core/dashboard.html:8
+#: templates/core/dashboard.html:9
 msgid "Here is what is happening in your family archive."
 msgstr "Oilaviy arxivingizdagi soʻnggi holat."
 
-#: templates/core/dashboard.html:9
+#: templates/core/dashboard.html:10
 #, python-format
 msgid "This is the year of the %(animal)s"
 msgstr "Bu yil — %(animal)s yili"
 
-#: templates/core/dashboard.html:12
+#: templates/core/dashboard.html:13
 msgid "View the family tree"
 msgstr "Shajarani koʻrish"
 
-#: templates/core/dashboard.html:13 templates/genealogy/people_list.html:12 templates/genealogy/person_form.html:3 templates/genealogy/person_form.html:7 templates/genealogy/relative_form.html:3 templates/genealogy/relative_form.html:7 templates/genealogy/tree.html:57
+#: templates/core/dashboard.html:14 templates/genealogy/people_list.html:12 templates/genealogy/person_form.html:3 templates/genealogy/person_form.html:7 templates/genealogy/relative_form.html:3 templates/genealogy/relative_form.html:7 templates/genealogy/tree.html:57
 msgid "Add a new relative"
 msgstr "Yangi qarindosh qoʻshish"
 
-#: templates/core/dashboard.html:20
+#: templates/core/dashboard.html:22
 msgid "Add your date of birth"
 msgstr "Tugʻilgan sanangizni kiriting"
 
-#: templates/core/dashboard.html:21
+#: templates/core/dashboard.html:23
 msgid "Then your brothers and sisters are named correctly as aka, uka, opa or singil."
 msgstr "Shunda aka-uka va opa-singillaringiz shajarada toʻgʻri — aka, uka, opa yoki singil deb koʻrsatiladi."
 
-#: templates/core/dashboard.html:23 templates/friends/list.html:31
+#: templates/core/dashboard.html:25 templates/friends/list.html:31
 msgid "Add"
 msgstr "Kiritish"
 
-#: templates/core/dashboard.html:29
+#: templates/core/dashboard.html:31
 msgctxt "count"
 msgid "generation"
 msgid_plural "generations"
 msgstr[0] "avlod"
 
-#: templates/core/dashboard.html:31
+#: templates/core/dashboard.html:33
 msgctxt "count"
 msgid "family event"
 msgid_plural "family events"
 msgstr[0] "oilaviy voqea"
 
-#: templates/core/dashboard.html:37
+#: templates/core/dashboard.html:39
 msgid "Coming up"
 msgstr "Yaqinlashayotgan sanalar"
 
-#: templates/core/dashboard.html:37
+#: templates/core/dashboard.html:39
 msgid "All dates"
 msgstr "Barcha sanalar"
 
-#: templates/core/dashboard.html:49
+#: templates/core/dashboard.html:51
 msgid "Nothing in the next 30 days. Add birthdays and family events so that you never forget them."
 msgstr "Keyingi 30 kunda hech narsa yoʻq. Tugʻilgan kunlar va oilaviy voqealarni kiriting — hech biri esdan chiqmaydi."
 
-#: templates/core/dashboard.html:54
+#: templates/core/dashboard.html:56
 msgid "Recently updated"
 msgstr "Yaqinda oʻzgartirilganlar"
 
-#: templates/core/dashboard.html:61 templates/genealogy/_people_grid.html:8
+#: templates/core/dashboard.html:63 templates/genealogy/_people_grid.html:8
 msgid "No relatives have been added yet."
 msgstr "Hali qarindoshlar qoʻshilmagan."
 
-#: templates/core/dashboard.html:62
+#: templates/core/dashboard.html:64
 msgid "Start with your parents: add your father and mother, then your grandparents."
 msgstr "Ota-onangizdan boshlang: avval otangiz va onangizni, keyin bobo va buvilaringizni qoʻshing."
 
-#: templates/core/dashboard.html:65
+#: templates/core/dashboard.html:67
 msgid "Add your father"
 msgstr "Otangizni qoʻshish"
 
-#: templates/core/dashboard.html:66
+#: templates/core/dashboard.html:68
 msgid "Add your mother"
 msgstr "Onangizni qoʻshish"
 
-#: templates/core/dashboard.html:75
+#: templates/core/dashboard.html:77
 msgid "Quick actions"
 msgstr "Tezkor amallar"
 
-#: templates/core/dashboard.html:77 templates/genealogy/event_form.html:3 templates/genealogy/event_form.html:6 templates/genealogy/events.html:10
+#: templates/core/dashboard.html:79 templates/genealogy/event_form.html:3 templates/genealogy/event_form.html:6 templates/genealogy/events.html:10
 msgid "Add a family event"
 msgstr "Oilaviy voqea qoʻshish"
 
-#: templates/core/dashboard.html:78 templates/friends/contact_form.html:3 templates/friends/contact_form.html:6 templates/friends/list.html:10 templates/friends/list.html:50 templates/genealogy/person_detail.html:68
+#: templates/core/dashboard.html:80 templates/friends/contact_form.html:3 templates/friends/contact_form.html:6 templates/friends/list.html:10 templates/friends/list.html:50 templates/genealogy/person_detail.html:68
 msgid "Add a friend"
 msgstr "Doʻst qoʻshish"
 
-#: templates/core/dashboard.html:80 templates/genealogy/person_detail.html:80 templates/genealogy/story_form.html:3 templates/genealogy/story_form.html:6 templates/genealogy/story_list.html:8
+#: templates/core/dashboard.html:82 templates/genealogy/person_detail.html:80 templates/genealogy/story_form.html:3 templates/genealogy/story_form.html:6 templates/genealogy/story_list.html:8
 msgid "Write a story"
 msgstr "Hikoya yozish"
 
-#: templates/core/dashboard.html:85
+#: templates/core/dashboard.html:87
 msgid "Requests to share a family tree"
 msgstr "Shajarani ulashish soʻrovlari"
 
-#: templates/core/dashboard.html:91 templates/friends/sharing.html:29 templates/friends/sharing.html:67
+#: templates/core/dashboard.html:93 templates/friends/sharing.html:29 templates/friends/sharing.html:67
 msgid "Accept"
 msgstr "Qabul qilish"
 
-#: templates/core/dashboard.html:92 templates/friends/sharing.html:68
+#: templates/core/dashboard.html:94 templates/friends/sharing.html:68
 msgid "Decline"
 msgstr "Rad etish"
 
-#: templates/core/dashboard.html:100
+#: templates/core/dashboard.html:102
 msgid "Downloads"
 msgstr "Yuklab olish"
 
-#: templates/core/dashboard.html:102 templates/genealogy/tree.html:39
+#: templates/core/dashboard.html:104 templates/genealogy/tree.html:39
 msgid "Family tree book (PDF)"
 msgstr "Shajara kitobi (PDF)"
 
-#: templates/core/dashboard.html:103 templates/genealogy/tree.html:37
+#: templates/core/dashboard.html:105 templates/genealogy/tree.html:37
 msgid "Family tree (PDF)"
 msgstr "Shajara daraxti (PDF)"
-
-#: templates/core/dashboard.html:104
-msgid "GEDCOM file (for other genealogy programs)"
-msgstr "GEDCOM fayli (boshqa shajara dasturlari uchun)"
 
 #: templates/core/landing.html:3
 msgid "Welcome"
 msgstr "Xush kelibsiz"
 
 #: templates/core/landing.html:7
-msgid "Keep your family's history in one place"
-msgstr "Oilangiz tarixini bir joyda saqlang"
+msgid "For Uzbek families"
+msgstr "Oʻzbek oilalari uchun"
 
 #: templates/core/landing.html:8
+msgid "Keep your family’s <em>history</em> in one place"
+msgstr "Oilangiz <em>tarixini</em> bir joyda saqlang"
+
+#: templates/core/landing.html:9
 msgid "Build your family tree, record the life stories of your relatives and share them with your family. Everything is in Uzbek, in Latin or Cyrillic script."
 msgstr "Shajarangizni tuzing, qarindoshlaringizning hayot tarixini yozib qoldiring va oilangiz bilan ulashing. Hammasi oʻzbek tilida — lotin yoki kirill yozuvida."
 
-#: templates/core/landing.html:28
+#: templates/core/landing.html:37
 msgid "Relationship names are worked out for you: aka and uka, amaki and togʻa, kelin and kuyov."
 msgstr "Qarindoshlik nomlari avtomatik aniqlanadi: aka va uka, amaki va togʻa, kelin va kuyov."
 
-#: templates/core/landing.html:29
+#: templates/core/landing.html:46
 msgid "Life stories"
 msgstr "Hayot tarixlari"
 
-#: templates/core/landing.html:29
+#: templates/core/landing.html:47
 msgid "Write down biographies and family stories so that they are not forgotten."
 msgstr "Tarjimai hol va oilaviy hikoyalarni unutilmasligi uchun yozib qoldiring."
 
-#: templates/core/landing.html:30 templates/genealogy/person_detail.html:18
+#: templates/core/landing.html:51 templates/genealogy/events.html:48
+msgid "Family chronicle"
+msgstr "Oila xronikasi"
+
+#: templates/core/landing.html:52 templates/genealogy/events.html:64
+msgid "Record weddings, births, celebrations and memorial gatherings so the family remembers them."
+msgstr "Toʻylar, tugʻilishlar, bayramlar va xotira marosimlarini yozib qoʻying — oila ularni eslab yursin."
+
+#: templates/core/landing.html:56 templates/genealogy/person_detail.html:18
 msgid "Download as PDF"
 msgstr "PDF yuklab olish"
 
-#: templates/core/landing.html:30
+#: templates/core/landing.html:57
 msgid "Download the family tree or a relative's biography as a PDF in the language you use."
 msgstr "Shajara yoki qarindoshingiz tarjimai holini oʻzingiz foydalanayotgan tilda PDF shaklida yuklab oling."
+
+#: templates/core/landing.html:62 templates/friends/list.html:71
+msgid "Relatives who have their own account on the site can see your family tree once you connect."
+msgstr "Saytda oʻz hisobi bor qarindoshlaringiz ulangandan keyin shajarangizni koʻra oladi."
 
 #: templates/friends/contact_form.html:3 templates/friends/list.html:41 templates/genealogy/event_detail.html:20 templates/genealogy/event_form.html:3 templates/genealogy/person_detail.html:19 templates/genealogy/person_form.html:3 templates/genealogy/story_detail.html:14 templates/genealogy/story_form.html:3
 msgid "Edit"
@@ -2130,7 +2324,7 @@ msgstr "Oʻchirish"
 msgid "Friends of anyone in your family: your own, your father’s, your grandmother’s. Their birthdays are remembered too."
 msgstr "Oilangizdagi istalgan kishining doʻstlari: oʻzingizning, dadangizning, buvingizning. Ularning tugʻilgan kunlari ham eslatiladi."
 
-#: templates/friends/list.html:15
+#: templates/friends/list.html:15 templates/genealogy/people_list.html:23
 msgid "Everyone"
 msgstr "Hammasi"
 
@@ -2162,10 +2356,6 @@ msgstr "Doʻstlarning tugʻilgan kunlari"
 #: templates/friends/list.html:66
 msgid "No birthdays in the next weeks."
 msgstr "Yaqin haftalarda tugʻilgan kun yoʻq."
-
-#: templates/friends/list.html:71
-msgid "Relatives who have their own account on the site can see your family tree once you connect."
-msgstr "Saytda oʻz hisobi bor qarindoshlaringiz ulangandan keyin shajarangizni koʻra oladi."
 
 #: templates/friends/sharing.html:7
 msgid "Connected people can view each other's family trees and stories, but cannot change them."
@@ -2360,10 +2550,6 @@ msgstr "Tez qoʻshish"
 msgid "You can be reminded of these dates on the site and in Telegram."
 msgstr "Bu sanalar haqida saytda va Telegramda eslatib turish mumkin."
 
-#: templates/genealogy/events.html:48
-msgid "Family chronicle"
-msgstr "Oila xronikasi"
-
 #: templates/genealogy/events.html:51
 msgid "Date unknown"
 msgstr "Sanasi nomaʼlum"
@@ -2371,10 +2557,6 @@ msgstr "Sanasi nomaʼlum"
 #: templates/genealogy/events.html:63 templates/genealogy/person_detail.html:62
 msgid "No events have been added yet."
 msgstr "Hali voqealar qoʻshilmagan."
-
-#: templates/genealogy/events.html:64
-msgid "Record weddings, births, celebrations and memorial gatherings so the family remembers them."
-msgstr "Toʻylar, tugʻilishlar, bayramlar va xotira marosimlarini yozib qoʻying — oila ularni eslab yursin."
 
 #: templates/genealogy/marriage_form.html:3 templates/genealogy/marriage_form.html:7 templates/genealogy/person_detail.html:112
 msgid "Marriage details"
@@ -2401,6 +2583,22 @@ msgstr[0] "Shajarangizda %(counter)s kishi"
 #: templates/genealogy/people_list.html:11
 msgid "Download the family tree book (PDF)"
 msgstr "Shajara kitobini yuklab olish (PDF)"
+
+#: templates/genealogy/people_list.html:24
+msgid "Living"
+msgstr "Tiriklar"
+
+#: templates/genealogy/people_list.html:25
+msgid "Deceased"
+msgstr "Marhumlar"
+
+#: templates/genealogy/people_list.html:26
+msgid "Men"
+msgstr "Erkaklar"
+
+#: templates/genealogy/people_list.html:27
+msgid "Women"
+msgstr "Ayollar"
 
 #: templates/genealogy/person_detail.html:11
 msgctxt "female"
@@ -2633,10 +2831,6 @@ msgstr "Qachon"
 msgid "You are also reminded on the day itself."
 msgstr "Oʻsha kunning oʻzida ham eslatiladi."
 
-#: templates/notify/settings.html:29
-msgid "Telegram"
-msgstr "Telegram"
-
 #: templates/notify/settings.html:34
 msgid "Telegram is connected"
 msgstr "Telegram ulangan"
@@ -2661,6 +2855,10 @@ msgstr "Uzish"
 msgid "Connect Telegram"
 msgstr "Telegramni ulash"
 
+#: templates/partials/google_button.html:4 templates/socialaccount/login.html:8
+msgid "Continue with Google"
+msgstr "Google orqali davom etish"
+
 #: templates/registration/password_reset_email.txt:1
 #, python-format
 msgid "Hello, %(name)s!"
@@ -2682,3 +2880,19 @@ msgstr "Agar bu soʻrovni siz yubormagan boʻlsangiz, xatga eʼtibor bermang —
 #: templates/registration/password_reset_subject.txt:1
 msgid "Setting a new password"
 msgstr "Yangi parol oʻrnatish"
+
+#: templates/socialaccount/authentication_error.html:6 templates/socialaccount/signup.html:6
+msgid "Could not sign in with Google"
+msgstr "Google orqali kirib boʻlmadi"
+
+#: templates/socialaccount/authentication_error.html:7 templates/socialaccount/signup.html:7
+msgid "Something went wrong while signing in. Please try again."
+msgstr "Kirish paytida xatolik yuz berdi. Qaytadan urinib koʻring."
+
+#: templates/socialaccount/login_cancelled.html:6
+msgid "Sign-in was cancelled"
+msgstr "Kirish bekor qilindi"
+
+#: templates/socialaccount/login_cancelled.html:7
+msgid "You can try again or sign in with a username and password."
+msgstr "Qaytadan urinib koʻring yoki foydalanuvchi nomi va parol bilan kiring."

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shajara\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-28 18:42+0500\n"
+"POT-Creation-Date: 2026-09-30 07:10+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Shajara team\n"
 "Language-Team: Uzbek (Latin)\n"
@@ -54,43 +54,43 @@ msgstr "Qidiruv natijasi topilmadi."
 msgid "All results"
 msgstr "Barcha natijalar"
 
-#: static/js/tree.js:123
+#: static/js/tree.js:135
 msgid "Family tree"
 msgstr "Shajara"
 
-#: static/js/tree.js:158
+#: static/js/tree.js:170
 msgid "Hide brothers and sisters"
 msgstr "Aka-uka va opa-singillarini yashirish"
 
-#: static/js/tree.js:158
+#: static/js/tree.js:170
 msgid "Show brothers and sisters"
 msgstr "Aka-uka va opa-singillarini koʻrsatish"
 
-#: static/js/tree.js:163
+#: static/js/tree.js:175
 msgid "Hide children"
 msgstr "Farzandlarini yashirish"
 
-#: static/js/tree.js:163
+#: static/js/tree.js:175
 msgid "Show children"
 msgstr "Farzandlarini koʻrsatish"
 
-#: static/js/tree.js:367
+#: static/js/tree.js:379
 msgid "Loading the family tree…"
 msgstr "Shajara yuklanmoqda…"
 
-#: static/js/tree.js:374
+#: static/js/tree.js:386
 msgid "The family tree is empty."
 msgstr "Shajara hali boʻsh."
 
-#: static/js/tree.js:381
+#: static/js/tree.js:393
 msgid "Could not load the family tree. Please try again."
 msgstr "Shajarani yuklab boʻlmadi. Qaytadan urinib koʻring."
 
-#: static/js/tree.js:452
+#: static/js/tree.js:464
 msgid "An error occurred."
 msgstr "Xatolik yuz berdi."
 
-#: static/js/tree.js:455
+#: static/js/tree.js:467
 msgctxt "file name"
 msgid "family-tree"
 msgstr "shajara"

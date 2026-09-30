@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Sign in" %}{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="card" style="text-align:center">
+  <h1>{% translate "Sign in" %}</h1>
+  <form method="post">{% csrf_token %}
+    <button class="btn btn-primary" type="submit">{% translate "Continue with Google" %}</button>
+  </form>
+</div></div>
+{% endblock %}

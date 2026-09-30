@@ -3,7 +3,7 @@
   "short_name": "Shajara",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fbf7f1",
-  "theme_color": "#c2694a",
+  "background_color": "#f7f6fb",
+  "theme_color": "#5b47c9",
   "icons": [{ "src": "img/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
 }

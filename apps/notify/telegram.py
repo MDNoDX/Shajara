@@ -6,6 +6,7 @@ the settings page opens t.me/<bot>?start=<token>, the bot receives
 "/start <token>" and stores the chat id on that user's settings.
 """
 import datetime
+import hashlib
 import json
 import logging
 import secrets
@@ -32,6 +33,17 @@ class TelegramError(Exception):
 
 def configured():
     return bool(getattr(settings, "TELEGRAM_BOT_TOKEN", ""))
+
+
+def webhook_secret():
+    """Secret Telegram sends back in every webhook call (A-Z, a-z, 0-9, _ and -)."""
+    return settings.TELEGRAM_WEBHOOK_SECRET or hashlib.sha256(
+        f"{settings.SECRET_KEY}:telegram-webhook".encode()).hexdigest()[:48]
+
+
+def set_webhook(url):
+    return call("setWebhook", url=url, secret_token=webhook_secret(), allowed_updates=["message"],
+                drop_pending_updates=False)
 
 
 def call(method, http_timeout=30, **params):

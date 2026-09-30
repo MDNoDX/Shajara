@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Delete account" %}{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="card">
+  <h1>{% translate "Delete account" %}</h1>
+  <p>{% translate "Your account and your whole family archive — people, photos, events, stories and friends — will be deleted permanently." %}</p>
+  <p class="muted">{% translate "Download your data first if you want to keep a copy." %}</p>
+  <a class="btn" href="{% url 'genealogy:archive_export' %}">{% include "partials/icon.html" with name="download" %}{% translate "Download my data (JSON)" %}</a>
+  <form method="post" novalidate style="margin-top:20px">{% csrf_token %}
+    <div class="field{% if error %} has-error{% endif %}">
+      <label for="confirm">{% blocktranslate with username=user.username %}Type your username ({{ username }}) to confirm{% endblocktranslate %}</label>
+      <input id="confirm" name="confirm" type="text" autocomplete="off">
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-danger" type="submit">{% translate "Delete my account" %}</button>
+      <a class="btn btn-ghost" href="{% url 'accounts:settings' %}">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

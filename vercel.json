@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python manage.py migrate --noinput && python manage.py createcachetable",
+  "functions": {
+    "config/wsgi.py": { "maxDuration": 60 }
+  },
+  "crons": [
+    { "path": "/cron/kunlik/", "schedule": "0 3 * * *" }
+  ]
+}

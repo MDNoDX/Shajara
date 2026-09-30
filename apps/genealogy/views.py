@@ -1,4 +1,5 @@
 import datetime
+import json
 from urllib.parse import quote
 
 from django.contrib import messages
@@ -20,7 +21,7 @@ from apps.core.text import surname_from_name
 from apps.notify.messages import render_parts
 from apps.notify.occasions import occasions
 
-from . import gedcom, pdf
+from . import archive_io, gedcom, pdf
 from .access import archive_owner, can_view, person_for_edit, person_for_view, story_for_edit, story_for_view
 from .forms import EventForm, MarriageForm, PersonForm, RelativeWithSpouseForm, StoryForm
 from .kinship import Archive
@@ -75,17 +76,26 @@ def _search(queryset, query):
 # ---------------------------------------------------------------------------
 # People
 # ---------------------------------------------------------------------------
+PEOPLE_FILTERS = {
+    "living": {"is_deceased": False},
+    "deceased": {"is_deceased": True},
+    "male": {"gender": "male"},
+    "female": {"gender": "female"},
+}
+
+
 @login_required
 def people_list(request):
     query = request.GET.get("q", "").strip()
+    show = request.GET.get("f", "")
     archive = Archive(request.user)
-    people = Person.objects.filter(owner=request.user)
+    people = Person.objects.filter(owner=request.user, **PEOPLE_FILTERS.get(show, {}))
     focus = _focus_for(request.user, archive)
     if query:
         people = _ranked(people, query, 500)
     rows = [(p, archive.label(focus, p.pk) if focus else "") for p in people]
     template = "genealogy/_people_grid.html" if request.GET.get("partial") else "genealogy/people_list.html"
-    return render(request, template, {"rows": rows, "query": query, "total": len(archive.people)})
+    return render(request, template, {"rows": rows, "query": query, "total": len(archive.people), "show": show})
 
 
 @login_required
@@ -499,4 +509,12 @@ def gedcom_export(request):
     data = gedcom.export(archive, request.user.display_name)
     response = HttpResponse(data.encode("utf-8"), content_type="text/plain; charset=utf-8")
     response["Content-Disposition"] = content_disposition_header(True, pgettext("file name", "family-tree") + ".ged")
+    return response
+
+
+@login_required
+def archive_export(request):
+    data = archive_io.export_archive(request.user)
+    response = HttpResponse(json.dumps(data, ensure_ascii=False, indent=1), content_type="application/json; charset=utf-8")
+    response["Content-Disposition"] = content_disposition_header(True, archive_io.export_filename())
     return response

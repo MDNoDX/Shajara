@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Almost done" %}{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>{% translate "Almost done" %}</h1>
+    <p class="muted">{% translate "Your own record in the family tree is created from these details." %}</p>
+    <form method="post" novalidate>{% csrf_token %}
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.first_name %}
+        {% include "partials/field.html" with field=form.last_name %}
+      </div>
+      {% include "partials/field.html" with field=form.gender %}
+      <div class="form-actions"><button class="btn btn-primary" type="submit">{% translate "Continue" %}</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

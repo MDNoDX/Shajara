@@ -94,6 +94,13 @@ class ProfileForm(forms.ModelForm):
         return normalize_apostrophes(self.cleaned_data["last_name"].strip())
 
 
+class PaletteForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["palette"]
+        widgets = {"palette": forms.RadioSelect}
+
+
 class LanguageForm(forms.Form):
     language = forms.ChoiceField(label=_("Language"), widget=forms.RadioSelect)
 
@@ -131,3 +138,27 @@ class SetPasswordForm(auth_forms.SetPasswordForm):
         self.fields["new_password1"].help_text = _password_help()
         self.fields["new_password2"].label = _("Confirm the new password")
         self.fields["new_password2"].help_text = _("Enter the same password again.")
+
+
+class CompleteProfileForm(forms.Form):
+    """For accounts created through Google: the details the family tree needs."""
+
+    first_name = forms.CharField(label=_("First name"), max_length=100)
+    last_name = forms.CharField(label=_("Last name"), max_length=100, required=False)
+    gender = forms.ChoiceField(label=_("Gender"), choices=Gender.choices, widget=forms.RadioSelect)
+
+    def clean_first_name(self):
+        return normalize_apostrophes(self.cleaned_data["first_name"].strip())
+
+    def clean_last_name(self):
+        return normalize_apostrophes(self.cleaned_data["last_name"].strip())
+
+    def save(self, user):
+        user.first_name = self.cleaned_data["first_name"]
+        user.last_name = self.cleaned_data["last_name"]
+        user.gender = self.cleaned_data["gender"]
+        user.person = Person.objects.create(
+            owner=user, first_name=user.first_name, last_name=user.last_name, gender=user.gender,
+        )
+        user.save()
+        return user

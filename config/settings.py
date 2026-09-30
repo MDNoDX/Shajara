@@ -14,14 +14,31 @@ from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+# Vercel sets VERCEL=1 (and VERCEL_URL, VERCEL_PROJECT_PRODUCTION_URL) in its functions.
+ON_VERCEL = bool(os.environ.get("VERCEL"))
+
+DEBUG = os.environ.get("DJANGO_DEBUG", "0" if ON_VERCEL else "1") == "1"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-insecure-key-change-me" if DEBUG else "")
 if not SECRET_KEY:
     from django.core.exceptions import ImproperlyConfigured
 
     raise ImproperlyConfigured("Set DJANGO_SECRET_KEY (see .env.example).")
-ALLOWED_HOSTS = [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]").split(",") if h]
-CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+
+
+def _env_list(name, default=""):
+    return [v.strip() for v in os.environ.get(name, default).split(",") if v.strip()]
+
+
+ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]")
+CSRF_TRUSTED_ORIGINS = _env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+for _var in ("VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_URL", "VERCEL_BRANCH_URL"):
+    if os.environ.get(_var):
+        ALLOWED_HOSTS.append(os.environ[_var])
+        CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ[_var]}")
+# The public address of the site (used in links sent by Telegram and e-mail).
+SITE_URL = os.environ.get("SITE_URL", "").rstrip("/") or (
+    f"https://{os.environ['VERCEL_PROJECT_PRODUCTION_URL']}" if os.environ.get("VERCEL_PROJECT_PRODUCTION_URL")
+    else "http://localhost:8000")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -35,6 +52,10 @@ INSTALLED_APPS = [
     "apps.genealogy",
     "apps.friends",
     "apps.notify",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
@@ -46,6 +67,9 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
+    # Accounts created through Google finish their profile (gender) first.
+    "apps.accounts.middleware.ProfileCompletionMiddleware",
     # For signed-in users the saved account preference wins.
     "apps.core.middleware.UserLanguageMiddleware",
     "apps.notify.middleware.DailyRemindersMiddleware",
@@ -78,14 +102,50 @@ WSGI_APPLICATION = "config.wsgi.application"
 # SQLite for local development; set DATABASE_URL=postgres://… for PostgreSQL.
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=60, conn_health_checks=True
     )
 }
+
+# The cache holds single-use sign-in tokens for the macOS app. A database
+# cache works across serverless instances; create it with `createcachetable`.
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "cache"}}
 
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# ---------------------------------------------------------------------------
+# Sign in with Google (django-allauth). Only the Google login is used from
+# allauth; username/password sign-in and registration are the site's own.
+# Create an OAuth client at console.cloud.google.com → APIs & Services →
+# Credentials, with the redirect URI  https://<domain>/accounts/google/login/callback/
+# ---------------------------------------------------------------------------
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APPS": [{"client_id": GOOGLE_CLIENT_ID, "secret": GOOGLE_CLIENT_SECRET, "key": ""}]
+        if GOOGLE_CLIENT_ID else [],
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"prompt": "select_account"},
+    }
+}
+SOCIALACCOUNT_ONLY = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_LOGIN_ON_GET = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_ADAPTER = "apps.accounts.adapters.SocialAccountAdapter"
+ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_LOGIN_METHODS = {"username"}
+ACCOUNT_SIGNUP_FIELDS = ["username*", "email*"]
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -119,7 +179,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    # Photos are kept in the database: one backup holds everything, and it
+    # works on serverless hosting without a disk. See apps/core/storage.py.
+    "default": {"BACKEND": "apps.core.storage.DatabaseStorage"},
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
         if DEBUG
@@ -138,6 +200,12 @@ CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
 # Telegram reminders (optional): create a bot with @BotFather.
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "")
+# Secret in the webhook URL header so only Telegram can call it.
+TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
+# Vercel Cron sends "Authorization: Bearer $CRON_SECRET" to /cron/kunlik/.
+CRON_SECRET = os.environ.get("CRON_SECRET", "")
+
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 60  # stay signed in for two months
 
 EMAIL_BACKEND = os.environ.get("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")

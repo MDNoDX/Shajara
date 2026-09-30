@@ -243,3 +243,86 @@ class LiveSearchTests(TestCase):
         m = self.p["me"].marriages_as_husband.first()
         html = self.client.get(reverse("genealogy:marriage_edit", args=[m.pk])).content.decode()
         self.assertNotIn("is_divorced", html)
+
+
+class GoogleAndAppLoginTests(TestCase):
+    def test_profile_completion_for_new_accounts(self):
+        from apps.accounts.models import User
+
+        user = User.objects.create_user("googler", "g@example.com")  # as created by Google sign-in
+        self.client.force_login(user)
+        response = self.client.get(reverse("home"))
+        self.assertRedirects(response, reverse("accounts:complete_profile") + "?next=/", fetch_redirect_response=False)
+        response = self.client.post(reverse("accounts:complete_profile"),
+                                    {"first_name": "Nodir", "last_name": "Madaminov", "gender": "male"})
+        user.refresh_from_db()
+        self.assertEqual((user.person.first_name, user.person.gender), ("Nodir", "male"))
+        self.assertEqual(self.client.get(reverse("home")).status_code, 200)
+
+    def test_app_login_bridge(self):
+        user, _p = make_family()
+        self.client.force_login(user)
+        response = self.client.get(reverse("app_login_finish"))
+        self.assertTrue(response["Location"].startswith("shajara://kirish?token="))
+        token = response["Location"].split("token=", 1)[1]
+        app = self.client_class()  # the app's own web view: a fresh session
+        response = app.get(reverse("app_login"), {"token": token})
+        self.assertRedirects(response, reverse("home"), fetch_redirect_response=False)
+        self.assertEqual(int(app.session["_auth_user_id"]), user.pk)
+        # The token works only once.
+        again = self.client_class().get(reverse("app_login"), {"token": token})
+        self.assertRedirects(again, reverse("accounts:login"), fetch_redirect_response=False)
+
+    def test_google_button_only_when_configured(self):
+        html = self.client.get(reverse("accounts:login")).content.decode()
+        self.assertNotIn("google-form", html)
+        providers = {"google": {"APPS": [{"client_id": "x.apps.googleusercontent.com", "secret": "s", "key": ""}],
+                                "SCOPE": ["profile", "email"]}}
+        with self.settings(GOOGLE_CLIENT_ID="x.apps.googleusercontent.com", SOCIALACCOUNT_PROVIDERS=providers):
+            html = self.client.get(reverse("accounts:login")).content.decode()
+        self.assertIn("google-form", html)
+
+
+class ServerlessTests(TestCase):
+    def test_cron_requires_secret(self):
+        self.assertEqual(self.client.get("/cron/kunlik/").status_code, 401)
+        with self.settings(CRON_SECRET="abc"):
+            self.assertEqual(self.client.get("/cron/kunlik/", HTTP_AUTHORIZATION="Bearer nope").status_code, 401)
+            response = self.client.get("/cron/kunlik/", HTTP_AUTHORIZATION="Bearer abc")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("created", response.json())
+
+    @override_settings(TELEGRAM_BOT_TOKEN="123:abc")
+    def test_telegram_webhook_checks_secret(self):
+        url = reverse("notify:telegram_webhook")
+        self.assertEqual(self.client.post(url, "{}", content_type="application/json").status_code, 403)
+        with mock.patch("apps.notify.telegram.handle_update") as handle:
+            response = self.client.post(url, '{"update_id": 1}', content_type="application/json",
+                                        HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN=telegram.webhook_secret())
+        self.assertEqual(response.status_code, 200)
+        handle.assert_called_once()
+
+    def test_photos_are_stored_in_the_database(self):
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        from apps.core.models import StoredFile
+
+        user, p = make_family()
+        self.client.force_login(user)
+        buf = BytesIO()
+        Image.new("RGB", (40, 40), "#5b47c9").save(buf, "PNG")
+        photo = SimpleUploadedFile("men.png", buf.getvalue(), content_type="image/png")
+        person = p["me"]
+        response = self.client.post(reverse("genealogy:person_edit", args=[person.pk]), {
+            "first_name": person.first_name, "gender": "male", "birth_year": "1984", "birth_month": "9",
+            "birth_day": "27", "photo": photo,
+        })
+        self.assertEqual(response.status_code, 302)
+        person.refresh_from_db()
+        self.assertTrue(StoredFile.objects.filter(name=person.photo.name).exists())
+        served = self.client.get(person.photo.url)
+        self.assertEqual(served.status_code, 200)
+        self.assertEqual(served["Content-Type"], "image/png")

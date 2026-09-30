@@ -1,9 +1,9 @@
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 
+from apps.accounts import app_bridge
 from apps.core import views as core_views
 
 urlpatterns = [
@@ -16,6 +16,18 @@ urlpatterns = [
     path("dostlar/", include("apps.friends.urls")),
     path("", include("apps.notify.urls")),
     path("salomatlik/", core_views.health, name="health"),
+    path("media/<path:name>", core_views.media, name="media"),
+    # Google sign-in (allauth). Its own login/signup pages point to the site's.
+    path("accounts/login/", RedirectView.as_view(pattern_name="accounts:login", query_string=True)),
+    path("accounts/signup/", RedirectView.as_view(pattern_name="accounts:register", query_string=True)),
+    path("accounts/logout/", RedirectView.as_view(pattern_name="accounts:logout")),
+    path("accounts/", include("allauth.urls")),
+    path("ilova/kirish/boshlash/", app_bridge.start, name="app_login_start"),
+    path("ilova/kirish/tugatish/", app_bridge.finish, name="app_login_finish"),
+    path("ilova/kirish/", app_bridge.consume, name="app_login"),
+    path("boshqaruv/", core_views.control_panel, name="control_panel"),
+    path("boshqaruv/zaxira.json", core_views.full_backup, name="full_backup"),
+    path("boshqaruv/telegram/", core_views.set_telegram_webhook, name="set_telegram_webhook"),
     path("admin/", admin.site.urls),
 ]
 
@@ -24,5 +36,3 @@ handler403 = "apps.core.views.permission_denied"
 handler404 = "apps.core.views.page_not_found"
 handler500 = "apps.core.views.server_error"
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

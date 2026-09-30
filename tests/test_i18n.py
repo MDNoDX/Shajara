@@ -16,7 +16,7 @@ CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 # Intentional exceptions: each language's switcher button names itself, the
 # search help shows a cross-script example, and file formats keep their names.
 SELF_NAMES = ("Oʻzbekcha", "Кириллча")
-ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "MB", "Alisher", "GEDCOM", "Ctrl", "Mac", "Start", "stop"}
+ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "MB", "Alisher", "GEDCOM", "Ctrl", "Mac", "Start", "stop", "JSON", "Google"}
 
 
 class CatalogueTests(TestCase):

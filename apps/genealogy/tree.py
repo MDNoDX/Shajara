@@ -158,15 +158,16 @@ class TreeLayout:
 
     def _connect(self, block, drop, centers, child_row, level=0):
         """Lines from a couple's drop point down to their children."""
+        # One elbow per child (down, across, down) so the browser can round
+        # the corners; the shared trunk is simply drawn over itself.
         bar = row_y(child_row) - ROW_GAP / 2 + 8 * level
         dx, dy = drop
         band = child_row - 0.5
-        block.add_line([(dx, dy), (dx, bar)], "child", band=band)
-        xs = centers + [dx]
-        if min(xs) != max(xs):
-            block.add_line([(min(xs), bar), (max(xs), bar)], "child", band=band)
         for cx in centers:
-            block.add_line([(cx, bar), (cx, row_y(child_row))], "child", band=band)
+            if abs(cx - dx) < 0.5:
+                block.add_line([(dx, dy), (dx, row_y(child_row))], "child", band=band)
+            else:
+                block.add_line([(dx, dy), (dx, bar), (cx, bar), (cx, row_y(child_row))], "child", band=band)
 
     # ---- descendants ----------------------------------------------------------
     def desc(self, pk, row):

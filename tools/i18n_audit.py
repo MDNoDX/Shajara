@@ -30,7 +30,7 @@ BAD_OG = re.compile(r"[oOgG]['‘’`ʼ]")
 BAD_TUTUQ = re.compile(r"(?<=[^\W\d_])['’`](?=[^\W\d_])")
 PLACEHOLDER = re.compile(r"%\(\w+\)[sd]|%[sd]|\{\w+\}")
 # Format names, key names and bot commands stay in Latin in both scripts.
-ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "Alisher", "MB", "GEDCOM", "Ctrl", "Mac", "Start", "stop"}
+ALLOWED_LATIN_IN_CYRILLIC = {"PDF", "PNG", "Alisher", "MB", "GEDCOM", "Ctrl", "Mac", "Start", "stop", "JSON", "Google"}
 
 
 def _po_entries():
@@ -60,7 +60,7 @@ def check_catalogues():
             if not text.strip():
                 problems.append(f"{where} is not translated")
                 continue
-            bare = PLACEHOLDER.sub("", text)
+            bare = re.sub(r"<[^>]+>", "", PLACEHOLDER.sub("", text))  # HTML tags are markup
             if script == "latin":
                 if CYRILLIC.search(bare) and "Алишер" not in bare:
                     problems.append(f"{where} contains Cyrillic in the Latin catalogue: {text!r}")
@@ -78,7 +78,7 @@ def check_catalogues():
 
 
 class _TextCollector(HTMLParser):
-    SKIP = {"script", "style", "svg"}
+    SKIP = {"script", "style", "svg", "code"}
 
     def __init__(self):
         super().__init__(convert_charrefs=True)

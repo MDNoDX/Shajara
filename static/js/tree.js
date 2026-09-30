@@ -96,8 +96,20 @@
     return node;
   }
 
+  // Polyline with softly rounded corners.
   function pathD(points) {
-    return points.map(function (p, i) { return (i ? "L" : "M") + p[0] + "," + p[1]; }).join(" ");
+    var R = 12, d = "M" + points[0][0] + "," + points[0][1];
+    for (var i = 1; i < points.length - 1; i++) {
+      var p = points[i - 1], c = points[i], n = points[i + 1];
+      var l1 = Math.hypot(c[0] - p[0], c[1] - p[1]), l2 = Math.hypot(n[0] - c[0], n[1] - c[1]);
+      var r = Math.min(R, l1 / 2, l2 / 2);
+      if (r < 1) { d += " L" + c[0] + "," + c[1]; continue; }
+      var a = [c[0] + (p[0] - c[0]) * r / l1, c[1] + (p[1] - c[1]) * r / l1];
+      var b = [c[0] + (n[0] - c[0]) * r / l2, c[1] + (n[1] - c[1]) * r / l2];
+      d += " L" + a[0] + "," + a[1] + " Q" + c[0] + "," + c[1] + " " + b[0] + "," + b[1];
+    }
+    var last = points[points.length - 1];
+    return d + " L" + last[0] + "," + last[1];
   }
 
   // Small rounded button on a card: open/close brothers and sisters or children.

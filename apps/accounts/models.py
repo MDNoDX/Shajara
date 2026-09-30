@@ -12,11 +12,19 @@ class Gender(models.TextChoices):
     FEMALE = "female", pgettext_lazy("gender", "Female")
 
 
+class Palette(models.TextChoices):
+    ATLAS = "atlas", pgettext_lazy("palette", "Atlas")
+    OSMON = "osmon", pgettext_lazy("palette", "Sky")
+    BOG = "bog", pgettext_lazy("palette", "Garden")
+    ANOR = "anor", pgettext_lazy("palette", "Pomegranate")
+
+
 class User(AbstractUser):
     preferred_language = models.CharField(
         _("interface language"), max_length=10, choices=language_choices(), default=LATIN
     )
     gender = models.CharField(_("gender"), max_length=10, choices=Gender.choices, blank=True)
+    palette = models.CharField(_("colours"), max_length=10, choices=Palette.choices, default=Palette.ATLAS)
     # The person in the user's own family tree who represents them.
     person = models.OneToOneField(
         "genealogy.Person",

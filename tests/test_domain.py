@@ -257,6 +257,8 @@ class AccessTests(TestCase):
     def setUp(self):
         self.owner, self.p = make_family()
         self.other = User.objects.create_user("begona", "b@example.com", "x-parol-12345", preferred_language="uz-cyrl")
+        self.other.person = Person.objects.create(owner=self.other, first_name="Бегона", gender="male")
+        self.other.save()
         self.client.force_login(self.other)
 
     def test_strangers_cannot_view(self):

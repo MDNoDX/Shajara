@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Sign in" %}{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="card" style="text-align:center">
+  <h1>{% translate "Sign-in was cancelled" %}</h1>
+  <p class="muted">{% translate "You can try again or sign in with a username and password." %}</p>
+  <a class="btn btn-primary" href="{% url 'accounts:login' %}">{% translate "Back to sign in" %}</a>
+</div></div>
+{% endblock %}

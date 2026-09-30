@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.translation import get_language
 
 from apps.friends.services import incoming_requests
@@ -16,8 +17,12 @@ def site(request):
             for code in supported_codes()
         ],
         "pending_requests": 0,
+        "google_login": bool(settings.GOOGLE_CLIENT_ID),
     }
     user = getattr(request, "user", None)
+    palette = request.COOKIES.get("palette", "atlas")
     if user is not None and user.is_authenticated:
         context["pending_requests"] = incoming_requests(user).count()
+        palette = user.palette
+    context["palette"] = palette if palette in ("atlas", "osmon", "bog", "anor") else "atlas"
     return context

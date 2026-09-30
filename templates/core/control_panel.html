@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n uz %}
+{% block title %}{% translate "Control panel" %}{% endblock %}
+{% block content %}
+<div class="pagehead"><div>
+  <h1>{% translate "Control panel" %}</h1>
+  <p>{% translate "The state of the whole site. Only administrators see this page." %}</p>
+</div>
+  <div class="row">
+    <a class="btn" href="{% url 'full_backup' %}">{% include "partials/icon.html" with name="download" %}{% translate "Full backup (JSON)" %}</a>
+    <a class="btn btn-primary" href="{% url 'admin:index' %}">{% include "partials/icon.html" with name="settings" %}{% translate "Database administration" %}</a>
+  </div>
+</div>
+
+<div class="stats">
+  {% for label, value in stats %}<div class="stat"><b>{{ value }}</b><span>{{ label }}</span></div>{% endfor %}
+</div>
+
+<div class="cols">
+  <section class="card">
+    <h2>{% translate "New users" %}</h2>
+    <ul class="kin-list">
+      {% for u in recent_users %}
+        <li class="row"><span class="spacer"><b>{{ u.display_name }}</b> <span class="muted small">@{{ u.username }}{% if u.email %} · {{ u.email }}{% endif %}</span></span>
+          <span class="muted small">{{ u.date_joined|uzdate }}</span></li>
+      {% endfor %}
+    </ul>
+  </section>
+  <aside>
+    <section class="card">
+      <h2>{% translate "Services" %}</h2>
+      <dl class="facts">
+        <dt>{% translate "Address" %}</dt><dd>{{ site_url }}</dd>
+        <dt>{% translate "Photos" %}</dt><dd>{% blocktranslate with size=photo_mb %}{{ size }} MB{% endblocktranslate %}</dd>
+        <dt>{% translate "Sign in with Google" %}</dt><dd>{% if google %}✓{% else %}—{% endif %}</dd>
+        <dt>{% translate "Daily reminders (cron)" %}</dt><dd>{% if cron %}✓{% else %}—{% endif %}</dd>
+        <dt>{% translate "Telegram" %}</dt>
+        <dd>{% if telegram %}{% if webhook.url %}✓ {{ webhook.url }}{% elif webhook.error %}{{ webhook.error }}{% else %}{% translate "Not connected" %}{% endif %}{% else %}—{% endif %}</dd>
+      </dl>
+      {% if telegram %}
+      <form method="post" action="{% url 'set_telegram_webhook' %}" style="margin-top:14px">{% csrf_token %}
+        <button class="btn" type="submit">{% include "partials/icon.html" with name="telegram" %}{% translate "Connect the bot to the site" %}</button>
+      </form>
+      {% endif %}
+    </section>
+    <section class="card">
+      <h2>{% translate "Moving to another server" %}</h2>
+      <p class="muted small">{% translate "Download the full backup and load it on the new server with the command below. Photos are stored in the database and move with it." %}</p>
+      <code class="cmd">python manage.py loaddata shajara-full-backup.json</code>
+    </section>
+  </aside>
+</div>
+{% endblock %}

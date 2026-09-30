@@ -6,6 +6,10 @@
   <div class="card">
     <h1>{% translate "Sign up" %}</h1>
     <p class="muted">{% translate "Your own record in the family tree is created from these details." %}</p>
+    {% if google_login %}
+      {% include "partials/google_button.html" %}
+      <div class="or"><span>{% translate "or" %}</span></div>
+    {% endif %}
     <form method="post" novalidate>{% csrf_token %}
       {% for error in form.non_field_errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
       <div class="form-grid">

@@ -2,17 +2,19 @@
 {% load i18n uz %}
 {% block title %}{% translate "Home" %}{% endblock %}
 {% block content %}
-<div class="pagehead">
-  <div>
-    <h1>{% blocktranslate with name=user.first_name|default:user.username %}Welcome, {{ name }}!{% endblocktranslate %}</h1>
-    <p>{% translate "Here is what is happening in your family archive." %}
-      {% if cycle_animal %}<span class="muchal-badge">· {{ cycle_animal.emoji }} {% blocktranslate with animal=cycle_animal.name %}This is the year of the {{ animal }}{% endblocktranslate %}</span>{% endif %}</p>
+<section class="banner">
+  <div class="banner-inner">
+    <div>
+      <h1>{% blocktranslate with name=user.first_name|default:user.username %}Welcome, {{ name }}!{% endblocktranslate %}</h1>
+      <p>{% translate "Here is what is happening in your family archive." %}
+        {% if cycle_animal %}<span class="muchal-badge">· {{ cycle_animal.emoji }} {% blocktranslate with animal=cycle_animal.name %}This is the year of the {{ animal }}{% endblocktranslate %}</span>{% endif %}</p>
+    </div>
+    <div class="row">
+      {% if me %}<a class="btn" href="{% url 'genealogy:tree' %}">{% include "partials/icon.html" with name="tree" %}{% translate "View the family tree" %}</a>{% endif %}
+      <a class="btn btn-primary" href="{% if me %}{% url 'genealogy:relative_add' me.pk %}{% else %}{% url 'genealogy:person_create' %}{% endif %}">{% include "partials/icon.html" with name="plus" %}{% translate "Add a new relative" %}</a>
+    </div>
   </div>
-  <div class="row">
-    {% if me %}<a class="btn" href="{% url 'genealogy:tree' %}">{% translate "View the family tree" %}</a>{% endif %}
-    <a class="btn btn-primary" href="{% if me %}{% url 'genealogy:relative_add' me.pk %}{% else %}{% url 'genealogy:person_create' %}{% endif %}">{% include "partials/icon.html" with name="plus" %}{% translate "Add a new relative" %}</a>
-  </div>
-</div>
+</section>
 
 {% if me and not me.birth_year %}
 <div class="notice">
