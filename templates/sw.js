@@ -1,5 +1,5 @@
 {% load static %}/* Shajara service worker: push notifications, and a friendly page when offline. */
-const CACHE = "shajara-v2";
+const CACHE = "shajara-v3";
 const OFFLINE = "{% url 'offline' %}";
 
 self.addEventListener("install", (event) => {

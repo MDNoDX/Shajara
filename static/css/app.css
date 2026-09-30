@@ -727,7 +727,7 @@ svg.z-far .t-line { stroke-width: 3; }
 .hero-art::after { content: ""; position: absolute; inset: 0; background: var(--ikat); opacity: .1; }
 .hero-art > * { position: relative; z-index: 1; }
 .hero-art svg { display: block; width: 100%; height: auto; }
-.features { margin-top: 44px; }
+.features { margin-top: 44px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .feature-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 14px; border-radius: var(--r-md); background: var(--accent-soft); color: var(--accent); }
 .feature-icon .ico { width: 23px; height: 23px; }
 .features .card p { margin: 0; color: var(--ink-2); }
@@ -782,6 +782,7 @@ svg.z-far .t-line { stroke-width: 3; }
 @media (max-width: 900px) {
   .cols, .hero, .settings-layout, .auth-layout, .tg-connect { grid-template-columns: minmax(0, 1fr); }
   .hero { gap: 26px; }
+  .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .auth-side { display: none; }
   .settings-nav { position: static; display: flex; overflow-x: auto; padding: 5px; scrollbar-width: none; }
   .settings-nav::-webkit-scrollbar { display: none; }
@@ -798,6 +799,7 @@ svg.z-far .t-line { stroke-width: 3; }
   .facts { grid-template-columns: 1fr; gap: 2px; }
   .facts dd { margin-bottom: 10px; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .features { grid-template-columns: minmax(0, 1fr); }
   .date3 { grid-template-columns: 1fr 1.6fr 1.2fr; }
   .profile { grid-template-columns: minmax(0, 1fr); padding: 112px 18px 20px; gap: 10px; }
   .profile .avatar.lg { margin-top: -64px; }

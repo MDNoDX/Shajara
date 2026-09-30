@@ -98,9 +98,11 @@
     <span data-theme-icon="light">{% include "partials/icon.html" with name="sun" %}</span>
     <span data-theme-icon="dark">{% include "partials/icon.html" with name="moon" %}</span>
   </button>
+  {% if url_name != "offline" %}
   {% include "partials/lang_switch.html" %}
   {% if url_name != "login" %}<a class="btn btn-ghost btn-sm" href="{% url 'accounts:login' %}">{% translate "Sign in" %}</a>{% endif %}
   {% if url_name != "register" %}<a class="btn btn-primary btn-sm" href="{% url 'accounts:register' %}">{% translate "Sign up" %}</a>{% endif %}
+  {% endif %}
 </header>
 {% endif %}
 

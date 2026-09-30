@@ -2,6 +2,7 @@ import datetime
 
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import AnonymousUser
 from django.db import connection
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
@@ -156,6 +157,9 @@ def service_worker(request):
 
 
 def offline(request):
+    """What the service worker shows when there is no connection. The page is
+    kept on the device, so it carries nothing about who is signed in."""
+    request.user = AnonymousUser()
     return render(request, "offline.html")
 
 
